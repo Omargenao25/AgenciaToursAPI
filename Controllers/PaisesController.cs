@@ -89,6 +89,7 @@ namespace AgenciaToursAPI.Controllers
 
 
 
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePais(int id)
         {
@@ -96,11 +97,20 @@ namespace AgenciaToursAPI.Controllers
 
             if (pais == null)
             {
-                return NotFound();
+                return NotFound("El país no existe.");
+            }
+
+            var tieneDestinos = await _context.Destinos
+                .AnyAsync(d => d.PaisId == id);
+
+            if (tieneDestinos)
+            {
+                return BadRequest(
+                    "No se puede eliminar el país porque tiene destinos asociados."
+                );
             }
 
             _context.Paises.Remove(pais);
-
             await _context.SaveChangesAsync();
 
             return NoContent();
