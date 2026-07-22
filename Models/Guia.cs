@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AgenciaToursAPI.Models
 {
@@ -14,6 +15,7 @@ namespace AgenciaToursAPI.Models
         [MaxLength(20)]
         public string Telefono { get; set; } = string.Empty;
 
+        [JsonIgnore]
         public List<Tour> Tours { get; set; } = new();
     }
 }
