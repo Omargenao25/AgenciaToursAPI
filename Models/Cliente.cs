@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AgenciaToursAPI.Models
 {
@@ -26,6 +27,7 @@ namespace AgenciaToursAPI.Models
         [EmailAddress(ErrorMessage = "El correo no tiene un formato válido.")]
         public string Correo { get; set; } = string.Empty;
 
+        [JsonIgnore]
         public List<Reserva> Reservas { get; set; } = new();
     }
 }
