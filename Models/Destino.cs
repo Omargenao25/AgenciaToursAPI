@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AgenciaToursAPI.Models
 {
@@ -21,6 +22,7 @@ namespace AgenciaToursAPI.Models
 
         public Pais? Pais { get; set; }
 
+        [JsonIgnore]
         public List<Tour> Tours { get; set; } = new();
     }
 }

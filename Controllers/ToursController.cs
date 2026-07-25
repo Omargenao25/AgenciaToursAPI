@@ -1,4 +1,5 @@
 ﻿using AgenciaToursAPI.Data;
+using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,63 +17,144 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-
+     
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tour>>> GetTours()
+        public async Task<ActionResult<IEnumerable<TourRespuestaDto>>> GetTours()
         {
-            return await _context.Tours
-                .Include(t => t.Pais)
-                .Include(t => t.Destino)
-                .Include(t => t.Categoria)
-                .Include(t => t.Guia)
-                .Include(t => t.Transporte)
+            var tours = await _context.Tours
+                .Select(t => new TourRespuestaDto
+                {
+                    Id = t.Id,
+                    Nombre = t.Nombre,
+
+                    Pais = t.Pais != null
+                        ? t.Pais.Nombre
+                        : string.Empty,
+
+                    Destino = t.Destino != null
+                        ? t.Destino.Nombre
+                        : string.Empty,
+
+                    Categoria = t.Categoria != null
+                        ? t.Categoria.Nombre
+                        : string.Empty,
+
+                    Guia = t.Guia != null
+                        ? t.Guia.Nombre
+                        : string.Empty,
+
+                    Transporte = t.Transporte != null
+                        ? t.Transporte.Tipo
+                        : string.Empty,
+
+                    Fecha = t.Fecha,
+                    Hora = t.Hora,
+                    Precio = t.Precio,
+                    Itbis = t.Itbis,
+                    DuracionDias = t.DuracionDias,
+                    DuracionHoras = t.DuracionHoras,
+                    FechaFin = t.FechaFin,
+                    Estado = t.Estado
+                })
                 .ToListAsync();
+
+            foreach (var tour in tours)
+            {
+                tour.Estado = CalcularEstado(
+                    tour.Fecha,
+                    tour.Hora,
+                    tour.FechaFin
+                );
+            }
+
+            return Ok(tours);
         }
 
-
    
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tour>> GetTour(int id)
+        public async Task<ActionResult<TourRespuestaDto>> GetTour(int id)
         {
             var tour = await _context.Tours
-                .Include(t => t.Pais)
-                .Include(t => t.Destino)
-                .Include(t => t.Categoria)
-                .Include(t => t.Guia)
-                .Include(t => t.Transporte)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                .Where(t => t.Id == id)
+                .Select(t => new TourRespuestaDto
+                {
+                    Id = t.Id,
+                    Nombre = t.Nombre,
+
+                    Pais = t.Pais != null
+                        ? t.Pais.Nombre
+                        : string.Empty,
+
+                    Destino = t.Destino != null
+                        ? t.Destino.Nombre
+                        : string.Empty,
+
+                    Categoria = t.Categoria != null
+                        ? t.Categoria.Nombre
+                        : string.Empty,
+
+                    Guia = t.Guia != null
+                        ? t.Guia.Nombre
+                        : string.Empty,
+
+                    Transporte = t.Transporte != null
+                        ? t.Transporte.Tipo
+                        : string.Empty,
+
+                    Fecha = t.Fecha,
+                    Hora = t.Hora,
+                    Precio = t.Precio,
+                    Itbis = t.Itbis,
+                    DuracionDias = t.DuracionDias,
+                    DuracionHoras = t.DuracionHoras,
+                    FechaFin = t.FechaFin,
+                    Estado = t.Estado
+                })
+                .FirstOrDefaultAsync();
 
             if (tour == null)
             {
                 return NotFound("El tour no existe.");
             }
 
-            return tour;
+            tour.Estado = CalcularEstado(
+                tour.Fecha,
+                tour.Hora,
+                tour.FechaFin
+            );
+
+            return Ok(tour);
         }
 
-
       
+
         [HttpPost]
-        public async Task<ActionResult<Tour>> PostTour(Tour tour)
+        public async Task<ActionResult<TourRespuestaDto>> PostTour(
+            CrearTourDto dto)
         {
             var paisExiste = await _context.Paises
-                .AnyAsync(p => p.Id == tour.PaisId);
+                .AnyAsync(p => p.Id == dto.PaisId);
 
             if (!paisExiste)
             {
-                return NotFound("El país especificado no existe.");
+                return NotFound(
+                    "El país especificado no existe."
+                );
             }
 
             var destino = await _context.Destinos
-                .FirstOrDefaultAsync(d => d.Id == tour.DestinoId);
+                .FirstOrDefaultAsync(d => d.Id == dto.DestinoId);
 
             if (destino == null)
             {
-                return NotFound("El destino especificado no existe.");
+                return NotFound(
+                    "El destino especificado no existe."
+                );
             }
 
-            if (destino.PaisId != tour.PaisId)
+            if (destino.PaisId != dto.PaisId)
             {
                 return BadRequest(
                     "El destino seleccionado no pertenece al país indicado."
@@ -80,92 +162,104 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var categoriaExiste = await _context.Categorias
-                .AnyAsync(c => c.Id == tour.CategoriaId);
+                .AnyAsync(c => c.Id == dto.CategoriaId);
 
             if (!categoriaExiste)
             {
-                return NotFound("La categoría especificada no existe.");
+                return NotFound(
+                    "La categoría especificada no existe."
+                );
             }
 
             var guiaExiste = await _context.Guias
-                .AnyAsync(g => g.Id == tour.GuiaId);
+                .AnyAsync(g => g.Id == dto.GuiaId);
 
             if (!guiaExiste)
             {
-                return NotFound("El guía especificado no existe.");
+                return NotFound(
+                    "El guía especificado no existe."
+                );
             }
 
             var transporteExiste = await _context.Transportes
-                .AnyAsync(t => t.Id == tour.TransporteId);
+                .AnyAsync(t => t.Id == dto.TransporteId);
 
             if (!transporteExiste)
             {
-                return NotFound("El transporte especificado no existe.");
+                return NotFound(
+                    "El transporte especificado no existe."
+                );
             }
 
-            tour.Itbis = tour.Precio * 0.18m;
-
-            tour.DuracionDias = destino.DuracionDias;
-            tour.DuracionHoras = destino.DuracionHoras;
-
-            var fechaInicio = tour.Fecha.Date.Add(tour.Hora);
-
-            tour.FechaFin = fechaInicio
-                .AddDays(tour.DuracionDias)
-                .AddHours(tour.DuracionHoras);
-
-            if (string.IsNullOrWhiteSpace(tour.Estado))
+            var tour = new Tour
             {
-                tour.Estado = "Disponible";
-            }
+                Nombre = dto.Nombre,
+                PaisId = dto.PaisId,
+                DestinoId = dto.DestinoId,
+                CategoriaId = dto.CategoriaId,
+                GuiaId = dto.GuiaId,
+                TransporteId = dto.TransporteId,
+                Fecha = dto.Fecha,
+                Hora = dto.Hora,
+                Precio = dto.Precio
+            };
+
+            PrepararDatosCalculados(tour, destino);
 
             _context.Tours.Add(tour);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetTour),
-                new { id = tour.Id },
-                tour
-            );
-        }
+            var respuesta = await ObtenerTourRespuesta(tour.Id);
 
-
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTour(int id, Tour tour)
-        {
-            if (id != tour.Id)
+            if (respuesta == null)
             {
-                return BadRequest(
-                    "El Id de la URL no coincide con el Id del tour."
+                return StatusCode(
+                    500,
+                    "El tour fue creado, pero no se pudo generar la respuesta."
                 );
             }
 
-            var tourExiste = await _context.Tours
-                .AnyAsync(t => t.Id == id);
+            return CreatedAtAction(
+                nameof(GetTour),
+                new { id = tour.Id },
+                respuesta
+            );
+        }
 
-            if (!tourExiste)
+       
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutTour(
+            int id,ActualizarTourDto dto)
+        {
+            var tour = await _context.Tours.FindAsync(id);
+
+            if (tour == null)
             {
                 return NotFound("El tour no existe.");
             }
 
             var paisExiste = await _context.Paises
-                .AnyAsync(p => p.Id == tour.PaisId);
+                .AnyAsync(p => p.Id == dto.PaisId);
 
             if (!paisExiste)
             {
-                return NotFound("El país especificado no existe.");
+                return NotFound(
+                    "El país especificado no existe."
+                );
             }
 
             var destino = await _context.Destinos
-                .FirstOrDefaultAsync(d => d.Id == tour.DestinoId);
+                .FirstOrDefaultAsync(d => d.Id == dto.DestinoId);
 
             if (destino == null)
             {
-                return NotFound("El destino especificado no existe.");
+                return NotFound(
+                    "El destino especificado no existe."
+                );
             }
 
-            if (destino.PaisId != tour.PaisId)
+            if (destino.PaisId != dto.PaisId)
             {
                 return BadRequest(
                     "El destino seleccionado no pertenece al país indicado."
@@ -173,59 +267,51 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var categoriaExiste = await _context.Categorias
-                .AnyAsync(c => c.Id == tour.CategoriaId);
+                .AnyAsync(c => c.Id == dto.CategoriaId);
 
             if (!categoriaExiste)
             {
-                return NotFound("La categoría especificada no existe.");
+                return NotFound(
+                    "La categoría especificada no existe."
+                );
             }
 
             var guiaExiste = await _context.Guias
-                .AnyAsync(g => g.Id == tour.GuiaId);
+                .AnyAsync(g => g.Id == dto.GuiaId);
 
             if (!guiaExiste)
             {
-                return NotFound("El guía especificado no existe.");
+                return NotFound(
+                    "El guía especificado no existe."
+                );
             }
 
             var transporteExiste = await _context.Transportes
-                .AnyAsync(t => t.Id == tour.TransporteId);
+                .AnyAsync(t => t.Id == dto.TransporteId);
 
             if (!transporteExiste)
             {
-                return NotFound("El transporte especificado no existe.");
+                return NotFound(
+                    "El transporte especificado no existe."
+                );
             }
 
-            tour.Itbis = tour.Precio * 0.18m;
+            tour.Nombre = dto.Nombre;
+            tour.PaisId = dto.PaisId;
+            tour.DestinoId = dto.DestinoId;
+            tour.CategoriaId = dto.CategoriaId;
+            tour.GuiaId = dto.GuiaId;
+            tour.TransporteId = dto.TransporteId;
+            tour.Fecha = dto.Fecha;
+            tour.Hora = dto.Hora;
+            tour.Precio = dto.Precio;
 
-            tour.DuracionDias = destino.DuracionDias;
-            tour.DuracionHoras = destino.DuracionHoras;
+            PrepararDatosCalculados(tour, destino);
 
-            var fechaInicio = tour.Fecha.Date.Add(tour.Hora);
-
-            tour.FechaFin = fechaInicio
-                .AddDays(tour.DuracionDias)
-                .AddHours(tour.DuracionHoras);
-
-            if (string.IsNullOrWhiteSpace(tour.Estado))
-            {
-                tour.Estado = "Disponible";
-            }
-
-            _context.Entry(tour).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return NotFound("El tour ya no existe.");
-            }
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
 
         
 
@@ -253,6 +339,103 @@ namespace AgenciaToursAPI.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private void PrepararDatosCalculados(
+            Tour tour,
+            Destino destino)
+        {
+            tour.Itbis = tour.Precio * 0.18m;
+
+            tour.DuracionDias = destino.DuracionDias;
+            tour.DuracionHoras = destino.DuracionHoras;
+
+            var fechaInicio = tour.Fecha.Date.Add(tour.Hora);
+
+            tour.FechaFin = fechaInicio
+                .AddDays(tour.DuracionDias)
+                .AddHours(tour.DuracionHoras);
+
+            tour.Estado = CalcularEstado(
+                tour.Fecha,
+                tour.Hora,
+                tour.FechaFin
+            );
+        }
+
+        private static string CalcularEstado(
+            DateTime fecha,
+            TimeSpan hora,
+            DateTime fechaFin)
+        {
+            var fechaInicio = fecha.Date.Add(hora);
+            var ahora = DateTime.Now;
+
+            if (ahora < fechaInicio)
+            {
+                return "Disponible";
+            }
+
+            if (ahora <= fechaFin)
+            {
+                return "En curso";
+            }
+
+            return "Finalizado";
+        }
+
+
+        private async Task<TourRespuestaDto?>
+            ObtenerTourRespuesta(int id)
+        {
+            var tour = await _context.Tours
+                .Where(t => t.Id == id)
+                .Select(t => new TourRespuestaDto
+                {
+                    Id = t.Id,
+                    Nombre = t.Nombre,
+
+                    Pais = t.Pais != null
+                        ? t.Pais.Nombre
+                        : string.Empty,
+
+                    Destino = t.Destino != null
+                        ? t.Destino.Nombre
+                        : string.Empty,
+
+                    Categoria = t.Categoria != null
+                        ? t.Categoria.Nombre
+                        : string.Empty,
+
+                    Guia = t.Guia != null
+                        ? t.Guia.Nombre
+                        : string.Empty,
+
+                    Transporte = t.Transporte != null
+                        ? t.Transporte.Tipo
+                        : string.Empty,
+
+                    Fecha = t.Fecha,
+                    Hora = t.Hora,
+                    Precio = t.Precio,
+                    Itbis = t.Itbis,
+                    DuracionDias = t.DuracionDias,
+                    DuracionHoras = t.DuracionHoras,
+                    FechaFin = t.FechaFin,
+                    Estado = t.Estado
+                })
+                .FirstOrDefaultAsync();
+
+            if (tour != null)
+            {
+                tour.Estado = CalcularEstado(
+                    tour.Fecha,
+                    tour.Hora,
+                    tour.FechaFin
+                );
+            }
+
+            return tour;
         }
     }
 }

@@ -94,5 +94,81 @@ namespace AgenciaToursAPI.Controllers
                 reserva
             );
         }
+
+
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutReserva(int id, Reserva reserva)
+        {
+            if (id != reserva.Id)
+            {
+                return BadRequest("El Id de la URL no coincide con el Id de la reserva.");
+            }
+
+            var reservaActual = await _context.Reservas.FindAsync(id);
+
+            if (reservaActual == null)
+            {
+                return NotFound("La reserva no existe.");
+            }
+
+            var clienteExiste = await _context.Clientes
+                .AnyAsync(c => c.Id == reserva.ClienteId);
+
+            if (!clienteExiste)
+            {
+                return NotFound("El cliente especificado no existe.");
+            }
+
+            var tour = await _context.Tours
+                .FirstOrDefaultAsync(t => t.Id == reserva.TourId);
+
+            if (tour == null)
+            {
+                return NotFound("El tour especificado no existe.");
+            }
+
+            if (tour.Estado != "Disponible")
+            {
+                return BadRequest("El tour seleccionado no está disponible.");
+            }
+
+            var metodoPagoExiste = await _context.MetodosPago
+                .AnyAsync(m => m.Id == reserva.MetodoPagoId);
+
+            if (!metodoPagoExiste)
+            {
+                return NotFound("El método de pago especificado no existe.");
+            }
+
+            reservaActual.ClienteId = reserva.ClienteId;
+            reservaActual.TourId = reserva.TourId;
+            reservaActual.MetodoPagoId = reserva.MetodoPagoId;
+            reservaActual.CantidadPersonas = reserva.CantidadPersonas;
+            reservaActual.Total = tour.Precio * reserva.CantidadPersonas;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+    
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReserva(int id)
+        {
+            var reserva = await _context.Reservas.FindAsync(id);
+
+            if (reserva == null)
+            {
+                return NotFound("La reserva no existe.");
+            }
+
+            _context.Reservas.Remove(reserva);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
