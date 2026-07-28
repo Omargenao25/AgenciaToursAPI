@@ -87,6 +87,10 @@ namespace AgenciaToursAPI.Data
                 .WithMany(m => m.Reservas)
                 .HasForeignKey(r => r.MetodoPagoId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Correo)
+                .IsUnique();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-        // GET: api/Reservas
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReservaRespuestaDto>>>
             GetReservas()
@@ -53,7 +53,6 @@ namespace AgenciaToursAPI.Controllers
             return Ok(reservas);
         }
 
-        // GET: api/Reservas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ReservaRespuestaDto>>
             GetReserva(int id)
@@ -68,7 +67,6 @@ namespace AgenciaToursAPI.Controllers
             return Ok(reserva);
         }
 
-        // POST: api/Reservas
         [HttpPost]
         public async Task<ActionResult<ReservaRespuestaDto>>
             PostReserva(CrearReservaDto dto)
@@ -93,13 +91,8 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
-            /*
-             * La fecha de reserva representa el momento en que
-             * el cliente realiza la reservación.
-             *
-             * La fecha y hora del tour representan el momento
-             * en que comienza el viaje.
-             */
+           
+
             var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
 
             if (DateTime.Now >= fechaInicioTour)
