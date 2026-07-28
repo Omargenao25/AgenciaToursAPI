@@ -1,12 +1,20 @@
 using AgenciaToursAPI.Data;
+using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Conexion")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("Conexion")
+    ));
 
-// Add services to the container.
+builder.Services.AddScoped<
+    IPasswordHasher<Usuario>,
+    PasswordHasher<Usuario>
+>();
+
 
 builder.Services.AddControllers();
 
@@ -14,8 +22,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
 
 if (app.Environment.IsDevelopment())
 {
