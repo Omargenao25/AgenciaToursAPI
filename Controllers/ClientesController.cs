@@ -2,9 +2,11 @@
 using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ClientesController : ControllerBase
@@ -16,36 +18,56 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-
-    
+      
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
         {
-            return await _context.Clientes.ToListAsync();
+            var clientes = await _context.Clientes
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(clientes);
         }
 
-
-
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Cliente>> GetCliente(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
+            var cliente = await _context.Clientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (cliente == null)
             {
                 return NotFound("El cliente no existe.");
             }
 
-            return cliente;
+            return Ok(cliente);
         }
 
-
-
+       
         [HttpPost]
         public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
         {
-            _context.Clientes.Add(cliente);
+            NormalizarCliente(cliente);
 
+            var cedulaExiste = await _context.Clientes
+                .AnyAsync(c => c.Cedula == cliente.Cedula);
+
+            if (cedulaExiste)
+            {
+                return BadRequest("Ya existe un cliente con esa cédula.");
+            }
+
+            var correoExiste = await _context.Clientes
+                .AnyAsync(c => c.Correo == cliente.Correo);
+
+            if (correoExiste)
+            {
+                return BadRequest("Ya existe un cliente con ese correo." );
+            }
+
+            _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
@@ -55,38 +77,93 @@ namespace AgenciaToursAPI.Controllers
             );
         }
 
-
        
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(int id, Cliente cliente)
+        public async Task<IActionResult> PutCliente(
+            int id,
+            Cliente cliente)
         {
             if (id != cliente.Id)
             {
-                return BadRequest("El Id no coincide.");
+                return BadRequest( "El Id de la URL no coincide con el Id del cliente.");
             }
 
-            _context.Entry(cliente).State = EntityState.Modified;
+            var clienteActual = await _context.Clientes
+                .FindAsync(id);
 
-            try
+            if (clienteActual == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound("El cliente no existe.");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClienteExiste(id))
-                {
-                    return NotFound("El cliente no existe.");
-                }
 
-                throw;
+            NormalizarCliente(cliente);
+
+            var cedulaExiste = await _context.Clientes
+                .AnyAsync(c =>
+                    c.Cedula == cliente.Cedula &&
+                    c.Id != id
+                );
+
+            if (cedulaExiste)
+            {
+                return BadRequest("Ya existe otro cliente con esa cédula.");
             }
+
+            var correoExiste = await _context.Clientes
+                .AnyAsync(c =>
+                    c.Correo == cliente.Correo &&
+                    c.Id != id
+                );
+
+            if (correoExiste)
+            {
+                return BadRequest("Ya existe otro cliente con ese correo.");
+            }
+
+            clienteActual.Nombre = cliente.Nombre;
+            clienteActual.Apellido = cliente.Apellido;
+            clienteActual.Cedula = cliente.Cedula;
+            clienteActual.Telefono = cliente.Telefono;
+            clienteActual.Correo = cliente.Correo;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool ClienteExiste(int id)
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCliente(int id)
         {
-            return _context.Clientes.Any(c => c.Id == id);
+            var cliente = await _context.Clientes
+                .FindAsync(id);
+
+            if (cliente == null)
+            {
+                return NotFound("El cliente no existe.");
+            }
+
+            var tieneReservas = await _context.Reservas
+                .AnyAsync(r => r.ClienteId == id);
+
+            if (tieneReservas)
+            {
+                return BadRequest( "No se puede eliminar el cliente porque tiene reservas asociadas.");
+            }
+
+            _context.Clientes.Remove(cliente);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private static void NormalizarCliente(Cliente cliente)
+        {
+            cliente.Nombre = cliente.Nombre.Trim();
+            cliente.Apellido = cliente.Apellido.Trim();
+            cliente.Cedula = cliente.Cedula.Trim();
+            cliente.Telefono = cliente.Telefono.Trim();
+            cliente.Correo = cliente.Correo.Trim().ToLower();
         }
     }
 }

@@ -91,6 +91,14 @@ namespace AgenciaToursAPI.Data
             modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Correo)
                 .IsUnique();
+
+            modelBuilder.Entity<Cliente>()
+                .HasIndex(c => c.Cedula)
+                .IsUnique();
+
+            modelBuilder.Entity<Cliente>()
+                .HasIndex(c => c.Correo)
+                .IsUnique();
         }
     }
 }

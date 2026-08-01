@@ -36,7 +36,7 @@ namespace AgenciaToursAPI.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
-                nameof(GetPaises),
+                nameof(GetPais),
                 new { id = pais.Id },
                 pais
             );

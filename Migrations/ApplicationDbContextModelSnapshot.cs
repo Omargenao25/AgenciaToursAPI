@@ -60,7 +60,7 @@ namespace AgenciaToursAPI.Migrations
 
                     b.Property<string>("Correo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -73,6 +73,12 @@ namespace AgenciaToursAPI.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Cedula")
+                        .IsUnique();
+
+                    b.HasIndex("Correo")
+                        .IsUnique();
 
                     b.ToTable("Clientes");
                 });
