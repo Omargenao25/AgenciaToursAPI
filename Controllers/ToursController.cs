@@ -1,9 +1,9 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -19,12 +19,12 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-     
-
+       
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TourRespuestaDto>>> GetTours()
         {
             var tours = await _context.Tours
+                .AsNoTracking()
                 .Select(t => new TourRespuestaDto
                 {
                     Id = t.Id,
@@ -73,12 +73,12 @@ namespace AgenciaToursAPI.Controllers
             return Ok(tours);
         }
 
-   
-
+    
         [HttpGet("{id}")]
         public async Task<ActionResult<TourRespuestaDto>> GetTour(int id)
         {
             var tour = await _context.Tours
+                .AsNoTracking()
                 .Where(t => t.Id == id)
                 .Select(t => new TourRespuestaDto
                 {
@@ -130,12 +130,20 @@ namespace AgenciaToursAPI.Controllers
             return Ok(tour);
         }
 
-      
 
         [HttpPost]
         public async Task<ActionResult<TourRespuestaDto>> PostTour(
             CrearTourDto dto)
         {
+            var fechaInicio = dto.Fecha.Date.Add(dto.Hora);
+
+            if (fechaInicio <= DateTime.Now)
+            {
+                return BadRequest(
+                    "No se puede crear un tour con una fecha y hora pasadas."
+                );
+            }
+
             var paisExiste = await _context.Paises
                 .AnyAsync(p => p.Id == dto.PaisId);
 
@@ -195,7 +203,7 @@ namespace AgenciaToursAPI.Controllers
 
             var tour = new Tour
             {
-                Nombre = dto.Nombre,
+                Nombre = dto.Nombre.Trim(),
                 PaisId = dto.PaisId,
                 DestinoId = dto.DestinoId,
                 CategoriaId = dto.CategoriaId,
@@ -216,7 +224,7 @@ namespace AgenciaToursAPI.Controllers
             if (respuesta == null)
             {
                 return StatusCode(
-                    500,
+                    StatusCodes.Status500InternalServerError,
                     "El tour fue creado, pero no se pudo generar la respuesta."
                 );
             }
@@ -229,16 +237,46 @@ namespace AgenciaToursAPI.Controllers
         }
 
        
-
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTour(
-            int id,ActualizarTourDto dto)
+            int id,
+            ActualizarTourDto dto)
         {
             var tour = await _context.Tours.FindAsync(id);
 
             if (tour == null)
             {
                 return NotFound("El tour no existe.");
+            }
+
+            var fechaInicioSolicitada = dto.Fecha.Date.Add(dto.Hora);
+
+            if (fechaInicioSolicitada <= DateTime.Now)
+            {
+                return BadRequest(
+                    "La fecha y hora del tour deben ser futuras."
+                );
+            }
+
+            var tieneReservas = await _context.Reservas
+                .AnyAsync(r => r.TourId == id);
+
+            if (tieneReservas)
+            {
+                var cambiaDatosLogisticos =
+                    tour.PaisId != dto.PaisId ||
+                    tour.DestinoId != dto.DestinoId ||
+                    tour.GuiaId != dto.GuiaId ||
+                    tour.TransporteId != dto.TransporteId ||
+                    tour.Fecha != dto.Fecha ||
+                    tour.Hora != dto.Hora;
+
+                if (cambiaDatosLogisticos)
+                {
+                    return BadRequest(
+                        "No se pueden modificar el país, destino, guía, transporte, fecha ni hora de un tour que tiene reservas asociadas."
+                    );
+                }
             }
 
             var paisExiste = await _context.Paises
@@ -298,7 +336,7 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
-            tour.Nombre = dto.Nombre;
+            tour.Nombre = dto.Nombre.Trim();
             tour.PaisId = dto.PaisId;
             tour.DestinoId = dto.DestinoId;
             tour.CategoriaId = dto.CategoriaId;
@@ -316,7 +354,6 @@ namespace AgenciaToursAPI.Controllers
         }
 
         
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTour(int id)
         {
@@ -343,11 +380,14 @@ namespace AgenciaToursAPI.Controllers
             return NoContent();
         }
 
-        private void PrepararDatosCalculados(
+        private static void PrepararDatosCalculados(
             Tour tour,
             Destino destino)
         {
-            tour.Itbis = tour.Precio * 0.18m;
+            tour.Itbis = Math.Round(
+                tour.Precio * 0.18m,
+                2
+            );
 
             tour.DuracionDias = destino.DuracionDias;
             tour.DuracionHoras = destino.DuracionHoras;
@@ -386,11 +426,10 @@ namespace AgenciaToursAPI.Controllers
             return "Finalizado";
         }
 
-
-        private async Task<TourRespuestaDto?>
-            ObtenerTourRespuesta(int id)
+        private async Task<TourRespuestaDto?> ObtenerTourRespuesta(int id)
         {
             var tour = await _context.Tours
+                .AsNoTracking()
                 .Where(t => t.Id == id)
                 .Select(t => new TourRespuestaDto
                 {

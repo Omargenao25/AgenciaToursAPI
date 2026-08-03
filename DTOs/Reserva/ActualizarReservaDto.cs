@@ -2,18 +2,21 @@
 
 namespace AgenciaToursAPI.DTOs
 {
-    public class ActualizarReservaDto
+    public class CrearReservaDto
     {
-        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un cliente válido.")]
         public int ClienteId { get; set; }
 
-        [Required]
+
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un tour válido.")]
         public int TourId { get; set; }
 
-        [Required]
+
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un método de pago válido.")]
         public int MetodoPagoId { get; set; }
 
-        [Range(1, 100, ErrorMessage = "La cantidad de personas debe ser mayor que cero.")]
+
+        [Range(1, 100, ErrorMessage = "La cantidad de personas debe estar entre 1 y 100.")]
         public int CantidadPersonas { get; set; }
     }
 }
