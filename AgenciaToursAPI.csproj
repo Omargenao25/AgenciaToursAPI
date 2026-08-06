@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Folder Include="DTOs\Usuario\" />
+    <Folder Include="Script-Sql\" />
   </ItemGroup>
 
 </Project>

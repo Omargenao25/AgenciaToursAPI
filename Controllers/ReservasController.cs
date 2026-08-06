@@ -56,7 +56,7 @@ namespace AgenciaToursAPI.Controllers
             return Ok(reservas);
         }
 
-        // GET: api/Reservas/5
+       
         [HttpGet("{id}")]
         public async Task<ActionResult<ReservaRespuestaDto>>
             GetReserva(int id)
@@ -71,7 +71,7 @@ namespace AgenciaToursAPI.Controllers
             return Ok(reserva);
         }
 
-        // POST: api/Reservas
+     
         [HttpPost]
         public async Task<ActionResult<ReservaRespuestaDto>>
             PostReserva(CrearReservaDto dto)
