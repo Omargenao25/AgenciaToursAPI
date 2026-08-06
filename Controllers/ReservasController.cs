@@ -46,8 +46,8 @@ namespace AgenciaToursAPI.Controllers
                     CantidadPersonas = r.CantidadPersonas,
 
                     PrecioPorPersona = r.CantidadPersonas > 0
-                        ? r.Total / r.CantidadPersonas
-                        : 0,
+                    ? Math.Round(r.Total / r.CantidadPersonas, 2)
+                    : 0,
 
                     Total = r.Total
                 })
@@ -239,16 +239,14 @@ namespace AgenciaToursAPI.Controllers
                 2
             );
 
-            /*
-             * FechaReserva no cambia porque representa
-             * el momento original en que se creó.
-             */
+           
+            
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE: api/Reservas/5
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
@@ -313,9 +311,10 @@ namespace AgenciaToursAPI.Controllers
                     FechaReserva = r.FechaReserva,
                     CantidadPersonas = r.CantidadPersonas,
 
+
                     PrecioPorPersona = r.CantidadPersonas > 0
-                        ? r.Total / r.CantidadPersonas
-                        : 0,
+                    ? Math.Round(r.Total / r.CantidadPersonas, 2)
+                    : 0,
 
                     Total = r.Total
                 })
