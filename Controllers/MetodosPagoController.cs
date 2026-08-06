@@ -1,8 +1,8 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -18,35 +18,53 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-
      
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MetodoPago>>> GetMetodosPago()
         {
-            return await _context.MetodosPago.ToListAsync();
+            var metodosPago = await _context.MetodosPago
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(metodosPago);
         }
 
 
-        
         [HttpGet("{id}")]
         public async Task<ActionResult<MetodoPago>> GetMetodoPago(int id)
         {
-            var metodoPago = await _context.MetodosPago.FindAsync(id);
+            var metodoPago = await _context.MetodosPago
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (metodoPago == null)
             {
                 return NotFound("El método de pago no existe.");
             }
 
-            return metodoPago;
+            return Ok(metodoPago);
         }
 
-
+      
         [HttpPost]
-        public async Task<ActionResult<MetodoPago>> PostMetodoPago(MetodoPago metodoPago)
+        public async Task<ActionResult<MetodoPago>> PostMetodoPago(
+            MetodoPago metodoPago)
         {
-            _context.MetodosPago.Add(metodoPago);
+            metodoPago.Nombre = metodoPago.Nombre.Trim();
 
+            var existe = await _context.MetodosPago
+                .AnyAsync(m =>
+                    m.Nombre.ToLower() == metodoPago.Nombre.ToLower()
+                );
+
+            if (existe)
+            {
+                return BadRequest(
+                    "Ya existe un método de pago con ese nombre."
+                );
+            }
+
+            _context.MetodosPago.Add(metodoPago);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
@@ -56,51 +74,63 @@ namespace AgenciaToursAPI.Controllers
             );
         }
 
-
-      
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMetodoPago(int id, MetodoPago metodoPago)
+        public async Task<IActionResult> PutMetodoPago(
+            int id,
+            MetodoPago metodoPago)
         {
             if (id != metodoPago.Id)
             {
-                return BadRequest("El Id no coincide.");
+                return BadRequest(
+                    "El Id de la URL no coincide con el Id del método de pago."
+                );
             }
 
-            _context.Entry(metodoPago).State = EntityState.Modified;
+            var metodoPagoActual = await _context.MetodosPago
+                .FindAsync(id);
 
-            try
+            if (metodoPagoActual == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound(
+                    "El método de pago no existe."
+                );
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MetodoPagoExiste(id))
-                {
-                    return NotFound("El método de pago no existe.");
-                }
 
-                throw;
+            metodoPago.Nombre = metodoPago.Nombre.Trim();
+
+            var existe = await _context.MetodosPago
+                .AnyAsync(m =>
+                    m.Nombre.ToLower() == metodoPago.Nombre.ToLower() &&
+                    m.Id != id
+                );
+
+            if (existe)
+            {
+                return BadRequest(
+                    "Ya existe otro método de pago con ese nombre."
+                );
             }
+
+            metodoPagoActual.Nombre = metodoPago.Nombre;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool MetodoPagoExiste(int id)
-        {
-            return _context.MetodosPago.Any(m => m.Id == id);
-        }
-
-
-
-
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMetodoPago(int id)
         {
-            var metodoPago = await _context.MetodosPago.FindAsync(id);
+            var metodoPago = await _context.MetodosPago
+                .FindAsync(id);
 
             if (metodoPago == null)
             {
-                return NotFound("El método de pago no existe.");
+                return NotFound(
+                    "El método de pago no existe."
+                );
             }
 
             var tieneReservas = await _context.Reservas
@@ -114,7 +144,6 @@ namespace AgenciaToursAPI.Controllers
             }
 
             _context.MetodosPago.Remove(metodoPago);
-
             await _context.SaveChangesAsync();
 
             return NoContent();

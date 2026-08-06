@@ -132,6 +132,9 @@ namespace AgenciaToursAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Telefono")
+                        .IsUnique();
+
                     b.ToTable("Guias");
                 });
 

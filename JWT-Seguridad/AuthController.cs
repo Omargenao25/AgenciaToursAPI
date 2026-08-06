@@ -1,6 +1,7 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +17,7 @@ namespace AgenciaToursAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
         private readonly IPasswordHasher<Usuario> _passwordHasher;
-
         private readonly IConfiguration _configuration;
 
         public AuthController(
@@ -31,14 +30,15 @@ namespace AgenciaToursAPI.Controllers
             _configuration = configuration;
         }
 
-       
+    
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<LoginRespuestaDto>> Login(
             LoginDto dto)
         {
             var correoNormalizado = dto.Correo
                 .Trim()
-                .ToLower();
+                .ToLowerInvariant();
 
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(
@@ -47,7 +47,10 @@ namespace AgenciaToursAPI.Controllers
 
             if (usuario == null)
             {
-                return Unauthorized("Correo o contraseña incorrectos.");
+                return Unauthorized(new
+                {
+                    mensaje = "Correo o contraseña incorrectos."
+                });
             }
 
             var resultado = _passwordHasher.VerifyHashedPassword(
@@ -58,14 +61,44 @@ namespace AgenciaToursAPI.Controllers
 
             if (resultado == PasswordVerificationResult.Failed)
             {
-                return Unauthorized("Correo o contraseña incorrectos.");
+                return Unauthorized(new
+                {
+                    mensaje = "Correo o contraseña incorrectos."
+                });
             }
 
-            var expiracion = DateTime.UtcNow.AddMinutes(
-                _configuration.GetValue<int>("Jwt:ExpireMinutes")
-            );
+           
+            if (resultado ==
+                PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                usuario.PasswordHash =
+                    _passwordHasher.HashPassword(
+                        usuario,
+                        dto.Contraseña
+                    );
 
-            var token = GenerarToken(usuario, expiracion);
+                await _context.SaveChangesAsync();
+            }
+
+            var minutosExpiracion =
+                _configuration.GetValue<int>(
+                    "Jwt:ExpireMinutes"
+                );
+
+            if (minutosExpiracion <= 0)
+            {
+                throw new InvalidOperationException(
+                    "El tiempo de expiración del JWT no está configurado correctamente."
+                );
+            }
+
+            var expiracion = DateTime.UtcNow
+                .AddMinutes(minutosExpiracion);
+
+            var token = GenerarToken(
+                usuario,
+                expiracion
+            );
 
             var respuesta = new LoginRespuestaDto
             {
@@ -82,10 +115,27 @@ namespace AgenciaToursAPI.Controllers
             DateTime expiracion)
         {
             var jwtKey = _configuration["Jwt:Key"]
-                ?? throw new InvalidOperationException("La clave JWT no está configurada.");
+                ?? throw new InvalidOperationException(
+                    "La clave JWT no está configurada."
+                );
+
+            var jwtIssuer = _configuration["Jwt:Issuer"]
+                ?? throw new InvalidOperationException(
+                    "El emisor JWT no está configurado."
+                );
+
+            var jwtAudience = _configuration["Jwt:Audience"]
+                ?? throw new InvalidOperationException(
+                    "La audiencia JWT no está configurada."
+                );
 
             var claims = new List<Claim>
             {
+                new Claim(
+                    ClaimTypes.NameIdentifier,
+                    usuario.Id.ToString()
+                ),
+
                 new Claim(
                     JwtRegisteredClaimNames.Sub,
                     usuario.Id.ToString()
@@ -117,8 +167,8 @@ namespace AgenciaToursAPI.Controllers
             );
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: jwtIssuer,
+                audience: jwtAudience,
                 claims: claims,
                 expires: expiracion,
                 signingCredentials: credenciales

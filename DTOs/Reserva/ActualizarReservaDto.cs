@@ -2,7 +2,7 @@
 
 namespace AgenciaToursAPI.DTOs
 {
-    public class CrearReservaDto
+    public class ActualizarReservaDto
     {
         [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un cliente válido.")]
         public int ClienteId { get; set; }

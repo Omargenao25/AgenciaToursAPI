@@ -7,24 +7,24 @@ namespace AgenciaToursAPI.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Debe seleccionar un cliente.")]
+        [Range( 1, int.MaxValue, ErrorMessage = "Debe seleccionar un cliente válido.")]
         public int ClienteId { get; set; }
 
         public Cliente? Cliente { get; set; }
 
-        [Required(ErrorMessage = "Debe seleccionar un tour.")]
+        [Range( 1, int.MaxValue, ErrorMessage = "Debe seleccionar un tour válido.")]
         public int TourId { get; set; }
 
         public Tour? Tour { get; set; }
 
-        [Required(ErrorMessage = "Debe seleccionar un método de pago.")]
+        [Range( 1, int.MaxValue, ErrorMessage = "Debe seleccionar un método de pago válido.")]
         public int MetodoPagoId { get; set; }
 
         public MetodoPago? MetodoPago { get; set; }
 
         public DateTime FechaReserva { get; set; }
 
-        [Range(1, 100, ErrorMessage = "La cantidad de personas debe ser mayor que cero.")]
+        [Range( 1, 100, ErrorMessage = "La cantidad de personas debe estar entre 1 y 100.")]
         public int CantidadPersonas { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]

@@ -1,8 +1,8 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -19,13 +19,15 @@ namespace AgenciaToursAPI.Controllers
         }
 
 
-      
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos()
         {
-            return await _context.Destinos
+            var destinos = await _context.Destinos
+                .AsNoTracking()
                 .Include(d => d.Pais)
                 .ToListAsync();
+
+            return Ok(destinos);
         }
 
 
@@ -34,32 +36,65 @@ namespace AgenciaToursAPI.Controllers
         public async Task<ActionResult<Destino>> GetDestino(int id)
         {
             var destino = await _context.Destinos
+                .AsNoTracking()
                 .Include(d => d.Pais)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
+
             if (destino == null)
             {
-                return NotFound();
+                return NotFound( "El destino no existe.");
             }
 
-            return destino;
+
+            return Ok(destino);
         }
 
 
 
         [HttpPost]
-        public async Task<ActionResult<Destino>> PostDestino(Destino destino)
+        public async Task<ActionResult<Destino>> PostDestino(
+            Destino destino)
         {
-            var pais = await _context.Paises.FindAsync(destino.PaisId);
 
-            if (pais == null)
+            destino.Nombre = destino.Nombre.Trim();
+
+
+            var paisExiste = await _context.Paises
+                .AnyAsync(p => p.Id == destino.PaisId);
+
+
+            if (!paisExiste)
             {
                 return NotFound("El país especificado no existe.");
             }
 
+
+            var existe = await _context.Destinos
+                .AnyAsync(d =>
+                    d.Nombre.ToLower() == destino.Nombre.ToLower()
+                    &&
+                    d.PaisId == destino.PaisId
+                );
+
+
+            if (existe)
+            {
+                return BadRequest("Ya existe este destino para el país seleccionado.");
+            }
+
+
+            if (destino.DuracionDias == 0 &&
+                destino.DuracionHoras == 0)
+            {
+                return BadRequest("La duración total del destino debe ser mayor que cero.");
+            }
+
+
             _context.Destinos.Add(destino);
 
             await _context.SaveChangesAsync();
+
 
             return CreatedAtAction(
                 nameof(GetDestino),
@@ -69,71 +104,117 @@ namespace AgenciaToursAPI.Controllers
         }
 
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDestino(int id, Destino destino)
+        public async Task<IActionResult> PutDestino(
+            int id,
+            Destino destino)
         {
+
             if (id != destino.Id)
             {
                 return BadRequest("El Id de la URL no coincide con el Id del destino.");
             }
 
-            var paisExiste = await _context.Paises.AnyAsync(
-                p => p.Id == destino.PaisId
-            );
+
+            var destinoActual = await _context.Destinos
+                .FindAsync(id);
+
+
+            if (destinoActual == null)
+            {
+                return NotFound("El destino no existe.");
+            }
+
+
+            var paisExiste = await _context.Paises
+                .AnyAsync(p => p.Id == destino.PaisId);
+
 
             if (!paisExiste)
             {
-                return NotFound("El país especificado no existe.");
+                return NotFound("El país especificado no existe." );
             }
 
-            _context.Entry(destino).State = EntityState.Modified;
 
-            try
+            destino.Nombre = destino.Nombre.Trim();
+
+
+            var existe = await _context.Destinos
+                .AnyAsync(d =>
+                    d.Nombre.ToLower() == destino.Nombre.ToLower()
+                    &&
+                    d.PaisId == destino.PaisId
+                    &&
+                    d.Id != id
+                );
+
+
+            if (existe)
             {
-                await _context.SaveChangesAsync();
+                return BadRequest("Ya existe otro destino igual para ese país.");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DestinoExiste(id))
-                {
-                    return NotFound("El destino no existe.");
-                }
 
-                throw;
+            if (destino.DuracionDias == 0 &&
+                destino.DuracionHoras == 0)
+
+            {
+                return BadRequest("La duración total del destino debe ser mayor que cero." );
             }
+
+
+            var tieneTours = await _context.Tours
+                .AnyAsync(t => t.DestinoId == id);
+
+
+            if (tieneTours &&
+                destinoActual.PaisId != destino.PaisId)
+            {
+                return BadRequest("No se puede cambiar el país de un destino que tiene tours asociados.");
+            }
+
+
+
+            destinoActual.Nombre = destino.Nombre;
+            destinoActual.DuracionDias = destino.DuracionDias;
+            destinoActual.DuracionHoras = destino.DuracionHoras;
+            destinoActual.PaisId = destino.PaisId;
+
+
+            await _context.SaveChangesAsync();
+
 
             return NoContent();
         }
 
 
-        private bool DestinoExiste(int id)
-        {
-            return _context.Destinos.Any(e => e.Id == id);
-        }
 
-
-   
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDestino(int id)
         {
-            var destino = await _context.Destinos.FindAsync(id);
+            var destino = await _context.Destinos
+                .FindAsync(id);
+
 
             if (destino == null)
             {
-                return NotFound("El destino no existe.");
+                return NotFound( "El destino no existe." );
             }
+
 
             var tieneTours = await _context.Tours
                 .AnyAsync(t => t.DestinoId == id);
 
+
             if (tieneTours)
             {
-                return BadRequest( "No se puede eliminar el destino porque tiene tours asociados.");
+                return BadRequest("No se puede eliminar el destino porque tiene tours asociados.");
             }
 
+
             _context.Destinos.Remove(destino);
+
             await _context.SaveChangesAsync();
+
 
             return NoContent();
         }

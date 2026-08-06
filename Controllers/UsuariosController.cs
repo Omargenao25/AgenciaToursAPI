@@ -1,10 +1,11 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -24,9 +25,10 @@ namespace AgenciaToursAPI.Controllers
             _passwordHasher = passwordHasher;
         }
 
-     
+      
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UsuarioRespuestaDto>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<UsuarioRespuestaDto>>>
+            GetUsuarios()
         {
             var usuarios = await _context.Usuarios
                 .AsNoTracking()
@@ -41,9 +43,10 @@ namespace AgenciaToursAPI.Controllers
             return Ok(usuarios);
         }
 
-        
+      
         [HttpGet("{id}")]
-        public async Task<ActionResult<UsuarioRespuestaDto>> GetUsuario(int id)
+        public async Task<ActionResult<UsuarioRespuestaDto>>
+            GetUsuario(int id)
         {
             var usuario = await _context.Usuarios
                 .AsNoTracking()
@@ -64,19 +67,21 @@ namespace AgenciaToursAPI.Controllers
             return Ok(usuario);
         }
 
-  
+        [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult<UsuarioRespuestaDto>> PostUsuario(
-            CrearUsuarioDto dto)
+        public async Task<ActionResult<UsuarioRespuestaDto>>
+            PostUsuario(CrearUsuarioDto dto)
         {
-            var correoNormalizado = dto.Correo.Trim().ToLower();
+            var correoNormalizado = dto.Correo
+                .Trim()
+                .ToLowerInvariant();
 
             var correoExiste = await _context.Usuarios
                 .AnyAsync(u => u.Correo == correoNormalizado);
 
             if (correoExiste)
             {
-                return BadRequest("Ya existe un usuario con ese correo.");
+                return BadRequest( "Ya existe un usuario con ese correo.");
             }
 
             var usuario = new Usuario
@@ -107,20 +112,23 @@ namespace AgenciaToursAPI.Controllers
             );
         }
 
-        
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUsuario(
             int id,
             ActualizarUsuarioDto dto)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
+            var usuario = await _context.Usuarios
+                .FindAsync(id);
 
             if (usuario == null)
             {
                 return NotFound("El usuario no existe.");
             }
 
-            var correoNormalizado = dto.Correo.Trim().ToLower();
+            var correoNormalizado = dto.Correo
+                .Trim()
+                .ToLowerInvariant();
 
             var correoExiste = await _context.Usuarios
                 .AnyAsync(u =>
@@ -130,7 +138,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (correoExiste)
             {
-                return BadRequest( "Ya existe otro usuario con ese correo.");
+                return BadRequest("Ya existe otro usuario con ese correo." );
             }
 
             usuario.Nombre = dto.Nombre.Trim();
@@ -141,15 +149,35 @@ namespace AgenciaToursAPI.Controllers
             return NoContent();
         }
 
-       
+     
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
+            var usuario = await _context.Usuarios
+                .FindAsync(id);
 
             if (usuario == null)
             {
                 return NotFound("El usuario no existe.");
+            }
+
+            var idUsuarioAutenticadoTexto =
+                User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (int.TryParse(
+                    idUsuarioAutenticadoTexto,
+                    out var idUsuarioAutenticado) &&
+                idUsuarioAutenticado == id)
+            {
+                return BadRequest("No puede eliminar el usuario con el que inició sesión." );
+            }
+
+            var cantidadUsuarios = await _context.Usuarios
+                .CountAsync();
+
+            if (cantidadUsuarios <= 1)
+            {
+                return BadRequest( "No se puede eliminar el último usuario del sistema.");
             }
 
             _context.Usuarios.Remove(usuario);

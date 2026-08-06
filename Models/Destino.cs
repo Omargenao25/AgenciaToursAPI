@@ -8,16 +8,16 @@ namespace AgenciaToursAPI.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "El nombre del destino es obligatorio.")]
-        [MaxLength(100)]
+        [MaxLength(100,ErrorMessage = "El nombre del destino no puede superar los 100 caracteres.")]
         public string Nombre { get; set; } = string.Empty;
 
-        [Range(0, 365, ErrorMessage = "La duración en días no puede ser negativa.")]
+        [Range( 0, 365, ErrorMessage = "La duración en días debe estar entre 0 y 365.")]
         public int DuracionDias { get; set; }
 
-        [Range(0, 23, ErrorMessage = "Las horas deben estar entre 0 y 23.")]
+        [Range(0,23,ErrorMessage = "La duración en horas debe estar entre 0 y 23.")]
         public int DuracionHoras { get; set; }
 
-        [Required(ErrorMessage = "Debe seleccionar un país.")]
+        [Range(1,int.MaxValue,ErrorMessage = "Debe seleccionar un país válido.")]
         public int PaisId { get; set; }
 
         public Pais? Pais { get; set; }

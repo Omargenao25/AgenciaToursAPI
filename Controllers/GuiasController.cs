@@ -1,8 +1,8 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -18,35 +18,48 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Guia>>> GetGuias()
         {
-            return await _context.Guias.ToListAsync();
-        }
+            var guias = await _context.Guias
+                .AsNoTracking()
+                .ToListAsync();
 
+            return Ok(guias);
+        }
 
       
         [HttpGet("{id}")]
         public async Task<ActionResult<Guia>> GetGuia(int id)
         {
-            var guia = await _context.Guias.FindAsync(id);
+            var guia = await _context.Guias
+                .AsNoTracking()
+                .FirstOrDefaultAsync(g => g.Id == id);
 
             if (guia == null)
             {
                 return NotFound("El guía no existe.");
             }
 
-            return guia;
+            return Ok(guia);
         }
 
-
-       
+        
         [HttpPost]
         public async Task<ActionResult<Guia>> PostGuia(Guia guia)
         {
-            _context.Guias.Add(guia);
+            NormalizarGuia(guia);
 
+            var telefonoExiste = await _context.Guias
+                .AnyAsync(g => g.Telefono == guia.Telefono);
+
+            if (telefonoExiste)
+            {
+                return BadRequest("Ya existe un guía con ese número de teléfono.");
+            }
+
+            _context.Guias.Add(guia);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
@@ -56,44 +69,52 @@ namespace AgenciaToursAPI.Controllers
             );
         }
 
-
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGuia(int id, Guia guia)
+        public async Task<IActionResult> PutGuia(
+            int id,
+            Guia guia)
         {
             if (id != guia.Id)
             {
-                return BadRequest("El Id no coincide.");
+                return BadRequest("El Id de la URL no coincide con el Id del guía.");
             }
 
-            _context.Entry(guia).State = EntityState.Modified;
+            var guiaActual = await _context.Guias
+                .FindAsync(id);
 
-            try
+            if (guiaActual == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound("El guía no existe.");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GuiaExiste(id))
-                {
-                    return NotFound("El guía no existe.");
-                }
 
-                throw;
+            NormalizarGuia(guia);
+
+            var telefonoExiste = await _context.Guias
+                .AnyAsync(g =>
+                    g.Telefono == guia.Telefono &&
+                    g.Id != id
+                );
+
+            if (telefonoExiste)
+            {
+                return BadRequest("Ya existe otro guía con ese número de teléfono.");
             }
+
+            guiaActual.Nombre = guia.Nombre;
+            guiaActual.Telefono = guia.Telefono;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
-        private bool GuiaExiste(int id)
-        {
-            return _context.Guias.Any(g => g.Id == id);
-        }
 
-
-
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGuia(int id)
         {
-            var guia = await _context.Guias.FindAsync(id);
+            var guia = await _context.Guias
+                .FindAsync(id);
 
             if (guia == null)
             {
@@ -105,16 +126,19 @@ namespace AgenciaToursAPI.Controllers
 
             if (tieneTours)
             {
-                return BadRequest(
-                    "No se puede eliminar el guía porque tiene tours asociados."
-                );
+                return BadRequest( "No se puede eliminar el guía porque tiene tours asociados.");
             }
 
             _context.Guias.Remove(guia);
-
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private static void NormalizarGuia(Guia guia)
+        {
+            guia.Nombre = guia.Nombre.Trim();
+            guia.Telefono = guia.Telefono.Trim();
         }
     }
 }

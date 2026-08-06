@@ -99,6 +99,10 @@ namespace AgenciaToursAPI.Data
             modelBuilder.Entity<Cliente>()
                 .HasIndex(c => c.Correo)
                 .IsUnique();
+
+            modelBuilder.Entity<Guia>()
+                .HasIndex(g => g.Telefono)
+                .IsUnique();
         }
     }
 }

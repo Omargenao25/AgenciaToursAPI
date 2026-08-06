@@ -1,8 +1,8 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -18,35 +18,52 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
-
-      
+     
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Transporte>>> GetTransportes()
         {
-            return await _context.Transportes.ToListAsync();
+            var transportes = await _context.Transportes
+                .AsNoTracking()
+                .ToListAsync();
+
+            return Ok(transportes);
         }
 
-
-     
         [HttpGet("{id}")]
         public async Task<ActionResult<Transporte>> GetTransporte(int id)
         {
-            var transporte = await _context.Transportes.FindAsync(id);
+            var transporte = await _context.Transportes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (transporte == null)
             {
                 return NotFound("El transporte no existe.");
             }
 
-            return transporte;
+            return Ok(transporte);
         }
 
-
         [HttpPost]
-        public async Task<ActionResult<Transporte>> PostTransporte(Transporte transporte)
+        public async Task<ActionResult<Transporte>> PostTransporte(
+            Transporte transporte)
         {
-            _context.Transportes.Add(transporte);
+            NormalizarTransporte(transporte);
 
+            var existe = await _context.Transportes
+                .AnyAsync(t =>
+                    t.Tipo.ToLower() == transporte.Tipo.ToLower() &&
+                    t.Descripcion.ToLower() == transporte.Descripcion.ToLower()
+                );
+
+            if (existe)
+            {
+                return BadRequest(
+                    "Ya existe un transporte con el mismo tipo y descripción."
+                );
+            }
+
+            _context.Transportes.Add(transporte);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
@@ -56,46 +73,57 @@ namespace AgenciaToursAPI.Controllers
             );
         }
 
-
-     
+        
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTransporte(int id, Transporte transporte)
+        public async Task<IActionResult> PutTransporte(
+            int id,
+            Transporte transporte)
         {
             if (id != transporte.Id)
             {
-                return BadRequest("El Id no coincide.");
+                return BadRequest(
+                    "El Id de la URL no coincide con el Id del transporte."
+                );
             }
 
-            _context.Entry(transporte).State = EntityState.Modified;
+            var transporteActual = await _context.Transportes
+                .FindAsync(id);
 
-            try
+            if (transporteActual == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound("El transporte no existe.");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TransporteExiste(id))
-                {
-                    return NotFound("El transporte no existe.");
-                }
 
-                throw;
+            NormalizarTransporte(transporte);
+
+            var existe = await _context.Transportes
+                .AnyAsync(t =>
+                    t.Tipo.ToLower() == transporte.Tipo.ToLower() &&
+                    t.Descripcion.ToLower() == transporte.Descripcion.ToLower() &&
+                    t.Id != id
+                );
+
+            if (existe)
+            {
+                return BadRequest(
+                    "Ya existe otro transporte con el mismo tipo y descripción."
+                );
             }
+
+            transporteActual.Tipo = transporte.Tipo;
+            transporteActual.Descripcion = transporte.Descripcion;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool TransporteExiste(int id)
-        {
-            return _context.Transportes.Any(t => t.Id == id);
-        }
-
-
-  
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTransporte(int id)
         {
-            var transporte = await _context.Transportes.FindAsync(id);
+            var transporte = await _context.Transportes
+                .FindAsync(id);
 
             if (transporte == null)
             {
@@ -113,10 +141,15 @@ namespace AgenciaToursAPI.Controllers
             }
 
             _context.Transportes.Remove(transporte);
-
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private static void NormalizarTransporte(Transporte transporte)
+        {
+            transporte.Tipo = transporte.Tipo.Trim();
+            transporte.Descripcion = transporte.Descripcion.Trim();
         }
     }
 }

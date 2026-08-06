@@ -8,7 +8,10 @@ namespace AgenciaToursAPI.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "El nombre del país es obligatorio.")]
-        [MaxLength(100)]
+        [MaxLength(
+            100,
+            ErrorMessage = "El nombre del país no puede superar los 100 caracteres."
+        )]
         public string Nombre { get; set; } = string.Empty;
 
         [JsonIgnore]

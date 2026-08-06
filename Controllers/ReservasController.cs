@@ -1,9 +1,9 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -25,12 +25,13 @@ namespace AgenciaToursAPI.Controllers
             GetReservas()
         {
             var reservas = await _context.Reservas
+                .AsNoTracking()
                 .Select(r => new ReservaRespuestaDto
                 {
                     Id = r.Id,
 
                     Cliente = r.Cliente != null
-                        ? r.Cliente.Nombre
+                        ? r.Cliente.Nombre + " " + r.Cliente.Apellido
                         : string.Empty,
 
                     Tour = r.Tour != null
@@ -44,8 +45,8 @@ namespace AgenciaToursAPI.Controllers
                     FechaReserva = r.FechaReserva,
                     CantidadPersonas = r.CantidadPersonas,
 
-                    PrecioPorPersona = r.Tour != null
-                        ? r.Tour.Precio
+                    PrecioPorPersona = r.CantidadPersonas > 0
+                        ? r.Total / r.CantidadPersonas
                         : 0,
 
                     Total = r.Total
@@ -55,6 +56,7 @@ namespace AgenciaToursAPI.Controllers
             return Ok(reservas);
         }
 
+        // GET: api/Reservas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ReservaRespuestaDto>>
             GetReserva(int id)
@@ -69,6 +71,7 @@ namespace AgenciaToursAPI.Controllers
             return Ok(reserva);
         }
 
+        // POST: api/Reservas
         [HttpPost]
         public async Task<ActionResult<ReservaRespuestaDto>>
             PostReserva(CrearReservaDto dto)
@@ -93,23 +96,12 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
-           
-
             var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
 
             if (DateTime.Now >= fechaInicioTour)
             {
                 return BadRequest(
                     "No es posible realizar una reserva para un tour que ya inició."
-                );
-            }
-
-            var estadoActual = CalcularEstadoTour(tour);
-
-            if (estadoActual != "Disponible")
-            {
-                return BadRequest(
-                    "El tour seleccionado no está disponible."
                 );
             }
 
@@ -130,7 +122,11 @@ namespace AgenciaToursAPI.Controllers
                 MetodoPagoId = dto.MetodoPagoId,
                 CantidadPersonas = dto.CantidadPersonas,
                 FechaReserva = DateTime.Now,
-                Total = tour.Precio * dto.CantidadPersonas
+
+                Total = Math.Round(
+                    tour.Precio * dto.CantidadPersonas,
+                    2
+                )
             };
 
             _context.Reservas.Add(reserva);
@@ -141,7 +137,7 @@ namespace AgenciaToursAPI.Controllers
             if (respuesta == null)
             {
                 return StatusCode(
-                    500,
+                    StatusCodes.Status500InternalServerError,
                     "La reserva fue creada, pero no se pudo generar la respuesta."
                 );
             }
@@ -153,13 +149,12 @@ namespace AgenciaToursAPI.Controllers
             );
         }
 
-       
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReserva(
             int id,
             ActualizarReservaDto dto)
         {
-        
             var reservaActual = await _context.Reservas
                 .FindAsync(id);
 
@@ -167,6 +162,30 @@ namespace AgenciaToursAPI.Controllers
             {
                 return NotFound(
                     "La reserva no existe."
+                );
+            }
+
+           
+            var tourOriginal = await _context.Tours
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    t => t.Id == reservaActual.TourId
+                );
+
+            if (tourOriginal == null)
+            {
+                return BadRequest(
+                    "El tour original de la reserva ya no existe."
+                );
+            }
+
+            var fechaInicioTourOriginal =
+                tourOriginal.Fecha.Date.Add(tourOriginal.Hora);
+
+            if (DateTime.Now >= fechaInicioTourOriginal)
+            {
+                return BadRequest(
+                    "No se puede modificar una reserva cuyo tour ya inició."
                 );
             }
 
@@ -180,30 +199,24 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
-            var tour = await _context.Tours
+            var tourNuevo = await _context.Tours
                 .FirstOrDefaultAsync(t => t.Id == dto.TourId);
 
-            if (tour == null)
+            if (tourNuevo == null)
             {
                 return NotFound(
                     "El tour especificado no existe."
                 );
             }
 
-            var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
+            var fechaInicioTourNuevo =
+                tourNuevo.Fecha.Date.Add(tourNuevo.Hora);
 
-            if (DateTime.Now >= fechaInicioTour)
+            if (DateTime.Now >= fechaInicioTourNuevo)
             {
                 return BadRequest(
                     "No es posible asignar la reserva a un tour que ya inició."
                 );
-            }
-
-            var estadoActual = CalcularEstadoTour(tour);
-
-            if (estadoActual != "Disponible")
-            {
-                return BadRequest("El tour seleccionado no está disponible.");
             }
 
             var metodoPagoExiste = await _context.MetodosPago
@@ -211,7 +224,9 @@ namespace AgenciaToursAPI.Controllers
 
             if (!metodoPagoExiste)
             {
-                return NotFound( "El método de pago especificado no existe.");
+                return NotFound(
+                    "El método de pago especificado no existe."
+                );
             }
 
             reservaActual.ClienteId = dto.ClienteId;
@@ -219,16 +234,21 @@ namespace AgenciaToursAPI.Controllers
             reservaActual.MetodoPagoId = dto.MetodoPagoId;
             reservaActual.CantidadPersonas = dto.CantidadPersonas;
 
-            reservaActual.Total =
-                tour.Precio * dto.CantidadPersonas;
+            reservaActual.Total = Math.Round(
+                tourNuevo.Precio * dto.CantidadPersonas,
+                2
+            );
 
+            /*
+             * FechaReserva no cambia porque representa
+             * el momento original en que se creó.
+             */
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-       
-
+        // DELETE: api/Reservas/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
@@ -242,43 +262,44 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
+            var tour = await _context.Tours
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == reserva.TourId);
+
+            if (tour == null)
+            {
+                return BadRequest(
+                    "El tour asociado a la reserva ya no existe."
+                );
+            }
+
+            var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
+
+            if (DateTime.Now >= fechaInicioTour)
+            {
+                return BadRequest(
+                    "No se puede eliminar una reserva de un tour que ya inició."
+                );
+            }
+
             _context.Reservas.Remove(reserva);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private static string CalcularEstadoTour(Tour tour)
-        {
-            var fechaInicio = tour.Fecha.Date.Add(tour.Hora);
-            var ahora = DateTime.Now;
-
-            if (ahora < fechaInicio)
-            {
-                return "Disponible";
-            }
-
-            if (ahora <= tour.FechaFin)
-            {
-                return "En curso";
-            }
-
-            return "Finalizado";
-        }
-
-
-
         private async Task<ReservaRespuestaDto?>
             ObtenerReservaRespuesta(int id)
         {
             return await _context.Reservas
+                .AsNoTracking()
                 .Where(r => r.Id == id)
                 .Select(r => new ReservaRespuestaDto
                 {
                     Id = r.Id,
 
                     Cliente = r.Cliente != null
-                        ? r.Cliente.Nombre
+                        ? r.Cliente.Nombre + " " + r.Cliente.Apellido
                         : string.Empty,
 
                     Tour = r.Tour != null
@@ -292,8 +313,8 @@ namespace AgenciaToursAPI.Controllers
                     FechaReserva = r.FechaReserva,
                     CantidadPersonas = r.CantidadPersonas,
 
-                    PrecioPorPersona = r.Tour != null
-                        ? r.Tour.Precio
+                    PrecioPorPersona = r.CantidadPersonas > 0
+                        ? r.Total / r.CantidadPersonas
                         : 0,
 
                     Total = r.Total

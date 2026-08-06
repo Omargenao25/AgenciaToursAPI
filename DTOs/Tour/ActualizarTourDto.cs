@@ -25,8 +25,7 @@ namespace AgenciaToursAPI.DTOs
         public int GuiaId { get; set; }
 
 
-        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un transporte válido."
-        )]
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un transporte válido.")]
         public int TransporteId { get; set; }
 
 
