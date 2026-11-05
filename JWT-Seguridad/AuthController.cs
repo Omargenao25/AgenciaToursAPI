@@ -1,6 +1,7 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using AgenciaToursAPI.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -104,7 +105,8 @@ namespace AgenciaToursAPI.Controllers
             {
                 Token = token,
                 Expiracion = expiracion,
-                Nombre = usuario.Nombre
+                Nombre = usuario.Nombre,
+                Rol = usuario.Rol
             };
 
             return Ok(respuesta);
@@ -150,6 +152,7 @@ namespace AgenciaToursAPI.Controllers
                     ClaimTypes.Name,
                     usuario.Nombre
                 ),
+                new Claim(ClaimTypes.Role, usuario.Rol),
 
                 new Claim(
                     JwtRegisteredClaimNames.Jti,
