@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using AgenciaToursAPI.Security;
 
 namespace AgenciaToursAPI.Models
 {
@@ -19,5 +20,9 @@ namespace AgenciaToursAPI.Models
 
         [Required(ErrorMessage = "El hash de la contraseña es obligatorio.")]
         public string PasswordHash { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(20)]
+        public string Rol { get; set; } = Roles.Cliente;
     }
 }
