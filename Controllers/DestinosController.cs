@@ -1,3 +1,4 @@
+using AgenciaToursAPI.Security;
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AgenciaToursAPI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Personal)]
     [Route("api/[controller]")]
     [ApiController]
     public class DestinosController : ControllerBase
@@ -19,6 +20,7 @@ namespace AgenciaToursAPI.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Destino>>> GetDestinos()
         {
@@ -32,6 +34,7 @@ namespace AgenciaToursAPI.Controllers
 
 
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<Destino>> GetDestino(int id)
         {
