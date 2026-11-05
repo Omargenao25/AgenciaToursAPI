@@ -1,3 +1,4 @@
+using AgenciaToursAPI.Security;
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AgenciaToursAPI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Personal)]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase
@@ -18,6 +19,7 @@ namespace AgenciaToursAPI.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
         {
@@ -29,6 +31,7 @@ namespace AgenciaToursAPI.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<Categoria>> GetCategoria(int id)
         {
