@@ -325,12 +325,21 @@ namespace AgenciaToursAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Cliente");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Correo")
                         .IsUnique();
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Usuarios", t =>
+                        {
+                            t.HasCheckConstraint("CK_Usuarios_Rol", "[Rol] IN (N'Administrador', N'Operador', N'Cliente')");
+                        });
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Destino", b =>
