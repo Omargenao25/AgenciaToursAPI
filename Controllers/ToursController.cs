@@ -1,3 +1,4 @@
+using AgenciaToursAPI.Security;
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AgenciaToursAPI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Personal)]
     [Route("api/[controller]")]
     [ApiController]
     public class ToursController : ControllerBase
@@ -20,6 +21,7 @@ namespace AgenciaToursAPI.Controllers
         }
 
        
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TourRespuestaDto>>> GetTours()
         {
@@ -74,6 +76,7 @@ namespace AgenciaToursAPI.Controllers
         }
 
     
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<TourRespuestaDto>> GetTour(int id)
         {
