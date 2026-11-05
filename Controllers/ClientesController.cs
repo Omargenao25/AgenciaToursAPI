@@ -1,5 +1,5 @@
 using AgenciaToursAPI.Security;
-﻿using AgenciaToursAPI.Data;
+using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
