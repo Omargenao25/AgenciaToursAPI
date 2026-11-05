@@ -1,6 +1,7 @@
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using AgenciaToursAPI.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using System.Security.Claims;
 
 namespace AgenciaToursAPI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Administrador)]
     [Route("api/[controller]")]
     [ApiController]
     public class UsuariosController : ControllerBase
@@ -36,7 +37,8 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = u.Id,
                     Nombre = u.Nombre,
-                    Correo = u.Correo
+                    Correo = u.Correo,
+                    Rol = u.Rol
                 })
                 .ToListAsync();
 
@@ -55,7 +57,8 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = u.Id,
                     Nombre = u.Nombre,
-                    Correo = u.Correo
+                    Correo = u.Correo,
+                    Rol = u.Rol
                 })
                 .FirstOrDefaultAsync();
 
@@ -87,7 +90,8 @@ namespace AgenciaToursAPI.Controllers
             var usuario = new Usuario
             {
                 Nombre = dto.Nombre.Trim(),
-                Correo = correoNormalizado
+                Correo = correoNormalizado,
+                Rol = Roles.Cliente
             };
 
             usuario.PasswordHash = _passwordHasher.HashPassword(
@@ -102,7 +106,8 @@ namespace AgenciaToursAPI.Controllers
             {
                 Id = usuario.Id,
                 Nombre = usuario.Nombre,
-                Correo = usuario.Correo
+                Correo = usuario.Correo,
+                Rol = usuario.Rol
             };
 
             return CreatedAtAction(
@@ -171,6 +176,10 @@ namespace AgenciaToursAPI.Controllers
             {
                 return BadRequest("No puede eliminar el usuario con el que inició sesión." );
             }
+
+            var cantidadAdministradores = await _context.Usuarios.CountAsync(u => u.Rol == Roles.Administrador);
+            if (usuario.Rol == Roles.Administrador && cantidadAdministradores <= 1)
+                return BadRequest("No se puede eliminar el último administrador.");
 
             var cantidadUsuarios = await _context.Usuarios
                 .CountAsync();
