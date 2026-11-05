@@ -1,3 +1,4 @@
+using AgenciaToursAPI.Security;
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AgenciaToursAPI.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Personal)]
     [Route("api/[controller]")]
     [ApiController]
     public class ClientesController : ControllerBase
