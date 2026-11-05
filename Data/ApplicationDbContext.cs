@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using AgenciaToursAPI.Models;
+using AgenciaToursAPI.Security;
 
 namespace AgenciaToursAPI.Data
 {
@@ -87,6 +88,14 @@ namespace AgenciaToursAPI.Data
                 .WithMany(m => m.Reservas)
                 .HasForeignKey(r => r.MetodoPagoId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Usuario>()
+                .Property(u => u.Rol)
+                .HasMaxLength(20)
+                .HasDefaultValue(Roles.Cliente);
+
+            modelBuilder.Entity<Usuario>()
+                .ToTable(t => t.HasCheckConstraint("CK_Usuarios_Rol", "[Rol] IN (N'Administrador', N'Operador', N'Cliente')"));
 
             modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Correo)
