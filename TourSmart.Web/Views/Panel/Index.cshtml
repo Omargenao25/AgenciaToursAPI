@@ -1,38 +1,97 @@
-@using System.Security.Claims
+@model DashboardViewModel
 @{
     ViewData["Title"] = "Mi espacio";
-    var rol = User.FindFirstValue(ClaimTypes.Role) ?? "Cliente";
-    var personal = rol is "Administrador" or "Operador";
+    var personal = Model.Rol is "Administrador" or "Operador";
 }
-<section class="inner-hero">
+<section class="inner-hero dashboard-hero">
     <div class="container">
-        <span class="eyebrow">TU ESPACIO TOURSMART</span>
+        <span class="eyebrow">CENTRO DE OPERACIONES · TOURSMART RD</span>
         <h1>Hola, @User.Identity?.Name <em>✦</em></h1>
-        <p>Has iniciado sesión como @rol. Tu experiencia comienza aquí.</p>
+        <p>Bienvenido a tu espacio como @Model.Rol.</p>
     </div>
 </section>
-<section class="section-space"><div class="container">
-    @if (personal)
-    {
-        <div class="row g-4">
-            <div class="col-lg-8"><div class="panel-feature"><span class="eyebrow">PANEL DE OPERACIONES</span>
-                <h2>Administra experiencias <em>inolvidables.</em></h2>
-                <p>La autenticación por roles ya está conectada. En la próxima etapa agregaremos aquí las tablas de reservas, cupos y gestión de tours usando la API protegida.</p>
-                <a asp-controller="Tours" asp-action="Index" class="btn btn-accent">Explorar catálogo ↗</a>
-            </div></div>
-            <div class="col-lg-4"><div class="panel-feature panel-secondary">
-                <span class="eyebrow">PERMISOS ACTIVOS</span><h3>@rol</h3>
-                <p>Tu rol se obtuvo del inicio de sesión de AgenciaToursAPI.</p>
-                @if (rol == "Administrador") { <p>La administración de usuarios se integrará aquí posteriormente.</p> }
-            </div></div>
-        </div>
-    }
-    else
-    {
-        <div class="panel-feature"><span class="eyebrow">MI ÁREA PERSONAL</span>
-            <h2>Tu próxima aventura <em>te espera.</em></h2>
-            <p>Tu cuenta está activa. Próximamente podrás consultar y gestionar tus propias reservas desde este espacio.</p>
-            <a asp-controller="Tours" asp-action="Index" class="btn btn-accent">Descubrir excursiones ↗</a>
-        </div>
-    }
-</div></section>
+<section class="section-space">
+    <div class="container">
+        @if (!personal)
+        {
+            <div class="panel-feature">
+                <span class="eyebrow">MI ÁREA PERSONAL</span>
+                <h2>Tu próxima aventura <em>te espera.</em></h2>
+                <p>Tu cuenta está activa. Pronto podrás gestionar tus propias reservas desde este espacio.</p>
+                <a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Explorar excursiones ↗</a>
+            </div>
+        }
+        else if (!Model.ApiDisponible)
+        {
+            <div class="service-alert" role="alert">
+                <strong>No se pudieron cargar las estadísticas.</strong>
+                <p class="mb-0 mt-2">@Model.Error</p>
+            </div>
+            <a class="btn btn-dark-pill mt-3" asp-controller="Panel" asp-action="Index">Reintentar ↗</a>
+        }
+        else
+        {
+            <div class="dashboard-head mb-4">
+                <div><span class="eyebrow">RESUMEN DEL NEGOCIO</span><h2>Tu agencia, <em>en un vistazo.</em></h2>
+                <p>Información obtenida de la API de TourSmart RD.</p></div>
+                <a class="btn btn-dark-pill" asp-controller="Tours" asp-action="Index">Ver catálogo ↗</a>
+            </div>
+            <div class="row g-3 mb-5">
+                <div class="col-6 col-xl"><div class="metric-card"><span>Tours futuros</span><strong>@Model.ToursFuturos</strong><small>Excursiones por iniciar</small></div></div>
+                <div class="col-6 col-xl"><div class="metric-card"><span>Pendientes</span><strong>@Model.Pendientes</strong><small>Esperando confirmación</small></div></div>
+                <div class="col-6 col-xl"><div class="metric-card"><span>Confirmadas</span><strong>@Model.Confirmadas</strong><small>Reservas confirmadas</small></div></div>
+                <div class="col-6 col-xl"><div class="metric-card"><span>Canceladas</span><strong>@Model.Canceladas</strong><small>Reservas históricas</small></div></div>
+                <div class="col-12 col-xl"><div class="metric-card metric-card-accent"><span>Plazas libres</span><strong>@Model.CuposDisponibles</strong><small>En tours futuros</small></div></div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <section class="dashboard-table">
+                        <div class="dashboard-table-title"><h3>Reservas recientes</h3><span>@Model.Reservas.Count en total</span></div>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>ID</th><th>Cliente y tour</th><th>Personas</th><th>Estado</th></tr></thead>
+                                <tbody>
+                                    @foreach (var reserva in Model.Reservas.OrderByDescending(r => r.FechaReserva).Take(8))
+                                    {
+                                        <tr>
+                                            <td>#@reserva.Id</td>
+                                            <td><strong>@reserva.Cliente</strong><small class="d-block text-secondary">@reserva.Tour</small></td>
+                                            <td>@reserva.CantidadPersonas</td>
+                                            <td><span class="reservation-status @(reserva.Estado == "Confirmada" ? "is-confirmed" : reserva.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@reserva.Estado</span></td>
+                                        </tr>
+                                    }
+                                    @if (!Model.Reservas.Any())
+                                    {
+                                        <tr><td colspan="4" class="text-secondary py-4">Todavía no hay reservas.</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+                <div class="col-xl-5">
+                    <section class="dashboard-table">
+                        <div class="dashboard-table-title"><h3>Capacidad de tours</h3><span>@Model.Tours.Count tours</span></div>
+                        @foreach (var tour in Model.Tours.OrderBy(t => t.Fecha).Take(6))
+                        {
+                            var ocupados = Math.Max(0, tour.CuposReservados);
+                            var capacidad = Math.Max(1, tour.CapacidadMaxima);
+                            var porcentaje = Math.Min(100, (int)Math.Round(100.0 * ocupados / capacidad));
+                            <div class="capacity-item">
+                                <div class="capacity-row"><a asp-controller="Tours" asp-action="Detalle" asp-route-id="@tour.Id">@tour.Nombre</a><span>@ocupados / @tour.CapacidadMaxima</span></div>
+                                <div class="capacity-track"><div class="capacity-fill" style="width:@(porcentaje)%"></div></div>
+                                <small>@tour.CuposDisponibles plazas disponibles · @tour.Estado</small>
+                            </div>
+                        }
+                        @if (!Model.Tours.Any())
+                        {
+                            <p class="text-secondary mb-0">Todavía no hay tours registrados.</p>
+                        }
+                    </section>
+                </div>
+            </div>
+            <p class="dashboard-footnote">Los indicadores muestran el estado actual de la API. La gestión de reservas desde botones administrativos se añadirá en la siguiente etapa.</p>
+        }
+    </div>
+</section>
