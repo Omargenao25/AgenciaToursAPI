@@ -1,0 +1,50 @@
+@model TourCard
+@{
+    ViewData["Title"] = Model.Nombre;
+}
+<section class="inner-hero detail-hero">
+    <div class="container">
+        <a asp-controller="Tours" asp-action="Index" class="back-link">← Todos los tours</a>
+        <span class="eyebrow">@Model.Categoria · @Model.Pais</span>
+        <h1>@Model.Nombre</h1>
+        <p>Descubre los detalles de tu próxima experiencia en @Model.Destino.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <div class="detail-poster"><div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div><span>@Model.Destino</span></div>
+                <h2 class="detail-title mt-5">La aventura comienza <em>aquí.</em></h2>
+                <p class="detail-copy">Esta experiencia forma parte del catálogo de TourSmart RD. La información de fecha, categoría, precio y capacidad se obtiene directamente de nuestra API.</p>
+                <div class="row g-3 mt-3">
+                    <div class="col-sm-6"><div class="info-tile"><small>Destino</small><strong>@Model.Destino, @Model.Pais</strong></div></div>
+                    <div class="col-sm-6"><div class="info-tile"><small>Guía</small><strong>@Model.Guia</strong></div></div>
+                    <div class="col-sm-6"><div class="info-tile"><small>Transporte</small><strong>@Model.Transporte</strong></div></div>
+                    <div class="col-sm-6"><div class="info-tile"><small>Duración</small><strong>@Model.DuracionDias día(s) y @Model.DuracionHoras hora(s)</strong></div></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <aside class="booking-summary">
+                    <span class="eyebrow">INFORMACIÓN DEL TOUR</span>
+                    <h3>Tu próxima experiencia</h3>
+                    <div class="summary-price">RD$@Model.Precio.ToString("N0", new System.Globalization.CultureInfo("es-DO")) <small>/ persona</small></div>
+                    <div class="summary-row"><span>Fecha</span><strong>@Model.Fecha.ToString("dd/MM/yyyy")</strong></div>
+                    <div class="summary-row"><span>Hora</span><strong>@Model.Hora.ToString(@"hh\:mm")</strong></div>
+                    <div class="summary-row"><span>Estado</span><strong>@Model.Estado</strong></div>
+                    <div class="summary-row"><span>Cupos disponibles</span><strong>@Model.CuposDisponibles / @Model.CapacidadMaxima</strong></div>
+                    @if (Model.Reservable)
+                    {
+                        <div class="booking-status">✓ Hay plazas disponibles</div>
+                    }
+                    else
+                    {
+                        <div class="booking-status booking-unavailable">Este tour no está disponible para reservar.</div>
+                    }
+                    <p class="booking-note">Las reservas en línea para clientes estarán disponibles en la siguiente fase. Por ahora, esta página es informativa.</p>
+                    <a asp-controller="Tours" asp-action="Index" class="btn btn-accent w-100">Explorar más experiencias ↗</a>
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>
