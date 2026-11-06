@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- El proyecto MVC tiene su propio proceso de compilación. -->
+    <Compile Remove="TourSmart.Web\**\*.cs" />
+    <Content Remove="TourSmart.Web\**\*" />
+    <None Remove="TourSmart.Web\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.28" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.28">
       <PrivateAssets>all</PrivateAssets>
