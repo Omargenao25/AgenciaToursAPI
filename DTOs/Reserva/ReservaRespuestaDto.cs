@@ -7,6 +7,9 @@
         public string Cliente { get; set; } = string.Empty;
 
         public string Tour { get; set; } = string.Empty;
+        public int TourId { get; set; }
+        public DateTime? FechaTour { get; set; }
+        public TimeSpan? HoraTour { get; set; }
 
         public string MetodoPago { get; set; } = string.Empty;
 
