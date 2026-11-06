@@ -39,6 +39,13 @@ builder.Services.AddHttpClient<IAuthApiClient, AuthApiClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(8);
 });
 
+builder.Services.AddHttpClient<IReservasAdminClient, ReservasAdminClient>(client =>
+{
+    var baseUrl = builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(8);
+});
+
 var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
