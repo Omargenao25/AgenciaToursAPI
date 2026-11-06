@@ -25,13 +25,13 @@ builder.Services.AddScoped<
 
 
 var jwtKey = builder.Configuration["Jwt:Key"]
-    ?? throw new InvalidOperationException("La clave JWT no está configurada.");
+    ?? throw new InvalidOperationException("La clave JWT no estÃ¡ configurada.");
 
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]
-    ?? throw new InvalidOperationException("El emisor JWT no está configurado.");
+    ?? throw new InvalidOperationException("El emisor JWT no estÃ¡ configurado.");
 
 var jwtAudience = builder.Configuration["Jwt:Audience"]
-    ?? throw new InvalidOperationException("La audiencia JWT no está configurada.");
+    ?? throw new InvalidOperationException("La audiencia JWT no estÃ¡ configurada.");
 
 
 builder.Services
@@ -67,6 +67,20 @@ builder.Services
  
         options.Events = new JwtBearerEvents
         {
+            OnAuthenticationFailed = context =>
+            {
+                // Solo registramos el tipo de error. Nunca registrar el token JWT.
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("TourSmart.Jwt");
+
+                logger.LogWarning(
+                    "JWT rechazado en {Ruta}. Tipo de error: {TipoError}",
+                    context.Request.Path,
+                    context.Exception.GetType().Name);
+
+                return Task.CompletedTask;
+            },
             OnChallenge = async context =>
             {
                 
@@ -83,15 +97,15 @@ builder.Services
                 if (context.AuthenticateFailure
                     is SecurityTokenExpiredException)
                 {
-                    mensaje = "El token ha expirado. Debe iniciar sesión nuevamente.";
+                    mensaje = "El token ha expirado. Debe iniciar sesiÃ³n nuevamente.";
                 }
                 else if (context.AuthenticateFailure != null)
                 {
-                    mensaje = "El token proporcionado no es válido.";
+                    mensaje = "El token proporcionado no es vÃ¡lido.";
                 }
                 else
                 {
-                    mensaje = "Debe iniciar sesión para acceder a este endpoint.";
+                    mensaje = "Debe iniciar sesiÃ³n para acceder a este endpoint.";
                 }
 
                 var respuesta = JsonSerializer.Serialize(new
@@ -112,7 +126,7 @@ builder.Services
 
                 var respuesta = JsonSerializer.Serialize(new
                 {
-                    mensaje = "No tiene permiso para realizar esta operación."
+                    mensaje = "No tiene permiso para realizar esta operaciÃ³n."
                 });
 
                 await context.Response.WriteAsync(respuesta);
@@ -149,7 +163,7 @@ builder.Services.AddSwaggerGen(options =>
             Scheme = "bearer",
             BearerFormat = "JWT",
             In = ParameterLocation.Header,
-            Description = "Introduzca el token JWT obtenido al iniciar sesión."
+            Description = "Introduzca el token JWT obtenido al iniciar sesiÃ³n."
         }
     );
 
