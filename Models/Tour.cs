@@ -50,6 +50,9 @@ namespace AgenciaToursAPI.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal Itbis { get; set; }
 
+        [Range(1, 100000)]
+        public int CapacidadMaxima { get; set; } = 100;
+
         public int DuracionDias { get; set; }
 
         public int DuracionHoras { get; set; }
