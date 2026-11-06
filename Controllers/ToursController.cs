@@ -62,7 +62,7 @@ namespace AgenciaToursAPI.Controllers
                     FechaFin = t.FechaFin,
                     Estado = t.Estado,
                     CapacidadMaxima = t.CapacidadMaxima,
-                    CuposReservados = t.Reservas.Sum(r => r.CantidadPersonas)
+                    CuposReservados = t.Reservas.Where(r => r.Estado != EstadosReserva.Cancelada).Sum(r => r.CantidadPersonas)
                 })
                 .ToListAsync();
 
@@ -120,7 +120,7 @@ namespace AgenciaToursAPI.Controllers
                     FechaFin = t.FechaFin,
                     Estado = t.Estado,
                     CapacidadMaxima = t.CapacidadMaxima,
-                    CuposReservados = t.Reservas.Sum(r => r.CantidadPersonas)
+                    CuposReservados = t.Reservas.Where(r => r.Estado != EstadosReserva.Cancelada).Sum(r => r.CantidadPersonas)
                 })
                 .FirstOrDefaultAsync();
 
@@ -271,7 +271,7 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var reservados = await _context.Reservas
-                .Where(r => r.TourId == id)
+                .Where(r => r.TourId == id && r.Estado != EstadosReserva.Cancelada)
                 .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
 
             if (dto.CapacidadMaxima < reservados)
@@ -485,7 +485,7 @@ namespace AgenciaToursAPI.Controllers
                     FechaFin = t.FechaFin,
                     Estado = t.Estado,
                     CapacidadMaxima = t.CapacidadMaxima,
-                    CuposReservados = t.Reservas.Sum(r => r.CantidadPersonas)
+                    CuposReservados = t.Reservas.Where(r => r.Estado != EstadosReserva.Cancelada).Sum(r => r.CantidadPersonas)
                 })
                 .FirstOrDefaultAsync();
 
