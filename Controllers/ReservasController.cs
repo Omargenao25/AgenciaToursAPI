@@ -5,6 +5,7 @@ using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -77,6 +78,8 @@ namespace AgenciaToursAPI.Controllers
         public async Task<ActionResult<ReservaRespuestaDto>>
             PostReserva(CrearReservaDto dto)
         {
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
             var clienteExiste = await _context.Clientes
                 .AnyAsync(c => c.Id == dto.ClienteId);
 
@@ -88,7 +91,8 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var tour = await _context.Tours
-                .FirstOrDefaultAsync(t => t.Id == dto.TourId);
+                .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {dto.TourId}")
+                .SingleOrDefaultAsync();
 
             if (tour == null)
             {
@@ -105,6 +109,13 @@ namespace AgenciaToursAPI.Controllers
                     "No es posible realizar una reserva para un tour que ya inició."
                 );
             }
+
+            var reservados = await _context.Reservas
+                .Where(r => r.TourId == dto.TourId)
+                .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
+
+            if ((long)reservados + dto.CantidadPersonas > tour.CapacidadMaxima)
+                return Conflict($"Cupos insuficientes. Disponibles: {Math.Max(0, tour.CapacidadMaxima - reservados)}.");
 
             var metodoPagoExiste = await _context.MetodosPago
                 .AnyAsync(m => m.Id == dto.MetodoPagoId);
@@ -132,6 +143,7 @@ namespace AgenciaToursAPI.Controllers
 
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
+            await transaccion.CommitAsync();
 
             var respuesta = await ObtenerReservaRespuesta(reserva.Id);
 
@@ -156,6 +168,7 @@ namespace AgenciaToursAPI.Controllers
             int id,
             ActualizarReservaDto dto)
         {
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             var reservaActual = await _context.Reservas
                 .FindAsync(id);
 
@@ -167,11 +180,17 @@ namespace AgenciaToursAPI.Controllers
             }
 
            
-            var tourOriginal = await _context.Tours
-                .AsNoTracking()
-                .FirstOrDefaultAsync(
-                    t => t.Id == reservaActual.TourId
-                );
+            // Bloquear ambos tours en orden fijo para evitar sobreventa y reducir interbloqueos.
+            var idsTour = new[] { reservaActual.TourId, dto.TourId }.Distinct().OrderBy(x => x).ToArray();
+            var toursBloqueados = new Dictionary<int, Tour>();
+            foreach (var tourId in idsTour)
+            {
+                var actual = await _context.Tours
+                    .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {tourId}")
+                    .SingleOrDefaultAsync();
+                if (actual != null) toursBloqueados[tourId] = actual;
+            }
+            toursBloqueados.TryGetValue(reservaActual.TourId, out var tourOriginal);
 
             if (tourOriginal == null)
             {
@@ -200,8 +219,7 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
-            var tourNuevo = await _context.Tours
-                .FirstOrDefaultAsync(t => t.Id == dto.TourId);
+            toursBloqueados.TryGetValue(dto.TourId, out var tourNuevo);
 
             if (tourNuevo == null)
             {
@@ -219,6 +237,12 @@ namespace AgenciaToursAPI.Controllers
                     "No es posible asignar la reserva a un tour que ya inició."
                 );
             }
+
+            var reservadosDestino = await _context.Reservas
+                .Where(r => r.TourId == dto.TourId && r.Id != id)
+                .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
+            if ((long)reservadosDestino + dto.CantidadPersonas > tourNuevo.CapacidadMaxima)
+                return Conflict($"Cupos insuficientes. Disponibles: {Math.Max(0, tourNuevo.CapacidadMaxima - reservadosDestino)}.");
 
             var metodoPagoExiste = await _context.MetodosPago
                 .AnyAsync(m => m.Id == dto.MetodoPagoId);
@@ -243,6 +267,7 @@ namespace AgenciaToursAPI.Controllers
            
             
             await _context.SaveChangesAsync();
+            await transaccion.CommitAsync();
 
             return NoContent();
         }
@@ -251,6 +276,7 @@ namespace AgenciaToursAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReserva(int id)
         {
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             var reserva = await _context.Reservas
                 .FindAsync(id);
 
@@ -262,8 +288,8 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var tour = await _context.Tours
-                .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.Id == reserva.TourId);
+                .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
+                .SingleOrDefaultAsync();
 
             if (tour == null)
             {
@@ -283,6 +309,7 @@ namespace AgenciaToursAPI.Controllers
 
             _context.Reservas.Remove(reserva);
             await _context.SaveChangesAsync();
+            await transaccion.CommitAsync();
 
             return NoContent();
         }
