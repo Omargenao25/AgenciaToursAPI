@@ -219,6 +219,10 @@ namespace AgenciaToursAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CapacidadMaxima")
+                        .HasColumnType("int")
+                        .HasDefaultValue(100);
+
                     b.Property<int>("CategoriaId")
                         .HasColumnType("int");
 
@@ -277,7 +281,10 @@ namespace AgenciaToursAPI.Migrations
 
                     b.HasIndex("TransporteId");
 
-                    b.ToTable("Tours");
+                    b.ToTable("Tours", t =>
+                        {
+                            t.HasCheckConstraint("CK_Tours_CapacidadMaxima", "[CapacidadMaxima] >= 1");
+                        });
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Transporte", b =>
