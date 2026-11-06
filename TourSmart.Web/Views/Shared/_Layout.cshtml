@@ -18,7 +18,20 @@
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Tours" asp-action="Index">Explorar tours</a></li>
                     <li class="nav-item"><span class="nav-link nav-soon" title="Próximamente">Mis reservas <small>Próximamente</small></span></li>
-                    <li class="nav-item"><span class="btn btn-light nav-disabled" title="Próximamente">Acceder <span>↗</span></span></li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Panel" asp-action="Index">Mi espacio</a></li>
+                        <li class="nav-item">
+                            <form method="post" asp-controller="Cuenta" asp-action="Salir" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button class="btn btn-light nav-login" type="submit">Salir ↗</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="btn btn-light nav-login" asp-controller="Cuenta" asp-action="Acceder">Acceder ↗</a></li>
+                    }
                 </ul>
             </div>
         </nav>
