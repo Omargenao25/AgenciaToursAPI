@@ -1,0 +1,38 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-shell">
+            <div class="auth-intro">
+                <span class="eyebrow">BIENVENIDO A TOURSMART RD</span>
+                <h1>Tu siguiente aventura <em>comienza aquí.</em></h1>
+                <p>Accede de forma segura para gestionar tus experiencias y descubrir una nueva manera de viajar.</p>
+                <div class="auth-deco" aria-hidden="true"><span>✦</span><span>EXPLORE MORE</span></div>
+            </div>
+            <div class="auth-form-panel">
+                <span class="eyebrow">TU CUENTA</span>
+                <h2>Bienvenido <em>de nuevo.</em></h2>
+                <p class="text-secondary mb-4">Introduce tus credenciales para continuar.</p>
+                <form asp-controller="Cuenta" asp-action="Acceder" method="post">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+                    <div class="mb-3">
+                        <label asp-for="Correo" class="form-label">Correo electrónico</label>
+                        <input asp-for="Correo" class="form-control" autocomplete="username" placeholder="tu@correo.com" />
+                        <span asp-validation-for="Correo" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-4">
+                        <label asp-for="Contrasena" class="form-label">Contraseña</label>
+                        <input asp-for="Contrasena" class="form-control" type="password" autocomplete="current-password" placeholder="Tu contraseña" />
+                        <span asp-validation-for="Contrasena" class="text-danger small"></span>
+                    </div>
+                    <button type="submit" class="btn btn-accent w-100">Iniciar sesión ↗</button>
+                </form>
+                <p class="auth-help">¿No tienes una cuenta? El registro desde la web estará disponible próximamente.</p>
+            </div>
+        </div>
+    </div>
+</section>
