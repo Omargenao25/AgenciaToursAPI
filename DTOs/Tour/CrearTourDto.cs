@@ -41,5 +41,8 @@ namespace AgenciaToursAPI.DTOs
 
         [Range(typeof(decimal),"0.01","10000000", ErrorMessage = "El precio debe ser mayor que cero.")]
         public decimal Precio { get; set; }
+
+        [Range(1, 100000)]
+        public int CapacidadMaxima { get; set; }
     }
 }
