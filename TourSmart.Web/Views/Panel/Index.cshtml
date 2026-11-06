@@ -31,6 +31,14 @@
         }
         else
         {
+            @if (TempData["Exito"] is string exito)
+            {
+                <div class="alert alert-success" role="status">@exito</div>
+            }
+            @if (TempData["Error"] is string error)
+            {
+                <div class="alert alert-warning" role="alert">@error</div>
+            }
             <div class="dashboard-head mb-4">
                 <div><span class="eyebrow">RESUMEN DEL NEGOCIO</span><h2>Tu agencia, <em>en un vistazo.</em></h2>
                 <p>Información obtenida de la API de TourSmart RD.</p></div>
@@ -50,7 +58,7 @@
                         <div class="dashboard-table-title"><h3>Reservas recientes</h3><span>@Model.Reservas.Count en total</span></div>
                         <div class="table-responsive">
                             <table class="table align-middle">
-                                <thead><tr><th>ID</th><th>Cliente y tour</th><th>Personas</th><th>Estado</th></tr></thead>
+                                <thead><tr><th>ID</th><th>Cliente y tour</th><th>Personas</th><th>Estado</th><th>Acciones</th></tr></thead>
                                 <tbody>
                                     @foreach (var reserva in Model.Reservas.OrderByDescending(r => r.FechaReserva).Take(8))
                                     {
@@ -59,11 +67,31 @@
                                             <td><strong>@reserva.Cliente</strong><small class="d-block text-secondary">@reserva.Tour</small></td>
                                             <td>@reserva.CantidadPersonas</td>
                                             <td><span class="reservation-status @(reserva.Estado == "Confirmada" ? "is-confirmed" : reserva.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@reserva.Estado</span></td>
+                                            <td>
+                                                @if (reserva.Estado == "Pendiente")
+                                                {
+                                                    <form asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="confirmar" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-outline-success">Confirmar</button>
+                                                    </form>
+                                                }
+                                                @if (reserva.Estado is "Pendiente" or "Confirmada")
+                                                {
+                                                    <form asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="cancelar" method="post" class="d-inline cancel-form">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                                                    </form>
+                                                }
+                                                @if (reserva.Estado == "Cancelada")
+                                                {
+                                                    <span class="text-secondary small">Sin acciones</span>
+                                                }
+                                            </td>
                                         </tr>
                                     }
                                     @if (!Model.Reservas.Any())
                                     {
-                                        <tr><td colspan="4" class="text-secondary py-4">Todavía no hay reservas.</td></tr>
+                                        <tr><td colspan="5" class="text-secondary py-4">Todavía no hay reservas.</td></tr>
                                     }
                                 </tbody>
                             </table>
@@ -91,7 +119,19 @@
                     </section>
                 </div>
             </div>
-            <p class="dashboard-footnote">Los indicadores muestran el estado actual de la API. La gestión de reservas desde botones administrativos se añadirá en la siguiente etapa.</p>
+            <p class="dashboard-footnote">Los indicadores muestran el estado actual de la API. Puedes confirmar o cancelar las reservas desde este panel. Las cancelaciones conservan el historial y liberan plazas.</p>
         }
     </div>
 </section>
+
+@section Scripts {
+<script>
+document.querySelectorAll(".cancel-form").forEach(form => {
+    form.addEventListener("submit", event => {
+        if (!window.confirm("¿Cancelar esta reserva? Se conservará en el historial y sus plazas volverán a estar disponibles.")) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
+}
