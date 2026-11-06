@@ -51,7 +51,9 @@ namespace AgenciaToursAPI.Controllers
                     ? Math.Round(r.Total / r.CantidadPersonas, 2)
                     : 0,
 
-                    Total = r.Total
+                    Total = r.Total,
+                    Estado = r.Estado,
+                    FechaCambioEstado = r.FechaCambioEstado
                 })
                 .ToListAsync();
 
@@ -111,7 +113,7 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var reservados = await _context.Reservas
-                .Where(r => r.TourId == dto.TourId)
+                .Where(r => r.TourId == dto.TourId && r.Estado != EstadosReserva.Cancelada)
                 .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
 
             if ((long)reservados + dto.CantidadPersonas > tour.CapacidadMaxima)
@@ -134,6 +136,7 @@ namespace AgenciaToursAPI.Controllers
                 MetodoPagoId = dto.MetodoPagoId,
                 CantidadPersonas = dto.CantidadPersonas,
                 FechaReserva = DateTime.Now,
+                Estado = EstadosReserva.Pendiente,
 
                 Total = Math.Round(
                     tour.Precio * dto.CantidadPersonas,
@@ -174,10 +177,11 @@ namespace AgenciaToursAPI.Controllers
 
             if (reservaActual == null)
             {
-                return NotFound(
-                    "La reserva no existe."
-                );
+                return NotFound("La reserva no existe.");
             }
+
+            if (reservaActual.Estado == EstadosReserva.Cancelada)
+                return Conflict("Una reserva cancelada no puede modificarse.");
 
            
             // Bloquear ambos tours en orden fijo para evitar sobreventa y reducir interbloqueos.
@@ -239,7 +243,7 @@ namespace AgenciaToursAPI.Controllers
             }
 
             var reservadosDestino = await _context.Reservas
-                .Where(r => r.TourId == dto.TourId && r.Id != id)
+                .Where(r => r.TourId == dto.TourId && r.Id != id && r.Estado != EstadosReserva.Cancelada)
                 .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
             if ((long)reservadosDestino + dto.CantidadPersonas > tourNuevo.CapacidadMaxima)
                 return Conflict($"Cupos insuficientes. Disponibles: {Math.Max(0, tourNuevo.CapacidadMaxima - reservadosDestino)}.");
@@ -273,46 +277,58 @@ namespace AgenciaToursAPI.Controllers
         }
 
        
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReserva(int id)
+        [HttpPatch("{id}/confirmar")]
+        public async Task<IActionResult> ConfirmarReserva(int id)
         {
             await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
-            var reserva = await _context.Reservas
-                .FindAsync(id);
-
-            if (reserva == null)
-            {
-                return NotFound(
-                    "La reserva no existe."
-                );
-            }
+            var reserva = await _context.Reservas.FindAsync(id);
+            if (reserva == null) return NotFound("La reserva no existe.");
+            if (reserva.Estado == EstadosReserva.Cancelada)
+                return Conflict("Una reserva cancelada no se puede confirmar.");
+            if (reserva.Estado == EstadosReserva.Confirmada)
+                return NoContent();
 
             var tour = await _context.Tours
                 .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
                 .SingleOrDefaultAsync();
 
-            if (tour == null)
-            {
-                return BadRequest(
-                    "El tour asociado a la reserva ya no existe."
-                );
-            }
+            if (tour == null) return NotFound("El tour asociado no existe.");
+            if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+                return Conflict("No es posible confirmar una reserva de un tour que ya comenzó.");
 
-            var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
-
-            if (DateTime.Now >= fechaInicioTour)
-            {
-                return BadRequest(
-                    "No se puede eliminar una reserva de un tour que ya inició."
-                );
-            }
-
-            _context.Reservas.Remove(reserva);
+            reserva.Estado = EstadosReserva.Confirmada;
+            reserva.FechaCambioEstado = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             await transaccion.CommitAsync();
-
             return NoContent();
         }
+
+        [HttpPatch("{id}/cancelar")]
+        public async Task<IActionResult> CancelarReserva(int id)
+        {
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            var reserva = await _context.Reservas.FindAsync(id);
+            if (reserva == null) return NotFound("La reserva no existe.");
+
+            var tour = await _context.Tours
+                .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
+                .SingleOrDefaultAsync();
+
+            if (tour == null) return NotFound("El tour asociado no existe.");
+            if (reserva.Estado == EstadosReserva.Cancelada) return NoContent();
+            if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+                return Conflict("No se puede cancelar una reserva después del inicio del tour.");
+
+            reserva.Estado = EstadosReserva.Cancelada;
+            reserva.FechaCambioEstado = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            await transaccion.CommitAsync();
+            return NoContent();
+        }
+
+        // No eliminamos el historial de reservas: el DELETE realiza una cancelación lógica.
+        [HttpDelete("{id}")]
+        public Task<IActionResult> DeleteReserva(int id) => CancelarReserva(id);
 
         private async Task<ReservaRespuestaDto?>
             ObtenerReservaRespuesta(int id)
@@ -344,7 +360,9 @@ namespace AgenciaToursAPI.Controllers
                     ? Math.Round(r.Total / r.CantidadPersonas, 2)
                     : 0,
 
-                    Total = r.Total
+                    Total = r.Total,
+                    Estado = r.Estado,
+                    FechaCambioEstado = r.FechaCambioEstado
                 })
                 .FirstOrDefaultAsync();
         }
