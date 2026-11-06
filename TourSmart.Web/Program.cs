@@ -19,7 +19,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         {
             var cache = context.HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
             var sessionId = context.Principal?.FindFirst("SessionId")?.Value;
-            if (string.IsNullOrWhiteSpace(sessionId) || !cache.TryGetValue("jwt:" + sessionId, out string? token) || string.IsNullOrWhiteSpace(token))
+            if (string.IsNullOrWhiteSpace(sessionId) || !cache.TryGetValue("jwt:" + sessionId, out object? token) || token is not string jwt || string.IsNullOrWhiteSpace(jwt))
                 context.RejectPrincipal();
             return Task.CompletedTask;
         };
