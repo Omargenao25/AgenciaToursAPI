@@ -1,0 +1,63 @@
+@model CatalogoViewModel
+@{
+    ViewData["Title"] = "Descubre tu próxima aventura";
+}
+<section class="hero">
+    <div class="container hero-content">
+        <div class="hero-text">
+            <div class="hero-eyebrow"><span class="live-dot"></span> EXPERIENCIAS QUE DEJAN HUELLAS</div>
+            <h1>El mundo está<br />esperando por <em>ti.</em></h1>
+            <p class="hero-description">Descubre excursiones únicas, explora nuevos destinos y encuentra la experiencia perfecta para tu próxima aventura.</p>
+            <div class="hero-actions">
+                <a asp-controller="Tours" asp-action="Index" class="btn btn-accent btn-lg">Explorar experiencias <span>↗</span></a>
+                <a href="#como-funciona" class="hero-secondary-link">Descubre cómo funciona <span>↓</span></a>
+            </div>
+            <div class="hero-proof"><div class="avatar-group"><span>☼</span><span>✈</span><span>✦</span></div><p><strong>Una nueva forma de viajar</strong><br />Experiencias, destinos y planificación en un solo lugar</p></div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+            <div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div>
+            <div class="floating-tag floating-tag-one">✦ Tu próxima historia comienza aquí</div>
+            <div class="floating-tag floating-tag-two">↗ Explora sin límites</div>
+            <div class="vertical-word">DISCOVER MORE · TOURSMART RD</div>
+        </div>
+    </div>
+    <div class="hero-bottom container"><span>01 / 03 — DESCUBRE</span><span>EXPERIENCIAS CON PROPÓSITO <span>↗</span></span></div>
+</section>
+
+<section class="section-space" id="destacados">
+    <div class="container">
+        <div class="section-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
+            <div><span class="eyebrow">DESTINOS Y EXPERIENCIAS</span><h2>Tu próxima aventura <em>empieza aquí.</em></h2><p>Explora excursiones disponibles en nuestro catálogo.</p></div>
+            <a asp-controller="Tours" asp-action="Index" class="section-link">Ver todos los tours <span>↗</span></a>
+        </div>
+        @if (!Model.ServicioDisponible)
+        {
+            <div class="service-alert" role="status">No pudimos conectar con la API de tours. Inicia AgenciaToursAPI en el puerto 5290 y recarga esta página.</div>
+        }
+        else if (!Model.Tours.Any())
+        {
+            <div class="empty-box">Aún no hay excursiones disponibles. Muy pronto podrás descubrir nuevas aventuras.</div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var tour in Model.Tours)
+                {
+                    <div class="col-md-6 col-xl-4"><partial name="_TourCard" model="tour" /></div>
+                }
+            </div>
+        }
+    </div>
+</section>
+<section class="how-section section-space" id="como-funciona">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5"><span class="eyebrow">VIAJAR, MÁS FÁCIL</span><h2>Menos planificación.<br /><em>Más aventura.</em></h2><p>Estamos construyendo una experiencia que combina un catálogo claro con disponibilidad y recomendaciones según tus intereses.</p><a asp-controller="Tours" asp-action="Index" class="btn btn-dark-pill">Explorar tours ↗</a></div>
+            <div class="col-lg-7"><div class="row g-3">
+                <div class="col-md-4"><div class="step-card"><span>01</span><strong>Explora</strong><p>Descubre tours y destinos disponibles.</p></div></div>
+                <div class="col-md-4"><div class="step-card"><span>02</span><strong>Compara</strong><p>Consulta precios, duración y cupos.</p></div></div>
+                <div class="col-md-4"><div class="step-card"><span>03</span><strong>Planifica</strong><p>Elige la aventura que más te inspire.</p></div></div>
+            </div></div>
+        </div>
+    </div>
+</section>
