@@ -191,6 +191,15 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<DateTime>("FechaReserva")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Confirmada");
+
+                    b.Property<DateTime?>("FechaCambioEstado")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("MetodoPagoId")
                         .HasColumnType("int");
 
@@ -208,7 +217,10 @@ namespace AgenciaToursAPI.Migrations
 
                     b.HasIndex("TourId");
 
-                    b.ToTable("Reservas");
+                    b.ToTable("Reservas", t =>
+                        {
+                            t.HasCheckConstraint("CK_Reservas_Estado", "[Estado] IN (N'Pendiente', N'Confirmada', N'Cancelada')");
+                        });
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Tour", b =>
