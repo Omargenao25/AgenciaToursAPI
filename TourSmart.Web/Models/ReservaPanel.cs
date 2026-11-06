@@ -11,7 +11,7 @@ public sealed class ReservaPanel
     public bool TourPorIniciar => FechaTour.HasValue && HoraTour.HasValue &&
         DateTime.Now < FechaTour.Value.Date.Add(HoraTour.Value);
     public bool PuedeConfirmar => Estado == "Pendiente" && TourPorIniciar;
-    public bool PuedeCancelar => Estado is "Pendiente" or "Confirmada" && TourPorIniciar;
+    public bool PuedeCancelar => (Estado is "Pendiente" or "Confirmada") && TourPorIniciar;
     public DateTime FechaReserva { get; set; }
     public int CantidadPersonas { get; set; }
     public decimal Total { get; set; }
