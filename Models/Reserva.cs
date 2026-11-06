@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using AgenciaToursAPI.Security;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AgenciaToursAPI.Models
@@ -21,6 +22,12 @@ namespace AgenciaToursAPI.Models
         public int MetodoPagoId { get; set; }
 
         public MetodoPago? MetodoPago { get; set; }
+
+        [Required]
+        [MaxLength(20)]
+        public string Estado { get; set; } = EstadosReserva.Pendiente;
+
+        public DateTime? FechaCambioEstado { get; set; }
 
         public DateTime FechaReserva { get; set; }
 
