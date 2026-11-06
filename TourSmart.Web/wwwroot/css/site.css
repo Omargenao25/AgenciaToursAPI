@@ -31,3 +31,13 @@
 .reservation-status{display:inline-block;border-radius:30px;padding:.33rem .65rem;font-size:.72rem;font-weight:750;background:#fff3d5;color:#825c0d;white-space:nowrap}.reservation-status.is-confirmed{background:#e3f5e6;color:#25603c}.reservation-status.is-cancelled{background:#f5e6e6;color:#923c3c}
 .capacity-item{padding:1rem 0;border-bottom:1px solid var(--line)}.capacity-item:last-child{border-bottom:0}.capacity-row{display:flex;justify-content:space-between;align-items:center;gap:.7rem}.capacity-row a{font-weight:750;color:var(--ink)}.capacity-row span{font-size:.75rem;color:var(--muted);white-space:nowrap}
 .capacity-track{height:9px;background:#edf0e7;border-radius:99px;overflow:hidden;margin:.65rem 0 .4rem}.capacity-fill{height:100%;background:#609e7e;border-radius:99px}.capacity-item small{font-size:.73rem;color:var(--muted)}.dashboard-footnote{margin:2rem 0 0;font-size:.8rem;color:var(--muted)}
+
+
+/* Módulo de gestión de reservas */
+.reservation-filters{background:#fff;border:1px solid var(--line);border-radius:22px;padding:1.4rem;box-shadow:0 8px 32px #142e3107}
+.reservation-filters .form-label{font-size:.82rem;font-weight:750;color:var(--ink)}
+.reservation-filters .form-control,.reservation-filters .form-select{border-radius:12px;border-color:#d9e5dc;padding:.8rem .9rem}
+.reservation-pagination{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:1.25rem;margin-top:1rem;font-size:.84rem;color:var(--muted)}
+.dashboard-table-title a{font-size:.8rem;font-weight:750;color:#235b4b}
+.dashboard-table-title a:hover{color:#448c60}
+@media(max-width:575px){.reservation-filters{padding:1rem}.reservation-pagination{justify-content:center}}
