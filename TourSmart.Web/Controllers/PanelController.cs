@@ -18,7 +18,7 @@ public sealed class PanelController(
     [Authorize(Roles = "Administrador,Operador")]
     [HttpPost("reservas/{id:int}/{accion}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CambiarEstado(int id, string accion, CancellationToken cancellationToken)
+    public async Task<IActionResult> CambiarEstado(int id, string accion, string? returnTo, CancellationToken cancellationToken)
     {
         if (id <= 0 || accion is not ("confirmar" or "cancelar"))
             return BadRequest();
@@ -66,7 +66,9 @@ public sealed class PanelController(
             TempData["Error"] = "La API tardó demasiado en responder. Consulta el estado de la reserva antes de repetir.";
         }
 
-        return RedirectToAction(nameof(Index));
+        return returnTo == "reservas"
+            ? RedirectToAction("Index", "ReservasWeb")
+            : RedirectToAction(nameof(Index));
     }
 
     [HttpGet("")]
