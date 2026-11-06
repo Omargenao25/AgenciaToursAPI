@@ -1,0 +1,121 @@
+@model ReservasListadoViewModel
+@{
+    ViewData["Title"] = "Gestionar reservas";
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al dashboard</a>
+        <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+        <h1>Gestión de <em>reservas.</em></h1>
+        <p>Consulta, busca y administra las reservas de la agencia.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Exito"] is string exito)
+        {
+            <div class="alert alert-success" role="status">@exito</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <form method="get" asp-controller="ReservasWeb" asp-action="Index" class="reservation-filters row g-3 align-items-end mb-4">
+            <div class="col-lg-7">
+                <label class="form-label" for="busqueda">Buscar por cliente, tour o ID</label>
+                <input id="busqueda" class="form-control" name="busqueda" value="@Model.Busqueda" maxlength="100" placeholder="Ej. Luis, Guadalajara o 6" />
+            </div>
+            <div class="col-lg-3">
+                <label class="form-label" for="estado">Estado</label>
+                <select id="estado" name="estado" class="form-select">
+                    <option value="Todas" selected="@(Model.Estado == "Todas")">Todos</option>
+                    <option value="Pendiente" selected="@(Model.Estado == "Pendiente")">Pendientes</option>
+                    <option value="Confirmada" selected="@(Model.Estado == "Confirmada")">Confirmadas</option>
+                    <option value="Cancelada" selected="@(Model.Estado == "Cancelada")">Canceladas</option>
+                </select>
+            </div>
+            <div class="col-lg-2 d-grid"><button class="btn btn-dark-pill" type="submit">Buscar ↗</button></div>
+        </form>
+        @if (!Model.ApiDisponible)
+        {
+            <div class="service-alert" role="alert">@Model.Error</div>
+        }
+        else
+        {
+            <div class="dashboard-table">
+                <div class="dashboard-table-title"><h3>Listado de reservas</h3><span>@Model.Total resultado(s)</span></div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr><th>ID</th><th>Cliente y excursión</th><th>Fecha reserva</th><th>Personas</th><th>Total</th><th>Estado</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var reserva in Model.Reservas)
+                        {
+                            <tr>
+                                <td>#@reserva.Id</td>
+                                <td><strong>@reserva.Cliente</strong><small class="d-block text-secondary">@reserva.Tour</small></td>
+                                <td>@reserva.FechaReserva.ToString("dd/MM/yyyy")</td>
+                                <td>@reserva.CantidadPersonas</td>
+                                <td>RD$ @reserva.Total.ToString("N2")</td>
+                                <td><span class="reservation-status @(reserva.Estado == "Confirmada" ? "is-confirmed" : reserva.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@reserva.Estado</span></td>
+                                <td>
+                                    @if (reserva.PuedeConfirmar)
+                                    {
+                                        <form method="post" asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="confirmar" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="returnTo" value="reservas" />
+                                            <button type="submit" class="btn btn-sm btn-outline-success">Confirmar</button>
+                                        </form>
+                                    }
+                                    @if (reserva.PuedeCancelar)
+                                    {
+                                        <form method="post" asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="cancelar" class="d-inline cancel-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="returnTo" value="reservas" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
+                                        </form>
+                                    }
+                                    @if (!reserva.PuedeConfirmar && !reserva.PuedeCancelar)
+                                    {
+                                        <span class="text-secondary small">Sin acciones</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Reservas.Any())
+                        {
+                            <tr><td colspan="7" class="text-secondary py-4">No se encontraron reservas con esos filtros.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="reservation-pagination">
+                    <span>Página @Model.Pagina de @Model.TotalPaginas</span>
+                    <div class="d-flex gap-2">
+                        @if (Model.Pagina > 1)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" asp-controller="ReservasWeb" asp-action="Index" asp-route-busqueda="@Model.Busqueda" asp-route-estado="@Model.Estado" asp-route-pagina="@(Model.Pagina - 1)">← Anterior</a>
+                        }
+                        @if (Model.Pagina < Model.TotalPaginas)
+                        {
+                            <a class="btn btn-sm btn-outline-secondary" asp-controller="ReservasWeb" asp-action="Index" asp-route-busqueda="@Model.Busqueda" asp-route-estado="@Model.Estado" asp-route-pagina="@(Model.Pagina + 1)">Siguiente →</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        <p class="dashboard-footnote">Las reservas de tours iniciados o finalizados no permiten confirmar ni cancelar. La API valida las condiciones nuevamente antes de efectuar cada cambio.</p>
+    </div>
+</section>
+@section Scripts {
+<script>
+document.querySelectorAll(".cancel-form").forEach(form => {
+    form.addEventListener("submit", event => {
+        if (!window.confirm("¿Cancelar esta reserva? La reserva quedará en el historial y sus cupos se liberarán.")) {
+            event.preventDefault();
+        }
+    });
+});
+</script>
+}
