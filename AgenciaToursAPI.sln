@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgenciaToursAPI", "AgenciaToursAPI.csproj", "{B9C697D0-B86D-4AD6-BE75-19E3E7099FA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TourSmart.Web", "TourSmart.Web\TourSmart.Web.csproj", "{D14C70C9-A035-45DA-9D9E-89CF11C5842A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B9C697D0-B86D-4AD6-BE75-19E3E7099FA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9C697D0-B86D-4AD6-BE75-19E3E7099FA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9C697D0-B86D-4AD6-BE75-19E3E7099FA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D14C70C9-A035-45DA-9D9E-89CF11C5842A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D14C70C9-A035-45DA-9D9E-89CF11C5842A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D14C70C9-A035-45DA-9D9E-89CF11C5842A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D14C70C9-A035-45DA-9D9E-89CF11C5842A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
