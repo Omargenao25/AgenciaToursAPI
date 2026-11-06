@@ -79,6 +79,14 @@ namespace AgenciaToursAPI.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Reserva>()
+                .Property(r => r.Estado)
+                .HasMaxLength(20)
+                .HasDefaultValue(EstadosReserva.Confirmada);
+
+            modelBuilder.Entity<Reserva>()
+                .ToTable(t => t.HasCheckConstraint("CK_Reservas_Estado", "[Estado] IN (N'Pendiente', N'Confirmada', N'Cancelada')"));
+
+            modelBuilder.Entity<Reserva>()
                 .HasOne(r => r.Cliente)
                 .WithMany(c => c.Reservas)
                 .HasForeignKey(r => r.ClienteId)
