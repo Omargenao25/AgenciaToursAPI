@@ -1,0 +1,38 @@
+@model CatalogoViewModel
+@{
+    ViewData["Title"] = "Explora nuestros tours";
+}
+<section class="inner-hero">
+    <div class="container">
+        <span class="eyebrow">TU SIGUIENTE DESTINO</span>
+        <h1>Explora nuevas <em>experiencias.</em></h1>
+        <p>Encuentra la excursión ideal y consulta la disponibilidad en tiempo real de nuestra plataforma.</p>
+    </div>
+</section>
+<section class="section-space catalog-section">
+    <div class="container">
+        <form method="get" asp-controller="Tours" asp-action="Index" class="search-bar row g-3 align-items-end">
+            <div class="col-lg-7"><label for="busqueda" class="form-label">Buscar destino o experiencia</label><input class="form-control" type="search" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Ej. Punta Cana, aventura, México..." /></div>
+            <div class="col-lg-3"><label for="categoria" class="form-label">Categoría</label><input class="form-control" id="categoria" name="categoria" value="@Model.Categoria" placeholder="Todas las categorías" /></div>
+            <div class="col-lg-2"><button type="submit" class="btn btn-accent w-100">Buscar ↗</button></div>
+        </form>
+        <div class="catalog-count"><strong>@Model.TotalTours</strong> experiencias encontradas</div>
+        @if (!Model.ServicioDisponible)
+        {
+            <div class="service-alert" role="status">No se pudo conectar con AgenciaToursAPI. Comprueba que esté ejecutándose en http://localhost:5290.</div>
+        }
+        else if (!Model.Tours.Any())
+        {
+            <div class="empty-box">No encontramos tours con esos filtros. <a asp-controller="Tours" asp-action="Index">Ver todos los tours</a>.</div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var tour in Model.Tours)
+                {
+                    <div class="col-md-6 col-xl-4"><partial name="_TourCard" model="tour" /></div>
+                }
+            </div>
+        }
+    </div>
+</section>
