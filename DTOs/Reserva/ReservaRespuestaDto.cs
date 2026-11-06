@@ -17,5 +17,7 @@
         public decimal PrecioPorPersona { get; set; }
 
         public decimal Total { get; set; }
+        public string Estado { get; set; } = string.Empty;
+        public DateTime? FechaCambioEstado { get; set; }
     }
 }
