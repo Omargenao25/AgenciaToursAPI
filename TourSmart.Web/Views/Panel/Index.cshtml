@@ -42,7 +42,7 @@
             <div class="dashboard-head mb-4">
                 <div><span class="eyebrow">RESUMEN DEL NEGOCIO</span><h2>Tu agencia, <em>en un vistazo.</em></h2>
                 <p>Información obtenida de la API de TourSmart RD.</p></div>
-                <a class="btn btn-dark-pill" asp-controller="Tours" asp-action="Index">Ver catálogo ↗</a>
+                <div class="d-flex gap-2 flex-wrap"><a class="btn btn-dark-pill" asp-controller="ReservasWeb" asp-action="Index">Gestionar reservas ↗</a><a class="btn btn-outline-secondary rounded-pill" asp-controller="Tours" asp-action="Index">Ver catálogo</a></div>
             </div>
             <div class="row g-3 mb-5">
                 <div class="col-6 col-xl"><div class="metric-card"><span>Tours futuros</span><strong>@Model.ToursFuturos</strong><small>Excursiones por iniciar</small></div></div>
@@ -55,7 +55,7 @@
             <div class="row g-4">
                 <div class="col-xl-7">
                     <section class="dashboard-table">
-                        <div class="dashboard-table-title"><h3>Reservas recientes</h3><span>@Model.Reservas.Count en total</span></div>
+                        <div class="dashboard-table-title"><h3>Reservas recientes</h3><a asp-controller="ReservasWeb" asp-action="Index">Ver todas (@Model.Reservas.Count) ↗</a></div>
                         <div class="table-responsive">
                             <table class="table align-middle">
                                 <thead><tr><th>ID</th><th>Cliente y tour</th><th>Personas</th><th>Estado</th><th>Acciones</th></tr></thead>
@@ -68,21 +68,21 @@
                                             <td>@reserva.CantidadPersonas</td>
                                             <td><span class="reservation-status @(reserva.Estado == "Confirmada" ? "is-confirmed" : reserva.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@reserva.Estado</span></td>
                                             <td>
-                                                @if (reserva.Estado == "Pendiente")
+                                                @if (reserva.PuedeConfirmar)
                                                 {
                                                     <form asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="confirmar" method="post" class="d-inline">
                                                         @Html.AntiForgeryToken()
                                                         <button type="submit" class="btn btn-sm btn-outline-success">Confirmar</button>
                                                     </form>
                                                 }
-                                                @if (reserva.Estado is "Pendiente" or "Confirmada")
+                                                @if (reserva.PuedeCancelar)
                                                 {
                                                     <form asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="cancelar" method="post" class="d-inline cancel-form">
                                                         @Html.AntiForgeryToken()
                                                         <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar</button>
                                                     </form>
                                                 }
-                                                @if (reserva.Estado == "Cancelada")
+                                                @if (!reserva.PuedeConfirmar && !reserva.PuedeCancelar)
                                                 {
                                                     <span class="text-secondary small">Sin acciones</span>
                                                 }
