@@ -5,6 +5,7 @@ using AgenciaToursAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace AgenciaToursAPI.Controllers
 {
@@ -59,7 +60,9 @@ namespace AgenciaToursAPI.Controllers
                     DuracionDias = t.DuracionDias,
                     DuracionHoras = t.DuracionHoras,
                     FechaFin = t.FechaFin,
-                    Estado = t.Estado
+                    Estado = t.Estado,
+                    CapacidadMaxima = t.CapacidadMaxima,
+                    CuposReservados = t.Reservas.Sum(r => r.CantidadPersonas)
                 })
                 .ToListAsync();
 
@@ -115,7 +118,9 @@ namespace AgenciaToursAPI.Controllers
                     DuracionDias = t.DuracionDias,
                     DuracionHoras = t.DuracionHoras,
                     FechaFin = t.FechaFin,
-                    Estado = t.Estado
+                    Estado = t.Estado,
+                    CapacidadMaxima = t.CapacidadMaxima,
+                    CuposReservados = t.Reservas.Sum(r => r.CantidadPersonas)
                 })
                 .FirstOrDefaultAsync();
 
@@ -214,7 +219,8 @@ namespace AgenciaToursAPI.Controllers
                 TransporteId = dto.TransporteId,
                 Fecha = dto.Fecha,
                 Hora = dto.Hora,
-                Precio = dto.Precio
+                Precio = dto.Precio,
+                CapacidadMaxima = dto.CapacidadMaxima
             };
 
             PrepararDatosCalculados(tour, destino);
@@ -245,7 +251,10 @@ namespace AgenciaToursAPI.Controllers
             int id,
             ActualizarTourDto dto)
         {
-            var tour = await _context.Tours.FindAsync(id);
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            var tour = await _context.Tours
+                .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
+                .SingleOrDefaultAsync();
 
             if (tour == null)
             {
@@ -261,8 +270,14 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
-            var tieneReservas = await _context.Reservas
-                .AnyAsync(r => r.TourId == id);
+            var reservados = await _context.Reservas
+                .Where(r => r.TourId == id)
+                .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
+
+            if (dto.CapacidadMaxima < reservados)
+                return Conflict($"La capacidad no puede ser menor que los {reservados} cupos ya reservados.");
+
+            var tieneReservas = reservados > 0;
 
             if (tieneReservas)
             {
@@ -348,10 +363,12 @@ namespace AgenciaToursAPI.Controllers
             tour.Fecha = dto.Fecha;
             tour.Hora = dto.Hora;
             tour.Precio = dto.Precio;
+            tour.CapacidadMaxima = dto.CapacidadMaxima;
 
             PrepararDatosCalculados(tour, destino);
 
             await _context.SaveChangesAsync();
+            await transaccion.CommitAsync();
 
             return NoContent();
         }
@@ -466,7 +483,9 @@ namespace AgenciaToursAPI.Controllers
                     DuracionDias = t.DuracionDias,
                     DuracionHoras = t.DuracionHoras,
                     FechaFin = t.FechaFin,
-                    Estado = t.Estado
+                    Estado = t.Estado,
+                    CapacidadMaxima = t.CapacidadMaxima,
+                    CuposReservados = t.Reservas.Sum(r => r.CantidadPersonas)
                 })
                 .FirstOrDefaultAsync();
 
