@@ -1,0 +1,38 @@
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Mi espacio";
+    var rol = User.FindFirstValue(ClaimTypes.Role) ?? "Cliente";
+    var personal = rol is "Administrador" or "Operador";
+}
+<section class="inner-hero">
+    <div class="container">
+        <span class="eyebrow">TU ESPACIO TOURSMART</span>
+        <h1>Hola, @User.Identity?.Name <em>✦</em></h1>
+        <p>Has iniciado sesión como @rol. Tu experiencia comienza aquí.</p>
+    </div>
+</section>
+<section class="section-space"><div class="container">
+    @if (personal)
+    {
+        <div class="row g-4">
+            <div class="col-lg-8"><div class="panel-feature"><span class="eyebrow">PANEL DE OPERACIONES</span>
+                <h2>Administra experiencias <em>inolvidables.</em></h2>
+                <p>La autenticación por roles ya está conectada. En la próxima etapa agregaremos aquí las tablas de reservas, cupos y gestión de tours usando la API protegida.</p>
+                <a asp-controller="Tours" asp-action="Index" class="btn btn-accent">Explorar catálogo ↗</a>
+            </div></div>
+            <div class="col-lg-4"><div class="panel-feature panel-secondary">
+                <span class="eyebrow">PERMISOS ACTIVOS</span><h3>@rol</h3>
+                <p>Tu rol se obtuvo del inicio de sesión de AgenciaToursAPI.</p>
+                @if (rol == "Administrador") { <p>La administración de usuarios se integrará aquí posteriormente.</p> }
+            </div></div>
+        </div>
+    }
+    else
+    {
+        <div class="panel-feature"><span class="eyebrow">MI ÁREA PERSONAL</span>
+            <h2>Tu próxima aventura <em>te espera.</em></h2>
+            <p>Tu cuenta está activa. Próximamente podrás consultar y gestionar tus propias reservas desde este espacio.</p>
+            <a asp-controller="Tours" asp-action="Index" class="btn btn-accent">Descubrir excursiones ↗</a>
+        </div>
+    }
+</div></section>
