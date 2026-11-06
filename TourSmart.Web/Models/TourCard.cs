@@ -1,0 +1,22 @@
+namespace TourSmart.Web.Models;
+
+public sealed class TourCard
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = "";
+    public string Pais { get; set; } = "";
+    public string Destino { get; set; } = "";
+    public string Categoria { get; set; } = "";
+    public string Guia { get; set; } = "";
+    public string Transporte { get; set; } = "";
+    public DateTime Fecha { get; set; }
+    public TimeSpan Hora { get; set; }
+    public decimal Precio { get; set; }
+    public int DuracionDias { get; set; }
+    public int DuracionHoras { get; set; }
+    public string Estado { get; set; } = "";
+    public int CapacidadMaxima { get; set; }
+    public int CuposReservados { get; set; }
+    public int CuposDisponibles { get; set; }
+    public bool Reservable => Estado == "Disponible" && CuposDisponibles > 0;
+}
