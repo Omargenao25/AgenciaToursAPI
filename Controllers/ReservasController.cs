@@ -39,6 +39,9 @@ namespace AgenciaToursAPI.Controllers
                     Tour = r.Tour != null
                         ? r.Tour.Nombre
                         : string.Empty,
+                    TourId = r.TourId,
+                    FechaTour = r.Tour != null ? r.Tour.Fecha : null,
+                    HoraTour = r.Tour != null ? r.Tour.Hora : null,
 
                     MetodoPago = r.MetodoPago != null
                         ? r.MetodoPago.Nombre
@@ -347,6 +350,9 @@ namespace AgenciaToursAPI.Controllers
                     Tour = r.Tour != null
                         ? r.Tour.Nombre
                         : string.Empty,
+                    TourId = r.TourId,
+                    FechaTour = r.Tour != null ? r.Tour.Fecha : null,
+                    HoraTour = r.Tour != null ? r.Tour.Hora : null,
 
                     MetodoPago = r.MetodoPago != null
                         ? r.MetodoPago.Nombre
