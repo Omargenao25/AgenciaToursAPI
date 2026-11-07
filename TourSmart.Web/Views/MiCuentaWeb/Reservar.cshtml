@@ -30,6 +30,7 @@
         Para <span id="personasResumen">@Model.CantidadPersonas</span> persona(s), el mínimo estimado es
         <strong id="adelantoResumen" data-precio="@Model.Tour.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                 data-porcentaje="@Model.Tour.PorcentajeAdelanto">RD$ @adelantoEstimado.ToString("N2")</strong>.
+        Tendrás <strong>@Model.Tour.HorasLimiteAdelanto horas</strong> desde que solicites la reserva para que la agencia registre el adelanto. Si el plazo vence sin ningún pago, la solicitud se cancelará y liberará sus plazas. Si existe un pago, la agencia deberá revisar la solicitud manualmente.
         Las plazas solicitadas se contabilizarán mientras la reserva esté activa.
     </div>
 }
