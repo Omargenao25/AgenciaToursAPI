@@ -18,6 +18,7 @@ public sealed class TourCard
     public TimeSpan Hora { get; set; }
     public decimal Precio { get; set; }
     public int PorcentajeAdelanto { get; set; } = 30;
+    public int HorasLimiteAdelanto { get; set; } = 24;
     public int DuracionDias { get; set; }
     public int DuracionHoras { get; set; }
     public string Estado { get; set; } = "";
