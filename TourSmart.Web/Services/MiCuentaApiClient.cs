@@ -25,6 +25,16 @@ public sealed class MiCuentaApiClient(HttpClient client) : IMiCuentaApiClient
         return request;
     }
 
+    public async Task<(HttpStatusCode Estado, string Mensaje)> CambiarContrasenaAsync(
+        string jwt, CambiarContrasenaViewModel model, CancellationToken ct)
+    {
+        using var request = Autorizar(HttpMethod.Post, "api/MiCuenta/cambiar-contrasena", jwt);
+        request.Content = JsonContent.Create(new { model.ContrasenaActual, model.ContrasenaNueva });
+        using var response = await client.SendAsync(request, ct);
+        var mensaje = response.IsSuccessStatusCode ? "" : await response.Content.ReadAsStringAsync(ct);
+        return (response.StatusCode, mensaje);
+    }
+
     public async Task<MiPerfilViewModel> PerfilAsync(string jwt, CancellationToken ct)
     {
         using var request = Autorizar(HttpMethod.Get, "api/MiCuenta/perfil", jwt);
