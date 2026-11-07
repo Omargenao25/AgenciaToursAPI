@@ -22,7 +22,7 @@
       <div class="row g-3">
         <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" maxlength="80" autocomplete="given-name" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
         <div class="col-md-6"><label asp-for="Apellido" class="form-label">Apellido</label><input asp-for="Apellido" class="form-control" maxlength="80" autocomplete="family-name" /><span asp-validation-for="Apellido" class="text-danger small"></span></div>
-        <div class="col-md-6"><label asp-for="Cedula" class="form-label">Cédula / documento</label><input asp-for="Cedula" class="form-control" maxlength="20" autocomplete="off" /><span asp-validation-for="Cedula" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Cedula" class="form-label">Cédula / documento</label><input asp-for="Cedula" class="form-control" maxlength="11" minlength="11" pattern="[0-9]{11}" inputmode="numeric" autocomplete="off" title="Introduce exactamente 11 dígitos numéricos" /><span asp-validation-for="Cedula" class="text-danger small"></span></div>
         <div class="col-md-6"><label asp-for="Telefono" class="form-label">Teléfono</label><input asp-for="Telefono" class="form-control" maxlength="20" autocomplete="tel" /><span asp-validation-for="Telefono" class="text-danger small"></span></div>
         <div class="col-12"><label asp-for="Correo" class="form-label">Correo electrónico</label><input asp-for="Correo" type="email" class="form-control" maxlength="150" autocomplete="email" /><span asp-validation-for="Correo" class="text-danger small"></span></div>
       </div>
