@@ -176,7 +176,8 @@ namespace AgenciaToursAPI.Controllers
         {
             await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
             var reservaActual = await _context.Reservas
-                .FindAsync(id);
+                .FromSqlInterpolated($"SELECT * FROM dbo.Reservas WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
+                .SingleOrDefaultAsync();
 
             if (reservaActual == null)
             {
@@ -185,6 +186,9 @@ namespace AgenciaToursAPI.Controllers
 
             if (reservaActual.Estado == EstadosReserva.Cancelada)
                 return Conflict("Una reserva cancelada no puede modificarse.");
+
+            if (await _context.PagosReserva.AnyAsync(p => p.ReservaId == id))
+                return Conflict("La reserva tiene pagos registrados. No es posible editar su importe o titular sin conciliación.");
 
            
             // Bloquear ambos tours en orden fijo para evitar sobreventa y reducir interbloqueos.
@@ -310,8 +314,12 @@ namespace AgenciaToursAPI.Controllers
         public async Task<IActionResult> CancelarReserva(int id)
         {
             await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
-            var reserva = await _context.Reservas.FindAsync(id);
+            var reserva = await _context.Reservas
+                .FromSqlInterpolated($"SELECT * FROM dbo.Reservas WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
+                .SingleOrDefaultAsync();
             if (reserva == null) return NotFound("La reserva no existe.");
+            if (await _context.PagosReserva.AnyAsync(p => p.ReservaId == id))
+                return Conflict("Esta reserva tiene pagos registrados. Se requiere conciliación o reembolso antes de cancelar.");
 
             var tour = await _context.Tours
                 .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
