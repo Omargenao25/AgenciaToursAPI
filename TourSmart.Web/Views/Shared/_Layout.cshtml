@@ -17,7 +17,10 @@
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-4">
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Tours" asp-action="Index">Explorar tours</a></li>
-                    <li class="nav-item"><span class="nav-link nav-soon" title="Próximamente">Mis reservas <small>Próximamente</small></span></li>
+                    @if (User.IsInRole("Cliente"))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="MiCuentaWeb" asp-action="MisReservas">Mis reservas</a></li>
+                    }
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="Panel" asp-action="Index">Mi espacio</a></li>
