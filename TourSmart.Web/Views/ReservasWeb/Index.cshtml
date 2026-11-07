@@ -61,6 +61,7 @@
                                 <td>RD$ @reserva.Total.ToString("N2")</td>
                                 <td><span class="reservation-status @(reserva.Estado == "Confirmada" ? "is-confirmed" : reserva.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@reserva.Estado</span></td>
                                 <td>
+                                    <a class="btn btn-sm btn-outline-primary mb-1" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@reserva.Id">Pagos / saldo</a>
                                     @if (reserva.PuedeConfirmar)
                                     {
                                         <form method="post" asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="confirmar" class="d-inline">
@@ -79,7 +80,7 @@
                                     }
                                     @if (!reserva.PuedeConfirmar && !reserva.PuedeCancelar)
                                     {
-                                        <span class="text-secondary small">Sin acciones</span>
+                                        <span class="text-secondary small">—</span>
                                     }
                                 </td>
                             </tr>
