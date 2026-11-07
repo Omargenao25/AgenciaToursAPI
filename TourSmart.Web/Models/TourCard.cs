@@ -4,6 +4,11 @@ public sealed class TourCard
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = "";
+    public int PaisId { get; set; }
+    public int DestinoId { get; set; }
+    public int CategoriaId { get; set; }
+    public int GuiaId { get; set; }
+    public int TransporteId { get; set; }
     public string Pais { get; set; } = "";
     public string Destino { get; set; } = "";
     public string Categoria { get; set; } = "";
