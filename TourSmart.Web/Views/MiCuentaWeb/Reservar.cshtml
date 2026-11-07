@@ -1,0 +1,33 @@
+@model MiReservaFormulario
+@{ ViewData["Title"] = "Reservar excursión"; }
+<section class="inner-hero dashboard-hero"><div class="container">
+<a class="back-link" asp-controller="Tours" asp-action="Detalle" asp-route-id="@Model.TourId">← Volver al tour</a>
+<span class="eyebrow">TOURSMART RD · RESERVAS</span><h1>Reserva tu <em>aventura.</em></h1>
+<p>Solicita tus plazas. El equipo confirmará la reserva posteriormente.</p>
+</div></section>
+<section class="section-space"><div class="container"><div class="tour-admin-form">
+@if (Model.Tour is not null)
+{
+<h2>@Model.Tour.Nombre</h2><p class="text-secondary">RD$ @Model.Tour.Precio.ToString("N2") por persona · @Model.Tour.CuposDisponibles plazas disponibles</p>
+}
+<form method="post" asp-controller="MiCuentaWeb" asp-action="Reservar" asp-route-tourId="@Model.TourId" id="miReservaForm">
+@Html.AntiForgeryToken()
+<input type="hidden" asp-for="TourId" />
+<div asp-validation-summary="ModelOnly" role="alert" class="text-danger mb-3"></div>
+<div class="row g-3">
+<div class="col-md-6"><label asp-for="CantidadPersonas" class="form-label">Personas</label><input asp-for="CantidadPersonas" class="form-control" type="number" min="1" max="100"/><span asp-validation-for="CantidadPersonas" class="text-danger small"></span></div>
+<div class="col-md-6"><label asp-for="MetodoPagoId" class="form-label">Método de pago</label>
+<select asp-for="MetodoPagoId" asp-items="Model.Metodos" class="form-select"><option value="0">Selecciona un método</option></select><span asp-validation-for="MetodoPagoId" class="text-danger small"></span></div>
+</div>
+<div class="booking-status mt-4">Esta solicitud no realiza un cobro. Se creará una reserva <strong>Pendiente</strong> y ocupará las plazas hasta que la agencia la confirme o cancele.</div>
+<button type="submit" class="btn btn-accent mt-3" id="enviarReserva">Solicitar reserva ↗</button>
+</form>
+</div></div></section>
+@section Scripts {
+<script>
+document.getElementById("miReservaForm").addEventListener("submit", function () {
+  if (!this.checkValidity()) return;
+  document.getElementById("enviarReserva").disabled = true;
+});
+</script>
+}
