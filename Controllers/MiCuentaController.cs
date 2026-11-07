@@ -237,7 +237,9 @@ public sealed class MiCuentaController(
                 CantidadPersonas = r.CantidadPersonas,
                 Total = r.Total,
                 Estado = r.Estado,
-                FechaCambioEstado = r.FechaCambioEstado
+                FechaCambioEstado = r.FechaCambioEstado,
+                VencePendienteUtc = r.VencePendienteUtc,
+                MotivoCancelacion = r.MotivoCancelacion
             })
             .SingleOrDefaultAsync(ct);
 
