@@ -53,11 +53,13 @@ namespace AgenciaToursAPI.Controllers
             NormalizarCliente(cliente);
 
             var cedulaExiste = await _context.Clientes
-                .AnyAsync(c => c.Cedula == cliente.Cedula);
+                .AnyAsync(c => c.TipoDocumento == cliente.TipoDocumento &&
+                    c.PaisEmisorDocumento == cliente.PaisEmisorDocumento &&
+                    c.NumeroDocumento == cliente.NumeroDocumento);
 
             if (cedulaExiste)
             {
-                return BadRequest("Ya existe un cliente con esa cédula.");
+                return BadRequest("Ya existe un cliente con ese documento.");
             }
 
             var correoExiste = await _context.Clientes
@@ -107,7 +109,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (cedulaExiste)
             {
-                return BadRequest("Ya existe otro cliente con esa cédula.");
+                return BadRequest("Ya existe otro cliente con ese documento.");
             }
 
             var correoExiste = await _context.Clientes
@@ -124,6 +126,9 @@ namespace AgenciaToursAPI.Controllers
             clienteActual.Nombre = cliente.Nombre;
             clienteActual.Apellido = cliente.Apellido;
             clienteActual.Cedula = cliente.Cedula;
+            clienteActual.TipoDocumento = cliente.TipoDocumento;
+            clienteActual.NumeroDocumento = cliente.NumeroDocumento;
+            clienteActual.PaisEmisorDocumento = cliente.PaisEmisorDocumento;
             clienteActual.Telefono = cliente.Telefono;
             clienteActual.Correo = cliente.Correo;
 
@@ -162,9 +167,12 @@ namespace AgenciaToursAPI.Controllers
         {
             cliente.Nombre = cliente.Nombre.Trim();
             cliente.Apellido = cliente.Apellido.Trim();
-            cliente.Cedula = cliente.Cedula.Trim();
+            cliente.TipoDocumento = cliente.TipoDocumento?.Trim() ?? "";
+            cliente.NumeroDocumento = cliente.NumeroDocumento?.Trim().ToUpperInvariant() ?? "";
+            cliente.PaisEmisorDocumento = cliente.PaisEmisorDocumento?.Trim() ?? "";
+            cliente.Cedula = cliente.TipoDocumento == "CedulaDominicana" ? cliente.NumeroDocumento : null;
             cliente.Telefono = cliente.Telefono.Trim();
-            cliente.Correo = cliente.Correo.Trim().ToLower();
+            cliente.Correo = cliente.Correo.Trim().ToLowerInvariant();
         }
     }
 }
