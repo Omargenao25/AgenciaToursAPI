@@ -113,6 +113,17 @@ namespace AgenciaToursAPI.Data
                 .ToTable(t => t.HasCheckConstraint("CK_Usuarios_Rol", "[Rol] IN (N'Administrador', N'Operador', N'Cliente')"));
 
             modelBuilder.Entity<Usuario>()
+                .HasOne(u => u.Cliente)
+                .WithMany()
+                .HasForeignKey(u => u.ClienteId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.ClienteId)
+                .IsUnique()
+                .HasFilter("[ClienteId] IS NOT NULL");
+
+            modelBuilder.Entity<Usuario>()
                 .HasIndex(u => u.Correo)
                 .IsUnique();
 
