@@ -118,6 +118,11 @@ namespace AgenciaToursAPI.Data
 
             modelBuilder.Entity<Cliente>()
                 .HasIndex(c => c.Cedula)
+                .IsUnique()
+                .HasFilter("[Cedula] IS NOT NULL");
+
+            modelBuilder.Entity<Cliente>()
+                .HasIndex(c => new { c.TipoDocumento, c.PaisEmisorDocumento, c.NumeroDocumento })
                 .IsUnique();
 
             modelBuilder.Entity<Cliente>()
