@@ -41,6 +41,15 @@ public sealed class MiCuentaApiClient(HttpClient client) : IMiCuentaApiClient
         return await response.Content.ReadFromJsonAsync<List<MetodoPagoReserva>>(cancellationToken: ct) ?? new();
     }
 
+    public async Task<(HttpStatusCode Estado, string Mensaje)> CancelarAsync(
+        string jwt, int reservaId, CancellationToken ct)
+    {
+        using var request = Autorizar(HttpMethod.Patch, $"api/MiCuenta/reservas/{reservaId}/cancelar", jwt);
+        using var response = await client.SendAsync(request, ct);
+        var mensaje = response.IsSuccessStatusCode ? "" : await response.Content.ReadAsStringAsync(ct);
+        return (response.StatusCode, mensaje);
+    }
+
     public async Task<(HttpStatusCode Estado, string Mensaje)> ReservarAsync(string jwt, MiReservaFormulario model, CancellationToken ct)
     {
         using var request = Autorizar(HttpMethod.Post, "api/MiCuenta/reservas", jwt);
