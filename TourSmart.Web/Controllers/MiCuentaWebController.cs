@@ -86,6 +86,46 @@ public sealed class MiCuentaWebController(
         return View(Array.Empty<ReservaPanel>());
     }
 
+    [HttpPost("reservas/{id:int}/cancelar")]
+    [Authorize(Roles = "Cliente")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelarMiReserva(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+
+        try
+        {
+            var (estado, _) = await cuentaApi.CancelarAsync(jwt, id, ct);
+            if (estado == HttpStatusCode.NoContent)
+            {
+                TempData["Exito"] = $"La reserva #{id} se canceló correctamente. Sus plazas vuelven a estar disponibles.";
+                return RedirectToAction(nameof(MisReservas));
+            }
+
+            TempData["Error"] = estado switch
+            {
+                HttpStatusCode.NotFound => "No se encontró esta reserva entre tus reservas.",
+                HttpStatusCode.Conflict => "No se pudo cancelar: la reserva ya está cancelada, el tour comenzó o tu cuenta necesita vinculación.",
+                HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized => "Tu sesión no permite cancelar esta reserva.",
+                _ => $"No se pudo cancelar la reserva (HTTP {(int)estado})."
+            };
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "No fue posible contactar con la API. Verifica el estado de la reserva antes de reintentar.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La operación tardó demasiado. Revisa el estado de la reserva antes de reintentar.";
+        }
+
+        return RedirectToAction(nameof(MisReservas));
+    }
+
     private async Task<bool> CargarReserva(MiReservaFormulario model, string jwt, CancellationToken ct)
     {
         model.Tour = await toursApi.GetTourAsync(model.TourId, ct);
