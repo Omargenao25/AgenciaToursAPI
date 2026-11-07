@@ -62,6 +62,96 @@ public sealed class MiCuentaWebController(
         return View(model);
     }
 
+    [HttpGet("perfil")]
+    [Authorize(Roles = "Cliente")]
+    public async Task<IActionResult> Perfil(CancellationToken ct)
+    {
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            return View(await cuentaApi.PerfilAsync(jwt, ct));
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode == HttpStatusCode.Conflict
+                ? "Tu cuenta todavía no tiene una ficha de cliente vinculada."
+                : "No se pudo cargar tu perfil. Comprueba la conexión con la API.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado al cargar tu perfil.";
+        }
+        return RedirectToAction("Index", "Panel");
+    }
+
+    [HttpPost("perfil")]
+    [Authorize(Roles = "Cliente")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Perfil(MiPerfilViewModel model, CancellationToken ct)
+    {
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+
+        model.Nombre = model.Nombre?.Trim() ?? "";
+        model.Apellido = model.Apellido?.Trim() ?? "";
+        model.Telefono = model.Telefono?.Trim() ?? "";
+        if (string.IsNullOrWhiteSpace(model.Nombre))
+            ModelState.AddModelError(nameof(model.Nombre), "El nombre es obligatorio.");
+        if (string.IsNullOrWhiteSpace(model.Apellido))
+            ModelState.AddModelError(nameof(model.Apellido), "El apellido es obligatorio.");
+        if (string.IsNullOrWhiteSpace(model.Telefono))
+            ModelState.AddModelError(nameof(model.Telefono), "El teléfono es obligatorio.");
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var estado = await cuentaApi.ActualizarPerfilAsync(jwt, model, ct);
+                if (estado == HttpStatusCode.NoContent)
+                {
+                    TempData["Exito"] = "Tus datos personales fueron actualizados correctamente.";
+                    return RedirectToAction(nameof(Perfil));
+                }
+                ModelState.AddModelError("", estado switch
+                {
+                    HttpStatusCode.BadRequest => "La API rechazó los datos. Revisa los campos.",
+                    HttpStatusCode.Conflict => "Esta cuenta no tiene una ficha verificada vinculada.",
+                    HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized => "Tu sesión no permite modificar este perfil.",
+                    _ => $"No se pudo actualizar el perfil (HTTP {(int)estado})."
+                });
+            }
+            catch (HttpRequestException)
+            {
+                ModelState.AddModelError("", "No se pudo contactar con la API. Comprueba si se guardaron los cambios antes de reintentar.");
+            }
+            catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+            {
+                ModelState.AddModelError("", "La API tardó demasiado. Revisa el perfil antes de reintentar.");
+            }
+        }
+
+        // No confiar en los campos de solo lectura enviados por el navegador:
+        // siempre recuperarlos de la API autenticada.
+        try
+        {
+            var actual = await cuentaApi.PerfilAsync(jwt, ct);
+            model.Correo = actual.Correo;
+            model.TipoDocumento = actual.TipoDocumento;
+            model.NumeroDocumento = actual.NumeroDocumento;
+            model.PaisEmisorDocumento = actual.PaisEmisorDocumento;
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "No se pudieron recuperar los datos de identificación.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La API tardó demasiado al cargar la identificación.");
+        }
+        return View(model);
+    }
+
     [HttpGet("reservas")]
     [Authorize(Roles = "Cliente")]
     public async Task<IActionResult> MisReservas(CancellationToken ct)
