@@ -80,7 +80,7 @@ public sealed class RecuperacionController(
     [HttpPost("restablecer")]
     public async Task<IActionResult> Restablecer(RestablecerContrasenaDto dto, CancellationToken ct)
     {
-        if (!Regex.IsMatch(dto.Token ?? "", "^[A-Fa-f0-9]{64}$"))
+        if (string.IsNullOrWhiteSpace(dto.Token) || !Regex.IsMatch(dto.Token, "^[A-Fa-f0-9]{64}$"))
             return BadRequest("Enlace inválido o vencido.");
         if (!ClaveFuerte(dto.ContrasenaNueva))
             return BadRequest("La nueva contraseña requiere 10 caracteres, mayúscula, minúscula, número y símbolo.");
