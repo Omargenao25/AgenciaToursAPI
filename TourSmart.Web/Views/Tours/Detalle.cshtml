@@ -1,6 +1,7 @@
 @model TourCard
 @{
     ViewData["Title"] = Model.Nombre;
+    var urlReserva = Url.Action("Reservar", "MiCuentaWeb", new { tourId = Model.Id });
 }
 <section class="inner-hero detail-hero">
     <div class="container">
@@ -49,7 +50,7 @@
                         }
                         else if (User.Identity?.IsAuthenticated != true)
                         {
-                            <a class="btn btn-accent w-100 mb-3" asp-controller="Cuenta" asp-action="Acceder" asp-route-returnUrl="@Url.Action("Reservar", "MiCuentaWeb", new { tourId = Model.Id })">Inicia sesión para reservar ↗</a>
+                            <a class="btn btn-accent w-100 mb-3" asp-controller="Cuenta" asp-action="Acceder" asp-route-returnUrl="@urlReserva">Inicia sesión para reservar ↗</a>
                             <p class="booking-note"><a asp-controller="MiCuentaWeb" asp-action="Registro">Crea tu cuenta de viajero</a> si todavía no tienes una.</p>
                         }
                     }
