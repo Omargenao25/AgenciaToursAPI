@@ -15,7 +15,8 @@ public sealed class ClienteFormularioViewModel
     public string Apellido { get; set; } = "";
 
     [Required(ErrorMessage = "La cédula es obligatoria.")]
-    [StringLength(20)]
+    [StringLength(11, MinimumLength = 11, ErrorMessage = "La cédula debe tener exactamente 11 dígitos.")]
+    [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Introduce 11 dígitos numéricos, sin guiones ni letras.")]
     public string Cedula { get; set; } = "";
 
     [Required(ErrorMessage = "El teléfono es obligatorio.")]
