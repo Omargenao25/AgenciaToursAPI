@@ -161,6 +161,7 @@ builder.Services.AddAuthorization();
 
 
 builder.Services.AddScoped<CorreoRecuperacionService>();
+builder.Services.AddHostedService<VencimientoReservasService>();
 builder.Services.AddControllers();
 
 
