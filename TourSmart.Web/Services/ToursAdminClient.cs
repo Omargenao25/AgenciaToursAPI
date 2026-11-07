@@ -30,7 +30,7 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
     {
         using var req = new HttpRequestMessage(HttpMethod.Put, $"api/Tours/{model.Id}/adelanto")
         {
-            Content = JsonContent.Create(new { model.PorcentajeAdelanto })
+            Content = JsonContent.Create(new { model.PorcentajeAdelanto, model.HorasLimiteAdelanto })
         };
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         using var resp = await http.SendAsync(req, ct);
