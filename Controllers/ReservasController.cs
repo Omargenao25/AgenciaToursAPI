@@ -288,7 +288,9 @@ namespace AgenciaToursAPI.Controllers
         public async Task<IActionResult> ConfirmarReserva(int id)
         {
             await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
-            var reserva = await _context.Reservas.FindAsync(id);
+            var reserva = await _context.Reservas
+                .FromSqlInterpolated($"SELECT * FROM dbo.Reservas WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
+                .SingleOrDefaultAsync();
             if (reserva == null) return NotFound("La reserva no existe.");
             if (reserva.Estado == EstadosReserva.Cancelada)
                 return Conflict("Una reserva cancelada no se puede confirmar.");
@@ -302,6 +304,15 @@ namespace AgenciaToursAPI.Controllers
             if (tour == null) return NotFound("El tour asociado no existe.");
             if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
                 return Conflict("No es posible confirmar una reserva de un tour que ya comenzó.");
+
+            // Confirmación financiera: el importe mínimo se redondea siempre
+            // hacia arriba al centavo; 30 % de RD$ 100.01 requiere RD$ 30.01.
+            var minimo = Math.Ceiling(reserva.Total * tour.PorcentajeAdelanto) / 100m;
+            var pagado = await _context.PagosReserva
+                .Where(p => p.ReservaId == id)
+                .SumAsync(p => (decimal?)p.Monto) ?? 0m;
+            if (pagado < minimo)
+                return Conflict($"Se requiere un adelanto del {tour.PorcentajeAdelanto}% (RD$ {minimo:N2}) para confirmar. Pagado: RD$ {pagado:N2}; faltante: RD$ {minimo - pagado:N2}.");
 
             reserva.Estado = EstadosReserva.Confirmada;
             reserva.FechaCambioEstado = DateTime.UtcNow;
