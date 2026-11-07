@@ -92,7 +92,10 @@ public sealed class ClientesAdminController(IClientesAdminClient clientesApi, IM
 
         model.Nombre = model.Nombre?.Trim() ?? "";
         model.Apellido = model.Apellido?.Trim() ?? "";
-        model.Cedula = model.Cedula?.Trim() ?? "";
+        model.TipoDocumento = model.TipoDocumento?.Trim() ?? "";
+        model.NumeroDocumento = model.NumeroDocumento?.Trim().ToUpperInvariant() ?? "";
+        model.PaisEmisorDocumento = model.PaisEmisorDocumento?.Trim() ?? "";
+        model.Cedula = model.TipoDocumento == "CedulaDominicana" ? model.NumeroDocumento : null;
         model.Telefono = model.Telefono?.Trim() ?? "";
         model.Correo = model.Correo?.Trim().ToLowerInvariant() ?? "";
 
@@ -126,7 +129,7 @@ public sealed class ClientesAdminController(IClientesAdminClient clientesApi, IM
 
                 ModelState.AddModelError("", status switch
                 {
-                    HttpStatusCode.BadRequest when yaExiste => "Ya existe otro cliente con esta cédula o correo. Comprueba los datos.",
+                    HttpStatusCode.BadRequest when yaExiste => "Ya existe otro cliente con ese documento o correo. Comprueba los datos.",
                     HttpStatusCode.BadRequest => "La API rechazó los datos del cliente. Revisa los campos.",
                     HttpStatusCode.NotFound => "El cliente ya no existe.",
                     HttpStatusCode.Conflict => "Se detectó un conflicto al guardar. Revisa los datos.",
