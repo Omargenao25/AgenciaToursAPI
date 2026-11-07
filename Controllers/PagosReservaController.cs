@@ -84,6 +84,13 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
 
         if (reserva.Estado == EstadosReserva.Cancelada)
             return Conflict("No se pueden registrar pagos en reservas canceladas.");
+        // No registrar el primer pago después de que expiró el plazo.
+        // Si ya hay pagos, la reserva queda protegida para conciliación manual.
+        var tienePagosPrevios = await db.PagosReserva.AnyAsync(p => p.ReservaId == reservaId, ct);
+        if (reserva.Estado == EstadosReserva.Pendiente &&
+            reserva.VencePendienteUtc is DateTime vencimiento &&
+            vencimiento <= DateTime.UtcNow && !tienePagosPrevios)
+            return Conflict("El plazo para registrar el adelanto venció. Esta reserva se cancelará automáticamente.");
         if (!await db.MetodosPago.AnyAsync(m => m.Id == dto.MetodoPagoId, ct))
             return BadRequest("Método de pago no válido.");
 
