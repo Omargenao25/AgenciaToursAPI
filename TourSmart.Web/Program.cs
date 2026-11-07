@@ -1,5 +1,6 @@
 using TourSmart.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
