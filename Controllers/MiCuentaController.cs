@@ -340,6 +340,7 @@ public sealed class MiCuentaController(
             ClienteId = clienteId.Value, TourId = dto.TourId,
             MetodoPagoId = dto.MetodoPagoId, CantidadPersonas = dto.CantidadPersonas,
             FechaReserva = DateTime.Now, Estado = EstadosReserva.Pendiente,
+            VencePendienteUtc = DateTime.UtcNow.AddHours(tour.HorasLimiteAdelanto),
             Total = Math.Round(tour.Precio * dto.CantidadPersonas, 2)
         };
         db.Reservas.Add(reserva);
