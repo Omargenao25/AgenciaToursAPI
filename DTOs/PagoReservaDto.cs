@@ -33,6 +33,8 @@ public sealed class EstadoPagosReservaDto
     public string Cliente { get; set; } = "";
     public string Tour { get; set; } = "";
     public string EstadoReserva { get; set; } = "";
+    public DateTime? FechaTour { get; set; }
+    public TimeSpan? HoraTour { get; set; }
     public decimal Total { get; set; }
     public decimal Pagado { get; set; }
     public int PorcentajeAdelanto { get; set; }
