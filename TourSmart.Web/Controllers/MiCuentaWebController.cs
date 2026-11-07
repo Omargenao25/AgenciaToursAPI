@@ -1,4 +1,6 @@
 using System.Net;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +61,62 @@ public sealed class MiCuentaWebController(
         {
             ModelState.AddModelError("", "El registro tardó demasiado. Revisa si ya existe tu cuenta antes de intentar de nuevo.");
         }
+        return View(model);
+    }
+
+    [HttpGet("seguridad")]
+    [Authorize(Roles = "Cliente")]
+    public IActionResult Seguridad() => View(new CambiarContrasenaViewModel());
+
+    [HttpPost("seguridad")]
+    [Authorize(Roles = "Cliente")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Seguridad(CambiarContrasenaViewModel model, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+
+        try
+        {
+            var (estado, mensaje) = await cuentaApi.CambiarContrasenaAsync(jwt, model, ct);
+            if (estado == HttpStatusCode.NoContent)
+            {
+                var sessionId = User.FindFirstValue("SessionId");
+                if (!string.IsNullOrWhiteSpace(sessionId)) cache.Remove("jwt:" + sessionId);
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["ContrasenaActualizada"] = "Contraseña actualizada. Inicia sesión de nuevo con tu nueva contraseña.";
+                return RedirectToAction("Acceder", "Cuenta");
+            }
+
+            ModelState.AddModelError("", estado switch
+            {
+                HttpStatusCode.BadRequest when mensaje.Contains("actual es incorrecta", StringComparison.OrdinalIgnoreCase)
+                    => "La contraseña actual es incorrecta.",
+                HttpStatusCode.BadRequest => "La nueva contraseña debe ser diferente y contener al menos 10 caracteres, mayúscula, minúscula, número y símbolo.",
+                HttpStatusCode.Conflict => "Tu cuenta cambió durante la operación. Inicia sesión nuevamente.",
+                HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => "Tu sesión ya no está autorizada. Vuelve a iniciar sesión.",
+                _ => $"No se pudo cambiar la contraseña (HTTP {(int)estado})."
+            });
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "No se pudo contactar con la API. Intenta iniciar sesión antes de repetir el cambio.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La solicitud tardó demasiado. Verifica si la contraseña ya cambió antes de repetir.");
+        }
+
+        // Jamás devolver las contraseñas previamente escritas en el HTML.
+        model.ContrasenaActual = "";
+        model.ContrasenaNueva = "";
+        model.ConfirmarContrasena = "";
+        ModelState.Remove(nameof(model.ContrasenaActual));
+        ModelState.Remove(nameof(model.ContrasenaNueva));
+        ModelState.Remove(nameof(model.ConfirmarContrasena));
         return View(model);
     }
 
