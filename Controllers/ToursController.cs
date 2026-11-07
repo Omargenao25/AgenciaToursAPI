@@ -155,6 +155,17 @@ namespace AgenciaToursAPI.Controllers
             public int PorcentajeAdelanto { get; set; }
         }
 
+        [AllowAnonymous]
+        [HttpGet("{id:int}/condiciones")]
+        public async Task<IActionResult> CondicionesPublicas(int id)
+        {
+            var condiciones = await _context.Tours.AsNoTracking()
+                .Where(t => t.Id == id)
+                .Select(t => new { t.PorcentajeAdelanto })
+                .SingleOrDefaultAsync();
+            return condiciones is null ? NotFound() : Ok(condiciones);
+        }
+
         [HttpGet("{id:int}/adelanto")]
         public async Task<IActionResult> ObtenerAdelanto(int id)
         {
