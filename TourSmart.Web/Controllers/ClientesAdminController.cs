@@ -37,7 +37,8 @@ public sealed class ClientesAdminController(IClientesAdminClient clientesApi, IM
                 c.Nombre.Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
                 c.Apellido.Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
                 (c.Nombre + " " + c.Apellido).Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
-                c.Cedula.Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
+                (c.NumeroDocumento ?? "").Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
+                c.TipoDocumento.Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
                 c.Correo.Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase) ||
                 c.Id.ToString().Contains(model.Busqueda, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(c => c.Apellido).ThenBy(c => c.Nombre).ToList();
