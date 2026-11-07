@@ -7,6 +7,31 @@ namespace TourSmart.Web.Services;
 
 public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClient
 {
+    public async Task<EstadoPagosReserva> EstadoPagosAsync(string jwt, int reservaId, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"api/reservas/{reservaId}/pagos");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<EstadoPagosReserva>(cancellationToken: ct)
+            ?? throw new HttpRequestException("No se recibieron los datos del saldo.");
+    }
+
+    public async Task<(HttpStatusCode Estado, string Mensaje)> RegistrarPagoAsync(string jwt, RegistrarPagoViewModel model, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"api/reservas/{model.ReservaId}/pagos")
+        {
+            Content = JsonContent.Create(new {
+                model.Monto, model.MetodoPagoId, model.Referencia,
+                model.Observacion, model.ClaveOperacion
+            })
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await client.SendAsync(request, ct);
+        var message = response.IsSuccessStatusCode ? "" : await response.Content.ReadAsStringAsync(ct);
+        return (response.StatusCode, message);
+    }
+
     public async Task<IReadOnlyList<ReservaPanel>> ListarAsync(string token, CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, "api/Reservas");
