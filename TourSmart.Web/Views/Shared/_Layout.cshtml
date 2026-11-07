@@ -20,6 +20,7 @@
                     @if (User.IsInRole("Cliente"))
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="MiCuentaWeb" asp-action="MisReservas">Mis reservas</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="MiCuentaWeb" asp-action="Perfil">Mi perfil</a></li>
                     }
                     @if (User.Identity?.IsAuthenticated == true)
                     {
