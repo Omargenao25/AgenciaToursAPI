@@ -1,0 +1,38 @@
+@model AdelantoTourViewModel
+@{ ViewData["Title"] = "Adelanto del tour"; }
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="ToursAdmin" asp-action="Index">← Gestionar tours</a>
+        <span class="eyebrow">CONDICIONES DE RESERVA · TOURSMART RD</span>
+        <h1>Adelanto <em>mínimo.</em></h1>
+        <p>Configura el porcentaje requerido para confirmar reservas de @Model.Nombre.</p>
+    </div>
+</section>
+<section class="section-space"><div class="container">
+    <div class="tour-admin-form">
+        <span class="eyebrow">POLÍTICA FINANCIERA DEL TOUR</span>
+        <h2 class="mt-2 mb-4">@Model.Nombre</h2>
+        @if (Model.TieneReservas)
+        {
+            <div class="alert alert-warning">
+                Este tour ya tiene reservas. Por seguridad, la política del adelanto queda bloqueada para no modificar las condiciones acordadas con los viajeros.
+            </div>
+            <div class="info-tile"><small>Adelanto mínimo vigente</small><strong>@Model.PorcentajeAdelanto%</strong></div>
+        }
+        else
+        {
+            <form method="post" asp-controller="ToursAdmin" asp-action="Adelanto" asp-route-id="@Model.Id">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="PorcentajeAdelanto" class="form-label">Porcentaje de adelanto (%)</label>
+                    <input asp-for="PorcentajeAdelanto" class="form-control" type="number" min="0" max="100" step="1" />
+                    <span asp-validation-for="PorcentajeAdelanto" class="text-danger small"></span>
+                </div>
+                <p class="text-secondary">Valor recomendado: 30 %. El mínimo se calculará sobre el importe total de cada reserva, redondeando hacia arriba al centavo. La confirmación solo se permitirá cuando los pagos recibidos alcancen ese mínimo.</p>
+                <button class="btn btn-accent" type="submit">Guardar política ↗</button>
+            </form>
+        }
+    </div>
+</div></section>
