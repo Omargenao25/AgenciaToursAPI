@@ -9,6 +9,7 @@ public interface IMiCuentaApiClient
     Task<MiPerfilViewModel> PerfilAsync(string jwt, CancellationToken ct);
     Task<HttpStatusCode> ActualizarPerfilAsync(string jwt, MiPerfilViewModel perfil, CancellationToken ct);
     Task<HttpStatusCode> RegistrarAsync(RegistroViajeroViewModel model, CancellationToken ct);
+    Task<ComprobanteReservaViewModel?> ComprobanteAsync(string jwt, int id, CancellationToken ct);
     Task<IReadOnlyList<ReservaPanel>> MisReservasAsync(string jwt, CancellationToken ct);
     Task<IReadOnlyList<MetodoPagoReserva>> MetodosAsync(string jwt, CancellationToken ct);
     Task<(HttpStatusCode Estado, string Mensaje)> CancelarAsync(string jwt, int reservaId, CancellationToken ct);
