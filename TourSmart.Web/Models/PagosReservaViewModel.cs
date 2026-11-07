@@ -22,6 +22,10 @@ public sealed class EstadoPagosReserva
     public string EstadoReserva { get; set; } = "";
     public decimal Total { get; set; }
     public decimal Pagado { get; set; }
+    public int PorcentajeAdelanto { get; set; }
+    public decimal AdelantoMinimo { get; set; }
+    public decimal FaltanteParaConfirmar { get; set; }
+    public bool PuedeConfirmar { get; set; }
     public decimal Saldo { get; set; }
     public string EstadoFinanciero { get; set; } = "";
     public List<PagoReservaItem> Pagos { get; set; } = new();
