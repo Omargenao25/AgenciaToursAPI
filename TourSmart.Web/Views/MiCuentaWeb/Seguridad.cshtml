@@ -1,0 +1,46 @@
+@model CambiarContrasenaViewModel
+@{
+    ViewData["Title"] = "Seguridad de mi cuenta";
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="MiCuentaWeb" asp-action="Perfil">← Volver a mi perfil</a>
+        <span class="eyebrow">MI ESPACIO · SEGURIDAD</span>
+        <h1>Protege tu <em>cuenta.</em></h1>
+        <p>Cambia tu contraseña de forma segura. Cerraremos las sesiones anteriores.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        <div class="tour-admin-form">
+            <span class="eyebrow">CREDENCIALES DE ACCESO</span>
+            <h2 class="mt-2 mb-4">Cambiar <em>contraseña.</em></h2>
+            <form method="post" asp-controller="MiCuentaWeb" asp-action="Seguridad">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="ContrasenaActual" class="form-label">Contraseña actual</label>
+                        <input asp-for="ContrasenaActual" type="password" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="ContrasenaActual" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ContrasenaNueva" class="form-label">Nueva contraseña</label>
+                        <input asp-for="ContrasenaNueva" type="password" class="form-control" autocomplete="new-password" minlength="10" maxlength="100" />
+                        <span asp-validation-for="ContrasenaNueva" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmarContrasena" class="form-label">Confirmar nueva contraseña</label>
+                        <input asp-for="ConfirmarContrasena" type="password" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmarContrasena" class="text-danger small"></span>
+                    </div>
+                </div>
+                <p class="booking-note mt-4">Usa al menos 10 caracteres e incluye una mayúscula, una minúscula, un número y un símbolo. No reutilices tu contraseña actual. Después de guardar deberás iniciar sesión de nuevo.</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <button type="submit" class="btn btn-accent">Actualizar contraseña ↗</button>
+                    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="MiCuentaWeb" asp-action="Perfil">Volver a mi perfil</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
