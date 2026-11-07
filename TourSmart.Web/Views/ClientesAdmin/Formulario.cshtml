@@ -1,0 +1,46 @@
+@model ClienteFormularioViewModel
+@{
+    var editando = Model.Id > 0;
+    ViewData["Title"] = editando ? "Editar cliente" : "Registrar cliente";
+}
+<section class="inner-hero dashboard-hero">
+  <div class="container">
+    <a class="back-link" asp-controller="ClientesAdmin" asp-action="Index">← Volver a clientes</a>
+    <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+    <h1>@(editando ? "Editar" : "Registrar") <em>cliente.</em></h1>
+    <p>@(editando ? "Mantén actualizada la información del cliente." : "Un nuevo viajero está a punto de unirse a TourSmart RD.")</p>
+  </div>
+</section>
+<section class="section-space"><div class="container">
+  <div class="tour-admin-form">
+    <span class="eyebrow">DATOS DEL CLIENTE</span>
+    <h2 class="mt-2 mb-4">Su próxima aventura <em>nos espera.</em></h2>
+    <form method="post" asp-controller="ClientesAdmin" asp-action="Guardar" id="clienteForm">
+      @Html.AntiForgeryToken()
+      <input type="hidden" asp-for="Id" />
+      <div asp-validation-summary="ModelOnly" class="text-danger mb-4" role="alert"></div>
+      <div class="row g-3">
+        <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" maxlength="80" autocomplete="given-name" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Apellido" class="form-label">Apellido</label><input asp-for="Apellido" class="form-control" maxlength="80" autocomplete="family-name" /><span asp-validation-for="Apellido" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Cedula" class="form-label">Cédula / documento</label><input asp-for="Cedula" class="form-control" maxlength="20" autocomplete="off" /><span asp-validation-for="Cedula" class="text-danger small"></span></div>
+        <div class="col-md-6"><label asp-for="Telefono" class="form-label">Teléfono</label><input asp-for="Telefono" class="form-control" maxlength="20" autocomplete="tel" /><span asp-validation-for="Telefono" class="text-danger small"></span></div>
+        <div class="col-12"><label asp-for="Correo" class="form-label">Correo electrónico</label><input asp-for="Correo" type="email" class="form-control" maxlength="150" autocomplete="email" /><span asp-validation-for="Correo" class="text-danger small"></span></div>
+      </div>
+      <div class="d-flex flex-wrap gap-3 mt-5">
+        <button class="btn btn-accent" type="submit" id="guardarCliente">@(editando ? "Guardar cambios" : "Registrar cliente") ↗</button>
+        <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ClientesAdmin" asp-action="Index">Cancelar</a>
+      </div>
+    </form>
+    <p class="dashboard-footnote">La cédula y el correo deben ser únicos. Los cambios se validan nuevamente en la API antes de guardarse.</p>
+  </div>
+</div></section>
+@section Scripts {
+<script>
+document.getElementById("clienteForm").addEventListener("submit", function(event) {
+    if (!this.checkValidity()) return;
+    const boton = document.getElementById("guardarCliente");
+    boton.disabled = true;
+    boton.textContent = "Guardando...";
+});
+</script>
+}
