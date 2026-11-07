@@ -1,0 +1,108 @@
+@model RegistrarPagoViewModel
+@{
+    ViewData["Title"] = "Pagos de reserva #" + Model.ReservaId;
+    var sinSaldo = Model.Resumen.Saldo <= 0;
+    var cancelada = Model.Resumen.EstadoReserva == "Cancelada";
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="ReservasWeb" asp-action="Index">← Gestión de reservas</a>
+        <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+        <h1>Pagos de <em>reserva #@Model.ReservaId.</em></h1>
+        <p>@Model.Resumen.Cliente · @Model.Resumen.Tour</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Exito"] is string exito)
+        {
+            <div class="alert alert-success" role="status">@exito</div>
+        }
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="metric-card"><span>Total de reserva</span><strong>RD$ @Model.Resumen.Total.ToString("N2")</strong></div></div>
+            <div class="col-md-4"><div class="metric-card"><span>Pagado</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
+            <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Saldo pendiente</span><strong>RD$ @Model.Resumen.Saldo.ToString("N2")</strong></div></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="tour-admin-form">
+                    <span class="eyebrow">REGISTRO DE MOVIMIENTO</span>
+                    <h2 class="mt-2 mb-2">Nuevo <em>abono.</em></h2>
+                    <p class="text-secondary">Estado de la reserva: <strong>@Model.Resumen.EstadoReserva</strong>. Estado financiero: <strong>@Model.Resumen.EstadoFinanciero</strong>.</p>
+                    @if (cancelada)
+                    {
+                        <div class="alert alert-warning">Esta reserva está cancelada. No se pueden registrar pagos.</div>
+                    }
+                    else if (sinSaldo)
+                    {
+                        <div class="alert alert-success">Esta reserva está pagada en su totalidad.</div>
+                    }
+                    else
+                    {
+                        <form asp-controller="PagosWeb" asp-action="Registrar" asp-route-reservaId="@Model.ReservaId" method="post">
+                            @Html.AntiForgeryToken()
+                            <input asp-for="ReservaId" type="hidden" />
+                            <input asp-for="ClaveOperacion" type="hidden" />
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            <div class="mb-3">
+                                <label asp-for="Monto" class="form-label">Monto recibido (RD$)</label>
+                                <input asp-for="Monto" type="number" class="form-control" min="0.01" max="@Model.Resumen.Saldo.ToString(System.Globalization.CultureInfo.InvariantCulture)" step="0.01" />
+                                <span asp-validation-for="Monto" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="MetodoPagoId" class="form-label">Método de pago recibido</label>
+                                <select asp-for="MetodoPagoId" asp-items="Model.Metodos" class="form-select">
+                                    <option value="">Selecciona un método</option>
+                                </select>
+                                <span asp-validation-for="MetodoPagoId" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Referencia" class="form-label">Referencia (opcional)</label>
+                                <input asp-for="Referencia" class="form-control" maxlength="100" placeholder="Número de transacción o recibo" />
+                                <span asp-validation-for="Referencia" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Observacion" class="form-label">Observación (opcional)</label>
+                                <textarea asp-for="Observacion" class="form-control" maxlength="200" rows="3"></textarea>
+                                <span asp-validation-for="Observacion" class="text-danger small"></span>
+                            </div>
+                            <div class="alert alert-info">Registra únicamente dinero efectivamente recibido por la agencia. Este formulario no realiza cargos a tarjetas ni transferencias.</div>
+                            <button type="submit" class="btn btn-accent">Registrar pago ↗</button>
+                        </form>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="dashboard-table">
+                    <div class="dashboard-table-title">
+                        <h3>Historial de pagos</h3>
+                        <span>@Model.Resumen.Pagos.Count movimiento(s)</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead><tr><th>ID</th><th>Fecha</th><th>Método / Ref.</th><th>Importe</th><th>Registrado por</th></tr></thead>
+                            <tbody>
+                                @foreach (var pago in Model.Resumen.Pagos)
+                                {
+                                    <tr>
+                                        <td>#@pago.Id</td>
+                                        <td>@pago.FechaRegistroUtc.ToString("dd/MM/yyyy HH:mm") UTC</td>
+                                        <td><strong>@pago.MetodoPago</strong><small class="d-block text-secondary">@pago.Referencia</small>
+                                        @if (!string.IsNullOrWhiteSpace(pago.Observacion)) { <small class="d-block text-secondary">@pago.Observacion</small> }
+                                        </td>
+                                        <td>RD$ @pago.Monto.ToString("N2")</td>
+                                        <td>@pago.RegistradoPor</td>
+                                    </tr>
+                                }
+                                @if (!Model.Resumen.Pagos.Any())
+                                {
+                                    <tr><td colspan="5" class="text-secondary py-4">Todavía no se han registrado pagos.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
