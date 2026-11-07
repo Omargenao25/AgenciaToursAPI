@@ -54,7 +54,7 @@
                             <p class="booking-note"><a asp-controller="MiCuentaWeb" asp-action="Registro">Crea tu cuenta de viajero</a> si todavía no tienes una.</p>
                         }
                     }
-                    <p class="booking-note">Para confirmar, la agencia debe verificar un adelanto mínimo del <strong>@Model.PorcentajeAdelanto%</strong> del total de la reserva. Se puede solicitar sin realizar un cobro en línea.</p>
+                    <p class="booking-note">Para confirmar, la agencia debe verificar un adelanto mínimo del <strong>@Model.PorcentajeAdelanto%</strong> del total. El plazo inicial para registrar el adelanto es de <strong>@Model.HorasLimiteAdelanto horas</strong> después de solicitar la reserva. Si vence sin ningún pago, las plazas se liberan. No se realiza ningún cobro en línea.</p>
                     <a asp-controller="Tours" asp-action="Index" class="btn btn-accent w-100">Explorar más experiencias ↗</a>
                 </aside>
             </div>
