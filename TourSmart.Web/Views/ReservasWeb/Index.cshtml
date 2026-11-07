@@ -64,11 +64,9 @@
                                     <a class="btn btn-sm btn-outline-primary mb-1" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@reserva.Id">Pagos / saldo</a>
                                     @if (reserva.PuedeConfirmar)
                                     {
-                                        <form method="post" asp-controller="Panel" asp-action="CambiarEstado" asp-route-id="@reserva.Id" asp-route-accion="confirmar" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="returnTo" value="reservas" />
-                                            <button type="submit" class="btn btn-sm btn-outline-success">Confirmar</button>
-                                        </form>
+                                        <a class="btn btn-sm btn-outline-success mb-1"
+                                           asp-controller="PagosWeb" asp-action="Detalle"
+                                           asp-route-reservaId="@reserva.Id">Revisar adelanto</a>
                                     }
                                     @if (reserva.PuedeCancelar)
                                     {
