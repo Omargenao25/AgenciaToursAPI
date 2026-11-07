@@ -53,6 +53,13 @@ namespace AgenciaToursAPI.Data
                 .ToTable(t => t.HasCheckConstraint("CK_Tours_CapacidadMaxima", "[CapacidadMaxima] >= 1"));
 
             modelBuilder.Entity<Tour>()
+                .Property(t => t.HorasLimiteAdelanto)
+                .HasDefaultValue(24);
+
+            modelBuilder.Entity<Tour>()
+                .ToTable(t => t.HasCheckConstraint("CK_Tours_HorasLimiteAdelanto", "[HorasLimiteAdelanto] BETWEEN 1 AND 168"));
+
+            modelBuilder.Entity<Tour>()
                 .Property(t => t.PorcentajeAdelanto)
                 .HasDefaultValue(30);
 
