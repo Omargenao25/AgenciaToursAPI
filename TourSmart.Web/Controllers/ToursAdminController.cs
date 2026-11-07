@@ -39,6 +39,69 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         ViewBag.DestinosPorPais = System.Text.Json.JsonSerializer.Serialize(catalogos.Destinos.Select(x => new { x.Id, x.PaisId }));
     }
 
+    [HttpGet("{id:int}/adelanto")]
+    public async Task<IActionResult> Adelanto(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            return View(await adminApi.ObtenerAdelantoAsync(jwt, id, ct));
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "No se pudo consultar la política de adelanto del tour.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("{id:int}/adelanto")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Adelanto(int id, AdelantoTourViewModel model, CancellationToken ct)
+    {
+        if (id <= 0 || model.Id != id) return BadRequest();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var actual = await adminApi.ObtenerAdelantoAsync(jwt, id, ct);
+            model.Nombre = actual.Nombre;
+            model.TieneReservas = actual.TieneReservas;
+            if (actual.TieneReservas)
+                ModelState.AddModelError("", "Este tour ya tiene reservas. No se puede modificar el adelanto acordado.");
+
+            if (ModelState.IsValid)
+            {
+                var status = await adminApi.ConfigurarAdelantoAsync(jwt, model, ct);
+                if (status == HttpStatusCode.NoContent)
+                {
+                    TempData["Exito"] = $"Adelanto de {model.PorcentajeAdelanto}% configurado correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", status switch
+                {
+                    HttpStatusCode.Conflict => "No se pudo actualizar: el tour ya comenzó o tiene reservas registradas.",
+                    HttpStatusCode.BadRequest => "El porcentaje debe estar entre 0 y 100.",
+                    _ => $"No se pudo actualizar la política de adelanto (HTTP {(int)status})."
+                });
+            }
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "No fue posible comunicarse con la API.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La solicitud tardó demasiado. Verifica el valor antes de reintentar.");
+        }
+        return View(model);
+    }
+
     [HttpGet("crear")]
     public async Task<IActionResult> Crear(CancellationToken ct)
     {
