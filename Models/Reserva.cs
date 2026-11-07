@@ -31,6 +31,12 @@ namespace AgenciaToursAPI.Models
 
         public DateTime FechaReserva { get; set; }
 
+        // UTC; null para reservas históricas anteriores a esta funcionalidad.
+        public DateTime? VencePendienteUtc { get; set; }
+
+        [MaxLength(30)]
+        public string? MotivoCancelacion { get; set; }
+
         [Range( 1, 100, ErrorMessage = "La cantidad de personas debe estar entre 1 y 100.")]
         public int CantidadPersonas { get; set; }
 
