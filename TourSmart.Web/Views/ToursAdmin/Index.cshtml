@@ -13,7 +13,7 @@
  @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
  <div class="dashboard-head mb-4">
   <div><span class="eyebrow">CATÁLOGO ADMINISTRATIVO</span><h2>Todos los <em>tours.</em></h2><p>@Model.Count excursiones registradas</p></div>
-  <a class="btn btn-accent" asp-controller="ToursAdmin" asp-action="Crear">+ Crear nuevo tour ↗</a>
+  <div class="d-flex flex-wrap gap-2"><a class="btn btn-accent" asp-controller="ToursAdmin" asp-action="Crear">+ Crear nuevo tour ↗</a><a class="btn btn-dark-pill" asp-controller="ReservasWeb" asp-action="Crear">+ Nueva reserva ↗</a></div>
  </div>
  <div class="dashboard-table"><div class="table-responsive">
   <table class="table align-middle">
