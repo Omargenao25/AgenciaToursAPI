@@ -270,6 +270,9 @@ public sealed class MiCuentaController(
         if (reserva.Estado == EstadosReserva.Cancelada)
             return Conflict("Esta reserva ya estaba cancelada.");
 
+        if (await db.PagosReserva.AnyAsync(p => p.ReservaId == id))
+            return Conflict("Esta reserva tiene pagos registrados. Contacta a la agencia para conciliar un reembolso.");
+
         if (reserva.Estado is not (EstadosReserva.Pendiente or EstadosReserva.Confirmada))
             return Conflict("El estado de esta reserva no permite cancelación.");
 
