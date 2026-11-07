@@ -1,5 +1,6 @@
 using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
+using AgenciaToursAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -159,6 +160,7 @@ builder.Services
 builder.Services.AddAuthorization();
 
 
+builder.Services.AddScoped<CorreoRecuperacionService>();
 builder.Services.AddControllers();
 
 
