@@ -312,6 +312,12 @@ namespace AgenciaToursAPI.Controllers
             var pagado = await _context.PagosReserva
                 .Where(p => p.ReservaId == id)
                 .SumAsync(p => (decimal?)p.Monto) ?? 0m;
+            // Si venció sin que se registrara ningún pago, no permitir
+            // confirmación manual mientras el proceso periódico libera los cupos.
+            if (reserva.VencePendienteUtc is DateTime vencimiento &&
+                vencimiento <= DateTime.UtcNow && pagado == 0m)
+                return Conflict("El plazo de adelanto venció sin pagos. Esta solicitud será cancelada automáticamente.");
+
             if (pagado < minimo)
                 return Conflict($"Se requiere un adelanto del {tour.PorcentajeAdelanto}% (RD$ {minimo:N2}) para confirmar. Pagado: RD$ {pagado:N2}; faltante: RD$ {minimo - pagado:N2}.");
 
