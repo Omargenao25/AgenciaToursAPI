@@ -348,6 +348,9 @@ namespace AgenciaToursAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ClienteId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Correo")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -369,6 +372,10 @@ namespace AgenciaToursAPI.Migrations
                         .HasDefaultValue("Cliente");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClienteId")
+                        .IsUnique()
+                        .HasFilter("[ClienteId] IS NOT NULL");
 
                     b.HasIndex("Correo")
                         .IsUnique();
