@@ -53,6 +53,15 @@ public sealed class MiCuentaApiClient(HttpClient client) : IMiCuentaApiClient
         return response.StatusCode;
     }
 
+    public async Task<ComprobanteReservaViewModel?> ComprobanteAsync(string jwt, int id, CancellationToken ct)
+    {
+        using var request = Autorizar(HttpMethod.Get, $"api/MiCuenta/reservas/{id}/comprobante", jwt);
+        using var response = await client.SendAsync(request, ct);
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ComprobanteReservaViewModel>(cancellationToken: ct);
+    }
+
     public async Task<IReadOnlyList<ReservaPanel>> MisReservasAsync(string jwt, CancellationToken ct)
     {
         using var request = Autorizar(HttpMethod.Get, "api/MiCuenta/reservas", jwt);
