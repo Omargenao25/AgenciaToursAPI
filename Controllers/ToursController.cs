@@ -149,6 +149,45 @@ namespace AgenciaToursAPI.Controllers
         }
 
 
+        public sealed class ActualizarAdelantoDto
+        {
+            [System.ComponentModel.DataAnnotations.Range(0, 100)]
+            public int PorcentajeAdelanto { get; set; }
+        }
+
+        [HttpGet("{id:int}/adelanto")]
+        public async Task<IActionResult> ObtenerAdelanto(int id)
+        {
+            var tour = await _context.Tours.AsNoTracking()
+                .Where(t => t.Id == id)
+                .Select(t => new { t.Id, t.Nombre, t.PorcentajeAdelanto,
+                    TieneReservas = t.Reservas.Any() })
+                .SingleOrDefaultAsync();
+            return tour is null ? NotFound() : Ok(tour);
+        }
+
+        [HttpPut("{id:int}/adelanto")]
+        public async Task<IActionResult> ConfigurarAdelanto(int id, ActualizarAdelantoDto dto)
+        {
+            await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            var tour = await _context.Tours
+                .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
+                .SingleOrDefaultAsync();
+            if (tour is null) return NotFound();
+
+            if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+                return Conflict("El tour ya comenzó.");
+
+            // No cambiar las condiciones anunciadas a clientes que ya reservaron.
+            if (await _context.Reservas.AnyAsync(r => r.TourId == id))
+                return Conflict("Este tour ya tiene reservas. No se puede cambiar el porcentaje de adelanto.");
+
+            tour.PorcentajeAdelanto = dto.PorcentajeAdelanto;
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+            return NoContent();
+        }
+
         [HttpPost]
         public async Task<ActionResult<TourRespuestaDto>> PostTour(
             CrearTourDto dto)
