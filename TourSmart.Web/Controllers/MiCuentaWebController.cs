@@ -234,6 +234,34 @@ public sealed class MiCuentaWebController(
         return View(Array.Empty<ReservaPanel>());
     }
 
+    [HttpGet("reservas/{id:int}/comprobante")]
+    [Authorize(Roles = "Cliente")]
+    public async Task<IActionResult> Comprobante(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var comprobante = await cuentaApi.ComprobanteAsync(jwt, id, ct);
+            if (comprobante is null) return NotFound();
+            Response.Headers.CacheControl = "private, no-store";
+            Response.Headers["X-Content-Type-Options"] = "nosniff";
+            return View(comprobante);
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode == HttpStatusCode.Unauthorized
+                ? "Tu sesión expiró. Inicia sesión nuevamente."
+                : "No pudimos cargar el comprobante. Intenta nuevamente.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La consulta del comprobante tardó demasiado.";
+        }
+        return RedirectToAction(nameof(MisReservas));
+    }
+
     [HttpPost("reservas/{id:int}/cancelar")]
     [Authorize(Roles = "Cliente")]
     [ValidateAntiForgeryToken]
