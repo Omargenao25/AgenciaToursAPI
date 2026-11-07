@@ -25,6 +25,24 @@ public sealed class MiCuentaApiClient(HttpClient client) : IMiCuentaApiClient
         return request;
     }
 
+    public async Task<MiPerfilViewModel> PerfilAsync(string jwt, CancellationToken ct)
+    {
+        using var request = Autorizar(HttpMethod.Get, "api/MiCuenta/perfil", jwt);
+        using var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<MiPerfilViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("Respuesta de perfil vacía.");
+    }
+
+    public async Task<HttpStatusCode> ActualizarPerfilAsync(string jwt, MiPerfilViewModel perfil, CancellationToken ct)
+    {
+        using var request = Autorizar(HttpMethod.Put, "api/MiCuenta/perfil", jwt);
+        // Solo se envían campos editables: correo y documento nunca forman parte del PUT.
+        request.Content = JsonContent.Create(new { perfil.Nombre, perfil.Apellido, perfil.Telefono });
+        using var response = await client.SendAsync(request, ct);
+        return response.StatusCode;
+    }
+
     public async Task<IReadOnlyList<ReservaPanel>> MisReservasAsync(string jwt, CancellationToken ct)
     {
         using var request = Autorizar(HttpMethod.Get, "api/MiCuenta/reservas", jwt);
