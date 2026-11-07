@@ -22,6 +22,7 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
             .Where(r => r.Id == reservaId)
             .Select(r => new {
                 r.Id, r.Total, r.Estado,
+                r.VencePendienteUtc, r.MotivoCancelacion,
                 FechaTour = r.Tour != null ? r.Tour.Fecha : (DateTime?)null,
                 HoraTour = r.Tour != null ? r.Tour.Hora : (TimeSpan?)null,
                 PorcentajeAdelanto = r.Tour != null ? r.Tour.PorcentajeAdelanto : 30,
