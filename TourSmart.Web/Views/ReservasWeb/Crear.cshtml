@@ -13,7 +13,7 @@
 <section class="section-space">
     <div class="container">
         <div class="tour-admin-form">
-            <span class="eyebrow">DATOS DE RESERVA</span>
+            <span class="eyebrow">DATOS DE RESERVA</span><div class="d-flex justify-content-end mb-3"><a class="btn btn-sm btn-outline-success" asp-controller="ClientesAdmin" asp-action="Crear">+ Registrar cliente nuevo</a></div>
             <h2 class="mt-2 mb-4">Comencemos <em>la aventura.</em></h2>
             <form method="post" asp-controller="ReservasWeb" asp-action="Crear" id="crearReservaForm">
                 @Html.AntiForgeryToken()
