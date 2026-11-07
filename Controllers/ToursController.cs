@@ -153,6 +153,9 @@ namespace AgenciaToursAPI.Controllers
         {
             [System.ComponentModel.DataAnnotations.Range(0, 100)]
             public int PorcentajeAdelanto { get; set; }
+
+            [System.ComponentModel.DataAnnotations.Range(1, 168)]
+            public int HorasLimiteAdelanto { get; set; } = 24;
         }
 
         [AllowAnonymous]
@@ -161,7 +164,7 @@ namespace AgenciaToursAPI.Controllers
         {
             var condiciones = await _context.Tours.AsNoTracking()
                 .Where(t => t.Id == id)
-                .Select(t => new { t.PorcentajeAdelanto })
+                .Select(t => new { t.PorcentajeAdelanto, t.HorasLimiteAdelanto })
                 .SingleOrDefaultAsync();
             return condiciones is null ? NotFound() : Ok(condiciones);
         }
@@ -171,7 +174,7 @@ namespace AgenciaToursAPI.Controllers
         {
             var tour = await _context.Tours.AsNoTracking()
                 .Where(t => t.Id == id)
-                .Select(t => new { t.Id, t.Nombre, t.PorcentajeAdelanto,
+                .Select(t => new { t.Id, t.Nombre, t.PorcentajeAdelanto, t.HorasLimiteAdelanto,
                     TieneReservas = t.Reservas.Any() })
                 .SingleOrDefaultAsync();
             return tour is null ? NotFound() : Ok(tour);
@@ -194,6 +197,7 @@ namespace AgenciaToursAPI.Controllers
                 return Conflict("Este tour ya tiene reservas. No se puede cambiar el porcentaje de adelanto.");
 
             tour.PorcentajeAdelanto = dto.PorcentajeAdelanto;
+            tour.HorasLimiteAdelanto = dto.HorasLimiteAdelanto;
             await _context.SaveChangesAsync();
             await tx.CommitAsync();
             return NoContent();
