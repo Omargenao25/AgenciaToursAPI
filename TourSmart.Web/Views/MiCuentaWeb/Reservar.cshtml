@@ -27,7 +27,9 @@
         Esta solicitud no realiza un cobro. Se creará como <strong>Pendiente</strong>.
         Para confirmarla, la agencia debe verificar y registrar al menos un adelanto del
         <strong>@Model.Tour.PorcentajeAdelanto%</strong> de la reserva.
-        Para @Model.CantidadPersonas persona(s), el mínimo estimado es <strong>RD$ @adelantoEstimado.ToString("N2")</strong>.
+        Para <span id="personasResumen">@Model.CantidadPersonas</span> persona(s), el mínimo estimado es
+        <strong id="adelantoResumen" data-precio="@Model.Tour.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                data-porcentaje="@Model.Tour.PorcentajeAdelanto">RD$ @adelantoEstimado.ToString("N2")</strong>.
         Las plazas solicitadas se contabilizarán mientras la reserva esté activa.
     </div>
 }
@@ -36,6 +38,19 @@
 </div></div></section>
 @section Scripts {
 <script>
+const campoPersonas = document.getElementById("CantidadPersonas");
+const adelantoResumen = document.getElementById("adelantoResumen");
+if (campoPersonas && adelantoResumen) {
+  const actualizarAdelanto = () => {
+    const personas = Math.max(1, Number(campoPersonas.value) || 1);
+    const precio = Number(adelantoResumen.dataset.precio);
+    const porcentaje = Number(adelantoResumen.dataset.porcentaje);
+    const centavos = Math.ceil((precio * personas * porcentaje) - 1e-8);
+    document.getElementById("personasResumen").textContent = personas;
+    adelantoResumen.textContent = "RD$ " + (centavos / 100).toLocaleString("en-US", {minimumFractionDigits:2, maximumFractionDigits:2});
+  };
+  campoPersonas.addEventListener("input", actualizarAdelanto);
+}
 document.getElementById("miReservaForm").addEventListener("submit", function () {
   if (!this.checkValidity()) return;
   document.getElementById("enviarReserva").disabled = true;
