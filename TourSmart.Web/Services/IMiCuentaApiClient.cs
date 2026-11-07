@@ -5,6 +5,7 @@ namespace TourSmart.Web.Services;
 
 public interface IMiCuentaApiClient
 {
+    Task<(HttpStatusCode Estado, string Mensaje)> CambiarContrasenaAsync(string jwt, CambiarContrasenaViewModel model, CancellationToken ct);
     Task<MiPerfilViewModel> PerfilAsync(string jwt, CancellationToken ct);
     Task<HttpStatusCode> ActualizarPerfilAsync(string jwt, MiPerfilViewModel perfil, CancellationToken ct);
     Task<HttpStatusCode> RegistrarAsync(RegistroViajeroViewModel model, CancellationToken ct);
