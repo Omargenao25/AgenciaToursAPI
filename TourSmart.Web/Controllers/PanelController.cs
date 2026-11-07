@@ -43,7 +43,9 @@ public sealed class PanelController(
                         : $"La reserva #{id} fue cancelada y sus cupos fueron liberados.";
                     break;
                 case HttpStatusCode.Conflict:
-                    TempData["Error"] = "La operación no es válida para el estado o la fecha actual de esta reserva.";
+                    TempData["Error"] = accion == "confirmar"
+                        ? "No se puede confirmar: comprueba que el adelanto mínimo esté registrado, que no esté cancelada y que el tour no haya comenzado."
+                        : "No se puede cancelar: la reserva ya empezó, está cancelada o tiene pagos registrados que requieren conciliación.";
                     break;
                 case HttpStatusCode.NotFound:
                     TempData["Error"] = "La reserva solicitada no existe.";
@@ -66,6 +68,8 @@ public sealed class PanelController(
             TempData["Error"] = "La API tardó demasiado en responder. Consulta el estado de la reserva antes de repetir.";
         }
 
+        if (returnTo == "pagos")
+            return RedirectToAction("Detalle", "PagosWeb", new { reservaId = id });
         return returnTo == "reservas"
             ? RedirectToAction("Index", "ReservasWeb")
             : RedirectToAction(nameof(Index));
