@@ -23,6 +23,39 @@
             <div class="col-md-4"><div class="metric-card"><span>Pagado</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
             <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Saldo pendiente</span><strong>RD$ @Model.Resumen.Saldo.ToString("N2")</strong></div></div>
         </div>
+        <div class="dashboard-table mb-4 p-4">
+            <span class="eyebrow">CONDICIÓN DE CONFIRMACIÓN</span>
+            <div class="row g-3 mt-1 align-items-center">
+                <div class="col-md-4">
+                    <small class="d-block text-secondary">Adelanto mínimo (@Model.Resumen.PorcentajeAdelanto%)</small>
+                    <strong class="fs-4">RD$ @Model.Resumen.AdelantoMinimo.ToString("N2")</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="d-block text-secondary">Falta para confirmar</small>
+                    <strong class="fs-4">RD$ @Model.Resumen.FaltanteParaConfirmar.ToString("N2")</strong>
+                </div>
+                <div class="col-md-4">
+                    @if (Model.Resumen.PuedeConfirmar)
+                    {
+                        <form method="post" asp-controller="Panel" asp-action="CambiarEstado"
+                              asp-route-id="@Model.ReservaId" asp-route-accion="confirmar">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="returnTo" value="pagos" />
+                            <button type="submit" class="btn btn-accent w-100">Confirmar reserva ↗</button>
+                        </form>
+                    }
+                    else if (Model.Resumen.EstadoReserva == "Pendiente")
+                    {
+                        <span class="text-secondary">Pendiente de adelanto. Registra y verifica el pago antes de confirmar.</span>
+                    }
+                    else
+                    {
+                        <span class="text-secondary">Estado de la reserva: @Model.Resumen.EstadoReserva</span>
+                    }
+                </div>
+            </div>
+            <p class="dashboard-footnote mb-0">El adelanto no constituye un cargo en línea. La confirmación está protegida por una nueva validación financiera en la API.</p>
+        </div>
         <div class="row g-4">
             <div class="col-lg-5">
                 <div class="tour-admin-form">
