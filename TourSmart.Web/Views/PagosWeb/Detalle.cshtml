@@ -22,6 +22,24 @@
         {
             <div class="alert alert-warning" role="alert">@error</div>
         }
+        @if (Model.Resumen.EstadoReserva == "Pendiente" && Model.Resumen.VencePendienteUtc is DateTime vencimiento)
+        {
+            <div class="alert @(Model.Resumen.RequiereRevision ? "alert-warning" : "alert-info")">
+                <strong>Fecha límite del adelanto:</strong> @vencimiento.ToString("dd/MM/yyyy HH:mm") UTC.
+                @if (Model.Resumen.RequiereRevision)
+                {
+                    <span>El plazo venció, pero hay pagos registrados. Esta reserva no se cancela automáticamente: requiere revisión de la agencia.</span>
+                }
+                else
+                {
+                    <span>Las reservas vencidas sin pagos registrados se cancelan automáticamente, conservando el historial.</span>
+                }
+            </div>
+        }
+        @if (Model.Resumen.MotivoCancelacion == "VencimientoSinPago")
+        {
+            <div class="alert alert-warning">La reserva se canceló automáticamente por vencimiento del plazo sin pagos. Sus plazas fueron liberadas.</div>
+        }
         <div class="row g-3 mb-4">
             <div class="col-md-4"><div class="metric-card"><span>Total de reserva</span><strong>RD$ @Model.Resumen.Total.ToString("N2")</strong></div></div>
             <div class="col-md-4"><div class="metric-card"><span>Pagado</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
