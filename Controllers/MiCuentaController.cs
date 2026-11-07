@@ -27,6 +27,52 @@ public sealed class MiCuentaController(
             .SingleOrDefaultAsync();
     }
 
+    [Authorize(Roles = Roles.Cliente)]
+    [HttpGet("sesion")]
+    public IActionResult ValidarSesion() => NoContent();
+
+    [Authorize(Roles = Roles.Cliente)]
+    [HttpPost("cambiar-contrasena")]
+    public async Task<IActionResult> CambiarContrasena(CambiarContrasenaDto dto)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var usuarioId))
+            return Unauthorized();
+
+        var usuario = await db.Usuarios
+            .SingleOrDefaultAsync(u => u.Id == usuarioId && u.Rol == Roles.Cliente);
+        if (usuario is null) return Unauthorized();
+
+        var resultado = passwordHasher.VerifyHashedPassword(usuario, usuario.PasswordHash, dto.ContrasenaActual);
+        if (resultado == PasswordVerificationResult.Failed)
+            return BadRequest("La contraseña actual es incorrecta.");
+
+        if (string.Equals(dto.ContrasenaActual, dto.ContrasenaNueva, StringComparison.Ordinal))
+            return BadRequest("La contraseña nueva debe ser diferente a la actual.");
+
+        if (dto.ContrasenaNueva.Length < 10 ||
+            !dto.ContrasenaNueva.Any(char.IsUpper) ||
+            !dto.ContrasenaNueva.Any(char.IsLower) ||
+            !dto.ContrasenaNueva.Any(char.IsDigit) ||
+            !dto.ContrasenaNueva.Any(c => !char.IsLetterOrDigit(c)))
+            return BadRequest("La nueva contraseña debe tener al menos 10 caracteres, mayúscula, minúscula, número y símbolo.");
+
+        // Update atómico con protección contra cambios concurrentes de contraseña:
+        // el hash anterior debe seguir vigente para autorizar la sustitución.
+        var nuevoHash = passwordHasher.HashPassword(usuario, dto.ContrasenaNueva);
+        var nuevaVersion = Guid.NewGuid().ToString("N");
+        var filas = await db.Usuarios
+            .Where(u => u.Id == usuarioId && u.PasswordHash == usuario.PasswordHash
+                && u.VersionSesion == usuario.VersionSesion)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.PasswordHash, nuevoHash)
+                .SetProperty(u => u.VersionSesion, nuevaVersion));
+        if (filas != 1)
+            return Conflict("La contraseña cambió durante la operación. Inicia sesión de nuevo.");
+
+        // Los JWT previos quedan revocados por OnTokenValidated.
+        return NoContent();
+    }
+
     // Las consultas y cambios se basan exclusivamente en la identidad JWT;
     // no se acepta un IdCliente arbitrario enviado por el navegador.
     [Authorize(Roles = Roles.Cliente)]
