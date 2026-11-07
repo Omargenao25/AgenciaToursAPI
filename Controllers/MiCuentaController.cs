@@ -212,6 +212,40 @@ public sealed class MiCuentaController(
         return Ok(reservas);
     }
 
+    [Authorize(Roles = Roles.Cliente)]
+    [HttpGet("reservas/{id:int}/comprobante")]
+    public async Task<IActionResult> Comprobante(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var clienteId = await ClienteAutenticado();
+        if (clienteId is null)
+            return Conflict("Tu cuenta no está vinculada a una ficha de cliente.");
+
+        // Solo la reserva propia: no revelar si un ID existe en otra cuenta.
+        var comprobante = await db.Reservas.AsNoTracking()
+            .Where(r => r.Id == id && r.ClienteId == clienteId.Value)
+            .Select(r => new ComprobanteReservaDto
+            {
+                Id = r.Id,
+                Cliente = r.Cliente != null ? r.Cliente.Nombre + " " + r.Cliente.Apellido : "",
+                Tour = r.Tour != null ? r.Tour.Nombre : "",
+                TourId = r.TourId,
+                FechaTour = r.Tour != null ? r.Tour.Fecha : null,
+                HoraTour = r.Tour != null ? r.Tour.Hora : null,
+                MetodoPago = r.MetodoPago != null ? r.MetodoPago.Nombre : "",
+                FechaReserva = r.FechaReserva,
+                CantidadPersonas = r.CantidadPersonas,
+                Total = r.Total,
+                Estado = r.Estado,
+                FechaCambioEstado = r.FechaCambioEstado
+            })
+            .SingleOrDefaultAsync(ct);
+
+        if (comprobante is null) return NotFound();
+        Response.Headers.CacheControl = "private, no-store";
+        return Ok(comprobante);
+    }
+
     // La identidad procede del JWT y la vinculación Usuario.ClienteId.
     // La API nunca acepta ClienteId desde el navegador para cancelar.
     [Authorize(Roles = Roles.Cliente)]
