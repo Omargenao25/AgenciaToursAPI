@@ -12,6 +12,90 @@ namespace TourSmart.Web.Controllers;
 [Route("cuenta")]
 public sealed class CuentaController(IAuthApiClient authApi, IMemoryCache cache) : Controller
 {
+    [HttpGet("recuperar")]
+    [AllowAnonymous]
+    public IActionResult Recuperar() => View(new SolicitarRecuperacionViewModel());
+
+    [HttpPost("recuperar")]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Recuperar(SolicitarRecuperacionViewModel model, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            var estado = await authApi.SolicitarRecuperacionAsync(model.Correo, ct);
+            if (estado == System.Net.HttpStatusCode.OK)
+            {
+                // Respuesta deliberadamente idéntica para cuentas existentes o inexistentes.
+                TempData["Recuperacion"] = "Si existe una cuenta de viajero con ese correo, recibirás instrucciones de recuperación.";
+                return RedirectToAction(nameof(Recuperar));
+            }
+            ModelState.AddModelError("", "No se pudo procesar la solicitud. Intenta nuevamente.");
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "No se pudo conectar con la API. Comprueba que esté encendida.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La solicitud tardó demasiado. Intenta de nuevo más tarde.");
+        }
+        return View(model);
+    }
+
+    [HttpGet("restablecer")]
+    [AllowAnonymous]
+    public IActionResult Restablecer(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token) || token.Length != 64)
+            return View("EnlaceInvalido");
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers["Referrer-Policy"] = "no-referrer";
+        return View(new RestablecerContrasenaViewModel { Token = token });
+    }
+
+    [HttpPost("restablecer")]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restablecer(RestablecerContrasenaViewModel model, CancellationToken ct)
+    {
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers["Referrer-Policy"] = "no-referrer";
+        if (string.IsNullOrWhiteSpace(model.Token) || model.Token.Length != 64)
+            return View("EnlaceInvalido");
+        if (!ModelState.IsValid) return View(model);
+
+        try
+        {
+            var estado = await authApi.RestablecerAsync(model.Token, model.ContrasenaNueva, ct);
+            if (estado == System.Net.HttpStatusCode.NoContent)
+            {
+                TempData["ContrasenaActualizada"] = "Tu contraseña fue restablecida. Inicia sesión con la nueva contraseña.";
+                return RedirectToAction(nameof(Acceder));
+            }
+            ModelState.AddModelError("", estado == System.Net.HttpStatusCode.BadRequest
+                ? "El enlace no es válido, expiró o la nueva contraseña no cumple los requisitos."
+                : "No pudimos restablecer la contraseña. Intenta solicitar otro enlace.");
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "No se pudo contactar con la API.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La solicitud tardó demasiado. Intenta iniciar sesión antes de repetir.");
+        }
+
+        // No devolver contraseñas al navegador después de un fallo.
+        model.ContrasenaNueva = "";
+        model.ConfirmarContrasena = "";
+        ModelState.Remove(nameof(model.ContrasenaNueva));
+        ModelState.Remove(nameof(model.ConfirmarContrasena));
+        return View(model);
+    }
+
     [HttpGet("acceder")]
     [AllowAnonymous]
     public IActionResult Acceder(string? returnUrl = null)
