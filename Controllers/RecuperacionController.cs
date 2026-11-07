@@ -64,10 +64,14 @@ public sealed class RecuperacionController(
         {
             await correoService.EnviarAsync(usuario.Correo, token);
         }
-        catch (Exception ex) when (ex is System.Net.Mail.SmtpException or
-            InvalidOperationException or FormatException)
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            // No guardar ni registrar token, dirección ni contenido del mensaje.
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // Mismo resultado HTTP para cuentas existentes o inexistentes aun cuando SMTP falle.
+            // No registrar el token, el destinatario ni el contenido del mensaje.
             logger.LogWarning("No fue posible enviar un correo de recuperación: {Tipo}", ex.GetType().Name);
         }
         return Ok(new { mensaje = respuesta });
