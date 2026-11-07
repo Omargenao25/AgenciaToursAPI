@@ -153,6 +153,7 @@ namespace AgenciaToursAPI.Controllers
                     usuario.Nombre
                 ),
                 new Claim(ClaimTypes.Role, usuario.Rol),
+                new Claim("version_sesion", usuario.VersionSesion),
 
                 new Claim(
                     JwtRegisteredClaimNames.Jti,
