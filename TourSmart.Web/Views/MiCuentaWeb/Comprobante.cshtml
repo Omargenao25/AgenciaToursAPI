@@ -54,10 +54,27 @@
                 <div><div class="receipt-label">Cantidad de viajeros</div><div class="receipt-value">@Model.CantidadPersonas</div></div>
                 <div><div class="receipt-label">Método de pago indicado</div><div class="receipt-value">@Model.MetodoPago</div></div>
             </div>
+            @if (Model.Estado == "Pendiente" && Model.VencePendienteUtc is DateTime vencimiento)
+            {
+                <div class="receipt-note">
+                    <strong>Fecha límite del adelanto:</strong> @vencimiento.ToString("dd/MM/yyyy HH:mm") UTC.
+                    Si vence sin ningún pago registrado por la agencia, esta solicitud se cancelará automáticamente.
+                    Las solicitudes con pagos requieren revisión manual.
+                </div>
+            }
             <div class="receipt-total"><div><div class="receipt-label">Importe total de la reserva</div><small>Pesos dominicanos · RD$</small></div><strong>RD$ @Model.Total.ToString("N2")</strong></div>
             @if (cancelada)
             {
-                <p class="receipt-note"><strong>Reserva cancelada.</strong> Este comprobante se conserva únicamente como constancia histórica. No es válido para acceder al tour.</p>
+                <p class="receipt-note"><strong>Reserva cancelada.</strong>
+                @if (Model.MotivoCancelacion == "VencimientoSinPago")
+                {
+                    <span>El plazo del adelanto venció sin que hubiera pagos registrados. Las plazas se liberaron.</span>
+                }
+                else
+                {
+                    <span>Este comprobante se conserva únicamente como constancia histórica.</span>
+                }
+                No es válido para acceder al tour.</p>
             }
             else if (!confirmada)
             {
