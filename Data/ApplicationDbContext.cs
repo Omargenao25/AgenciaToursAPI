@@ -97,6 +97,9 @@ namespace AgenciaToursAPI.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Reserva>()
+                .HasIndex(r => new { r.Estado, r.VencePendienteUtc });
+
+            modelBuilder.Entity<Reserva>()
                 .Property(r => r.Estado)
                 .HasMaxLength(20)
                 .HasDefaultValue(EstadosReserva.Confirmada);
