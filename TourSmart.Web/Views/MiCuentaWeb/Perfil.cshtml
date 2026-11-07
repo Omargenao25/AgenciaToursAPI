@@ -1,0 +1,66 @@
+@model MiPerfilViewModel
+@{
+    ViewData["Title"] = "Mi perfil";
+    var tipo = Model.TipoDocumento switch {
+        "CedulaDominicana" => "Cédula dominicana",
+        "Pasaporte" => "Pasaporte",
+        "Residencia" => "Carné de residencia",
+        "Otro" => "Otro documento",
+        _ => Model.TipoDocumento
+    };
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Mi espacio</a>
+        <span class="eyebrow">MI ESPACIO · TOURSMART RD</span>
+        <h1>Mi <em>perfil.</em></h1>
+        <p>Actualiza tus datos de contacto para que podamos acompañarte en tu próximo viaje.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Exito"] is string exito)
+        {
+            <div class="alert alert-success" role="status">@exito</div>
+        }
+        <div class="tour-admin-form">
+            <span class="eyebrow">MI INFORMACIÓN PERSONAL</span>
+            <h2 class="mt-2 mb-4">Tus datos, <em>siempre al día.</em></h2>
+            <form method="post" asp-controller="MiCuentaWeb" asp-action="Perfil">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label">Nombre</label>
+                        <input asp-for="Nombre" class="form-control" maxlength="80" autocomplete="given-name" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Apellido" class="form-label">Apellido</label>
+                        <input asp-for="Apellido" class="form-control" maxlength="80" autocomplete="family-name" />
+                        <span asp-validation-for="Apellido" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Telefono" class="form-label">Teléfono de contacto</label>
+                        <input asp-for="Telefono" class="form-control" maxlength="20" autocomplete="tel" />
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <button type="submit" class="btn btn-accent">Guardar cambios ↗</button>
+                    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="MiCuentaWeb" asp-action="MisReservas">Mis reservas</a>
+                </div>
+            </form>
+            <hr class="my-5" />
+            <span class="eyebrow">IDENTIFICACIÓN · SOLO LECTURA</span>
+            <p class="text-secondary mt-2">Por seguridad, el correo y el documento de identidad no pueden cambiarse desde este formulario.</p>
+            <div class="row g-3">
+                <div class="col-md-6"><div class="info-tile"><small>Correo de la cuenta</small><strong>@Model.Correo</strong></div></div>
+                <div class="col-md-6"><div class="info-tile"><small>Tipo de documento</small><strong>@tipo</strong></div></div>
+                <div class="col-md-6"><div class="info-tile"><small>Número de documento</small><strong>@Model.NumeroDocumento</strong></div></div>
+                <div class="col-md-6"><div class="info-tile"><small>País emisor</small><strong>@Model.PaisEmisorDocumento</strong></div></div>
+            </div>
+            <p class="dashboard-footnote">Si necesitas corregir tu correo o documento, solicita a la agencia un proceso de verificación de identidad. El cambio de nombre se reflejará en el saludo después de volver a iniciar sesión.</p>
+        </div>
+    </div>
+</section>
