@@ -9,13 +9,54 @@
 @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
 <div class="dashboard-head mb-4"><h2>Mis <em>viajes.</em></h2><a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Explorar tours ↗</a></div>
 <div class="dashboard-table"><div class="table-responsive"><table class="table align-middle">
-<thead><tr><th>Reserva</th><th>Excursión</th><th>Fecha</th><th>Personas</th><th>Total</th><th>Estado</th></tr></thead>
+<thead><tr><th>Reserva</th><th>Excursión</th><th>Fecha</th><th>Personas</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
 <tbody>
 @foreach (var item in Model)
 {
-<tr><td>#@item.Id</td><td><strong>@item.Tour</strong></td><td>@(item.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</td><td>@item.CantidadPersonas</td><td>RD$ @item.Total.ToString("N2")</td><td><span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span></td></tr>
+<tr>
+  <td>#@item.Id</td>
+  <td><strong>@item.Tour</strong></td>
+  <td>@(item.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</td>
+  <td>@item.CantidadPersonas</td>
+  <td>RD$ @item.Total.ToString("N2")</td>
+  <td><span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span></td>
+  <td>
+    @if (item.PuedeCancelar)
+    {
+      <form asp-controller="MiCuentaWeb" asp-action="CancelarMiReserva" asp-route-id="@item.Id" method="post" class="d-inline mi-cancel-form" data-reserva="@item.Id" data-tour="@item.Tour">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar reserva</button>
+      </form>
+    }
+    else
+    {
+      <span class="text-secondary small">Sin acciones</span>
+    }
+  </td>
+</tr>
 }
-@if (!Model.Any()) { <tr><td colspan="6" class="text-secondary py-4">No tienes reservas registradas en tu cuenta.</td></tr> }
+@if (!Model.Any()) { <tr><td colspan="7" class="text-secondary py-4">No tienes reservas registradas en tu cuenta.</td></tr> }
 </tbody></table></div></div>
-<p class="dashboard-footnote">Las nuevas reservas se crean como pendientes hasta su confirmación por la agencia. Tu cuenta solo muestra reservas de tu ficha vinculada.</p>
+<p class="dashboard-footnote">Puedes cancelar una reserva pendiente o confirmada antes del inicio de su tour. Se conserva el registro en tu historial y las plazas vuelven a estar disponibles.</p>
 </div></section>
+
+@section Scripts {
+<script>
+document.querySelectorAll(".mi-cancel-form").forEach(form => {
+  form.addEventListener("submit", event => {
+    const numero = form.dataset.reserva;
+    const tour = form.dataset.tour;
+    if (!window.confirm("¿Quieres cancelar la reserva #" + numero + " de " + tour + "? Esta acción no se puede deshacer desde tu cuenta.")) {
+      event.preventDefault();
+      return;
+    }
+    if (!form.checkValidity()) return;
+    const boton = form.querySelector('button[type="submit"]');
+    if (boton) {
+      boton.disabled = true;
+      boton.textContent = "Cancelando...";
+    }
+  });
+});
+</script>
+}
