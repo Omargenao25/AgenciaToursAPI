@@ -467,6 +467,16 @@ namespace AgenciaToursAPI.Migrations
                     b.Navigation("Transporte");
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.Usuario", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.Cliente", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Cliente");
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.Categoria", b =>
                 {
                     b.Navigation("Tours");
