@@ -31,6 +31,8 @@ namespace AgenciaToursAPI.Data
 
         public DbSet<Usuario> Usuarios { get; set; }
 
+        public DbSet<RecuperacionContrasena> RecuperacionesContrasena { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -103,6 +105,19 @@ namespace AgenciaToursAPI.Data
                 .WithMany(m => m.Reservas)
                 .HasForeignKey(r => r.MetodoPagoId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<RecuperacionContrasena>()
+                .HasOne(r => r.Usuario)
+                .WithMany()
+                .HasForeignKey(r => r.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RecuperacionContrasena>()
+                .HasIndex(r => r.TokenHash)
+                .IsUnique();
+
+            modelBuilder.Entity<RecuperacionContrasena>()
+                .HasIndex(r => new { r.UsuarioId, r.CreadoUtc });
 
             modelBuilder.Entity<Usuario>()
                 .Property(u => u.Rol)
