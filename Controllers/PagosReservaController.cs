@@ -70,7 +70,9 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
         {
             if (pagoPrevio.ReservaId != reservaId ||
                 pagoPrevio.Monto != dto.Monto ||
-                pagoPrevio.MetodoPagoId != dto.MetodoPagoId)
+                pagoPrevio.MetodoPagoId != dto.MetodoPagoId ||
+                pagoPrevio.Referencia != (dto.Referencia ?? "").Trim() ||
+                pagoPrevio.Observacion != (dto.Observacion ?? "").Trim())
                 return Conflict("Esta clave de operación ya se utilizó con datos diferentes.");
             return Ok(new { pagoPrevio.Id, pagoPrevio.ReservaId, pagoPrevio.Monto, Repetida = true });
         }
