@@ -7,6 +7,11 @@ namespace AgenciaToursAPI.Models
     {
         public int Id { get; set; }
 
+        // Cambia al restablecer la contraseña; invalida los JWT anteriores.
+        [Required]
+        [MaxLength(32)]
+        public string VersionSesion { get; set; } = Guid.NewGuid().ToString("N");
+
         public int? ClienteId { get; set; }
         public Cliente? Cliente { get; set; }
 
