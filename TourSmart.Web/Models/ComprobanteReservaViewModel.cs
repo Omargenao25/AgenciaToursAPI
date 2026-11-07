@@ -14,4 +14,6 @@ public sealed class ComprobanteReservaViewModel
     public decimal Total { get; set; }
     public string Estado { get; set; } = "";
     public DateTime? FechaCambioEstado { get; set; }
+    public DateTime? VencePendienteUtc { get; set; }
+    public string? MotivoCancelacion { get; set; }
 }
