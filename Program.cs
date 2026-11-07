@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +68,26 @@ builder.Services
  
         options.Events = new JwtBearerEvents
         {
+            OnTokenValidated = async context =>
+            {
+                var userIdText = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var tokenVersion = context.Principal?.FindFirst("version_sesion")?.Value;
+                if (!int.TryParse(userIdText, out var userId) || string.IsNullOrWhiteSpace(tokenVersion))
+                {
+                    context.Fail("La sesión no tiene datos de validación.");
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                var versionActual = await db.Usuarios.AsNoTracking()
+                    .Where(u => u.Id == userId)
+                    .Select(u => u.VersionSesion)
+                    .SingleOrDefaultAsync(context.HttpContext.RequestAborted);
+
+                if (!string.Equals(versionActual, tokenVersion, StringComparison.Ordinal))
+                    context.Fail("La sesión fue revocada o el usuario ya no existe.");
+            },
+
             OnAuthenticationFailed = context =>
             {
                 // Solo registramos el tipo de error. Nunca registrar el token JWT.
