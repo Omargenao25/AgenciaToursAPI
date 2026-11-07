@@ -57,6 +57,9 @@ namespace AgenciaToursAPI.Models
         [Range(0, 100)]
         public int PorcentajeAdelanto { get; set; } = 30;
 
+        [Range(1, 168)]
+        public int HorasLimiteAdelanto { get; set; } = 24;
+
         public int DuracionDias { get; set; }
 
         public int DuracionHoras { get; set; }
