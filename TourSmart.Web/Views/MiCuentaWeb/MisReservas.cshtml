@@ -21,6 +21,7 @@
   <td>RD$ @item.Total.ToString("N2")</td>
   <td><span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span></td>
   <td>
+    <a class="btn btn-sm btn-outline-secondary me-2 mb-1" asp-controller="MiCuentaWeb" asp-action="Comprobante" asp-route-id="@item.Id">Ver comprobante</a>
     @if (item.PuedeCancelar)
     {
       <form asp-controller="MiCuentaWeb" asp-action="CancelarMiReserva" asp-route-id="@item.Id" method="post" class="d-inline mi-cancel-form" data-reserva="@item.Id" data-tour="@item.Tour">
@@ -30,7 +31,7 @@
     }
     else
     {
-      <span class="text-secondary small">Sin acciones</span>
+      <span class="text-secondary small">—</span>
     }
   </td>
 </tr>
