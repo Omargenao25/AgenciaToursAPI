@@ -32,6 +32,11 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    PaisId = t.PaisId,
+                    DestinoId = t.DestinoId,
+                    CategoriaId = t.CategoriaId,
+                    GuiaId = t.GuiaId,
+                    TransporteId = t.TransporteId,
 
                     Pais = t.Pais != null
                         ? t.Pais.Nombre
@@ -90,6 +95,11 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    PaisId = t.PaisId,
+                    DestinoId = t.DestinoId,
+                    CategoriaId = t.CategoriaId,
+                    GuiaId = t.GuiaId,
+                    TransporteId = t.TransporteId,
 
                     Pais = t.Pais != null
                         ? t.Pais.Nombre
@@ -455,6 +465,11 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    PaisId = t.PaisId,
+                    DestinoId = t.DestinoId,
+                    CategoriaId = t.CategoriaId,
+                    GuiaId = t.GuiaId,
+                    TransporteId = t.TransporteId,
 
                     Pais = t.Pais != null
                         ? t.Pais.Nombre
