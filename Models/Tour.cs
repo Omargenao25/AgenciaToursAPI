@@ -53,6 +53,10 @@ namespace AgenciaToursAPI.Models
         [Range(1, 100000)]
         public int CapacidadMaxima { get; set; } = 100;
 
+        // Porcentaje requerido para confirmar una reserva; 30 % por defecto.
+        [Range(0, 100)]
+        public int PorcentajeAdelanto { get; set; } = 30;
+
         public int DuracionDias { get; set; }
 
         public int DuracionHoras { get; set; }
