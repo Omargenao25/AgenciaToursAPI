@@ -29,6 +29,8 @@ namespace AgenciaToursAPI.Data
 
         public DbSet<Reserva> Reservas { get; set; }
 
+        public DbSet<PagoReserva> PagosReserva { get; set; }
+
         public DbSet<Usuario> Usuarios { get; set; }
 
         public DbSet<RecuperacionContrasena> RecuperacionesContrasena { get; set; }
@@ -105,6 +107,25 @@ namespace AgenciaToursAPI.Data
                 .WithMany(m => m.Reservas)
                 .HasForeignKey(r => r.MetodoPagoId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PagoReserva>()
+                .HasOne(p => p.Reserva)
+                .WithMany()
+                .HasForeignKey(p => p.ReservaId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PagoReserva>()
+                .HasOne(p => p.MetodoPago)
+                .WithMany()
+                .HasForeignKey(p => p.MetodoPagoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PagoReserva>()
+                .HasIndex(p => p.ClaveOperacion)
+                .IsUnique();
+
+            modelBuilder.Entity<PagoReserva>()
+                .ToTable(t => t.HasCheckConstraint("CK_PagosReserva_Monto", "[Monto] > 0"));
 
             modelBuilder.Entity<RecuperacionContrasena>()
                 .HasOne(r => r.Usuario)
