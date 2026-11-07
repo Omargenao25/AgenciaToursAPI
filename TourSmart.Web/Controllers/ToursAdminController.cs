@@ -72,6 +72,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
             var actual = await adminApi.ObtenerAdelantoAsync(jwt, id, ct);
             model.Nombre = actual.Nombre;
             model.TieneReservas = actual.TieneReservas;
+            if (actual.TieneReservas) model.HorasLimiteAdelanto = actual.HorasLimiteAdelanto;
             if (actual.TieneReservas)
                 ModelState.AddModelError("", "Este tour ya tiene reservas. No se puede modificar el adelanto acordado.");
 
@@ -80,7 +81,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
                 var status = await adminApi.ConfigurarAdelantoAsync(jwt, model, ct);
                 if (status == HttpStatusCode.NoContent)
                 {
-                    TempData["Exito"] = $"Adelanto de {model.PorcentajeAdelanto}% configurado correctamente.";
+                    TempData["Exito"] = $"Adelanto de {model.PorcentajeAdelanto}% y plazo de {model.HorasLimiteAdelanto} horas configurados correctamente.";
                     return RedirectToAction(nameof(Index));
                 }
                 ModelState.AddModelError("", status switch
