@@ -1,5 +1,6 @@
 using TourSmart.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
@@ -15,13 +16,40 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/cuenta/denegado";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
         options.SlidingExpiration = false;
-        options.Events.OnValidatePrincipal = context =>
+        options.Events.OnValidatePrincipal = async context =>
         {
-            var cache = context.HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+            var services = context.HttpContext.RequestServices;
+            var cache = services.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
             var sessionId = context.Principal?.FindFirst("SessionId")?.Value;
-            if (string.IsNullOrWhiteSpace(sessionId) || !cache.TryGetValue("jwt:" + sessionId, out object? token) || token is not string jwt || string.IsNullOrWhiteSpace(jwt))
+            if (string.IsNullOrWhiteSpace(sessionId) ||
+                !cache.TryGetValue("jwt:" + sessionId, out object? value) ||
+                value is not string jwt || string.IsNullOrWhiteSpace(jwt))
+            {
                 context.RejectPrincipal();
-            return Task.CompletedTask;
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            // El cambio de contraseña también invalida cookies antiguas, no solo
+            // las llamadas directas a la API. Validación fail-closed para viajeros.
+            if (context.Principal?.IsInRole("Cliente") == true)
+            {
+                try
+                {
+                    var client = services.GetRequiredService<IHttpClientFactory>()
+                        .CreateClient("TourSmart.Sesion");
+                    using var request = new HttpRequestMessage(HttpMethod.Get, "api/MiCuenta/sesion");
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                    using var response = await client.SendAsync(request, context.HttpContext.RequestAborted);
+                    if (response.IsSuccessStatusCode) return;
+                }
+                catch (HttpRequestException) { }
+                catch (TaskCanceledException) when (!context.HttpContext.RequestAborted.IsCancellationRequested) { }
+
+                cache.Remove("jwt:" + sessionId);
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
         };
     });
 builder.Services.AddAuthorization();
@@ -62,6 +90,12 @@ builder.Services.AddHttpClient<IMiCuentaApiClient, MiCuentaApiClient>(client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/");
     client.Timeout = TimeSpan.FromSeconds(8);
+});
+
+builder.Services.AddHttpClient("TourSmart.Sesion", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/");
+    client.Timeout = TimeSpan.FromSeconds(5);
 });
 
 var app = builder.Build();
