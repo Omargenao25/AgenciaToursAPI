@@ -54,7 +54,7 @@
                             <p class="booking-note"><a asp-controller="MiCuentaWeb" asp-action="Registro">Crea tu cuenta de viajero</a> si todavía no tienes una.</p>
                         }
                     }
-                    <p class="booking-note">El equipo de la agencia confirmará las reservas pendientes. No se efectúa ningún cobro en línea por ahora.</p>
+                    <p class="booking-note">Para confirmar, la agencia debe verificar un adelanto mínimo del <strong>@Model.PorcentajeAdelanto%</strong> del total de la reserva. Se puede solicitar sin realizar un cobro en línea.</p>
                     <a asp-controller="Tours" asp-action="Index" class="btn btn-accent w-100">Explorar más experiencias ↗</a>
                 </aside>
             </div>
