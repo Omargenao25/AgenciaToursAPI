@@ -384,6 +384,10 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<int>("PaisId")
                         .HasColumnType("int");
 
+                    b.Property<int>("PorcentajeAdelanto")
+                        .HasColumnType("int")
+                        .HasDefaultValue(30);
+
                     b.Property<decimal>("Precio")
                         .HasColumnType("decimal(18,2)");
 
@@ -405,6 +409,8 @@ namespace AgenciaToursAPI.Migrations
                     b.ToTable("Tours", t =>
                         {
                             t.HasCheckConstraint("CK_Tours_CapacidadMaxima", "[CapacidadMaxima] >= 1");
+
+                            t.HasCheckConstraint("CK_Tours_PorcentajeAdelanto", "[PorcentajeAdelanto] BETWEEN 0 AND 100");
                         });
                 });
 
