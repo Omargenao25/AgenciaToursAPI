@@ -5,6 +5,11 @@
         public int Id { get; set; }
 
         public string Nombre { get; set; } = string.Empty;
+        public int PaisId { get; set; }
+        public int DestinoId { get; set; }
+        public int CategoriaId { get; set; }
+        public int GuiaId { get; set; }
+        public int TransporteId { get; set; }
 
         public string Pais { get; set; } = string.Empty;
 
