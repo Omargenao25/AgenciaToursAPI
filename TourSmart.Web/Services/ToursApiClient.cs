@@ -25,7 +25,11 @@ public sealed class ToursApiClient(HttpClient client) : IToursApiClient
         using var condiciones = await client.GetAsync($"api/Tours/{id}/condiciones", cancellationToken);
         condiciones.EnsureSuccessStatusCode();
         var politica = await condiciones.Content.ReadFromJsonAsync<CondicionesTour>(JsonOptions, cancellationToken);
-        if (politica is not null) tour.PorcentajeAdelanto = politica.PorcentajeAdelanto;
+        if (politica is not null)
+        {
+            tour.PorcentajeAdelanto = politica.PorcentajeAdelanto;
+            tour.HorasLimiteAdelanto = politica.HorasLimiteAdelanto;
+        }
         return tour;
     }
 }
