@@ -19,7 +19,18 @@
 <div class="col-md-6"><label asp-for="MetodoPagoId" class="form-label">Método de pago</label>
 <select asp-for="MetodoPagoId" asp-items="Model.Metodos" class="form-select"><option value="0">Selecciona un método</option></select><span asp-validation-for="MetodoPagoId" class="text-danger small"></span></div>
 </div>
-<div class="booking-status mt-4">Esta solicitud no realiza un cobro. Se creará una reserva <strong>Pendiente</strong> y ocupará las plazas hasta que la agencia la confirme o cancele.</div>
+@if (Model.Tour is not null)
+{
+    var totalEstimado = Model.Tour.Precio * Model.CantidadPersonas;
+    var adelantoEstimado = Math.Ceiling(totalEstimado * Model.Tour.PorcentajeAdelanto) / 100m;
+    <div class="booking-status mt-4">
+        Esta solicitud no realiza un cobro. Se creará como <strong>Pendiente</strong>.
+        Para confirmarla, la agencia debe verificar y registrar al menos un adelanto del
+        <strong>@Model.Tour.PorcentajeAdelanto%</strong> de la reserva.
+        Para @Model.CantidadPersonas persona(s), el mínimo estimado es <strong>RD$ @adelantoEstimado.ToString("N2")</strong>.
+        Las plazas solicitadas se contabilizarán mientras la reserva esté activa.
+    </div>
+}
 <button type="submit" class="btn btn-accent mt-3" id="enviarReserva">Solicitar reserva ↗</button>
 </form>
 </div></div></section>
