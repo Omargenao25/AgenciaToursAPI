@@ -1,5 +1,5 @@
 @model TourFormularioViewModel
-@{ var editando = Model.Id > 0; ViewData["Title"] = editando ? "Editar tour" : "Crear tour"; }
+@{ var editando = Model.Id > 0; ViewData["Title"] = editando ? "Editar tour" : "Crear tour"; var horaTexto = Model.Hora.ToString(@"hh\:mm"); }
 <section class="inner-hero dashboard-hero">
  <div class="container">
   <a class="back-link" asp-controller="ToursAdmin" asp-action="Index">← Volver a mis tours</a>
@@ -30,7 +30,7 @@
    <div class="eyebrow mt-5 mb-3">FECHA, PRECIO Y CAPACIDAD</div>
    <div class="row g-3">
     <div class="col-md-6"><label asp-for="Fecha" class="form-label">Fecha de salida</label><input asp-for="Fecha" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" /><span asp-validation-for="Fecha" class="text-danger small"></span></div>
-    <div class="col-md-6"><label asp-for="Hora" class="form-label">Hora de salida</label><input asp-for="Hora" type="time" value="@Model.Hora.ToString(@"hh\:mm")" class="form-control" /><span asp-validation-for="Hora" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="Hora" class="form-label">Hora de salida</label><input asp-for="Hora" type="time" value="@horaTexto" class="form-control" /><span asp-validation-for="Hora" class="text-danger small"></span></div>
     <div class="col-md-6"><label asp-for="Precio" class="form-label">Precio por persona (RD$)</label><input asp-for="Precio" type="number" step="0.01" min="0.01" max="10000000" class="form-control" /><span asp-validation-for="Precio" class="text-danger small"></span></div>
     <div class="col-md-6"><label asp-for="CapacidadMaxima" class="form-label">Capacidad máxima</label><input asp-for="CapacidadMaxima" type="number" min="1" max="100000" class="form-control" /><span asp-validation-for="CapacidadMaxima" class="text-danger small"></span></div>
    </div>
