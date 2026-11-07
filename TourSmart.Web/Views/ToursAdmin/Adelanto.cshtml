@@ -18,6 +18,7 @@
                 Este tour ya tiene reservas. Por seguridad, la política del adelanto queda bloqueada para no modificar las condiciones acordadas con los viajeros.
             </div>
             <div class="info-tile"><small>Adelanto mínimo vigente</small><strong>@Model.PorcentajeAdelanto%</strong></div>
+            <div class="info-tile mt-3"><small>Plazo para recibir el adelanto</small><strong>@Model.HorasLimiteAdelanto horas</strong></div>
         }
         else
         {
@@ -30,6 +31,12 @@
                     <input asp-for="PorcentajeAdelanto" class="form-control" type="number" min="0" max="100" step="1" />
                     <span asp-validation-for="PorcentajeAdelanto" class="text-danger small"></span>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="HorasLimiteAdelanto" class="form-label">Plazo de pago para reservas pendientes (horas)</label>
+                    <input asp-for="HorasLimiteAdelanto" class="form-control" type="number" min="1" max="168" step="1" />
+                    <span asp-validation-for="HorasLimiteAdelanto" class="text-danger small"></span>
+                </div>
+                <p class="text-secondary">Valor inicial: 24 horas. Las solicitudes sin pagos vencerán y sus plazas se liberarán automáticamente. Si existe algún pago, la solicitud se conserva para revisión manual.</p>
                 <p class="text-secondary">Valor recomendado: 30 %. El mínimo se calculará sobre el importe total de cada reserva, redondeando hacia arriba al centavo. La confirmación solo se permitirá cuando los pagos recibidos alcancen ese mínimo.</p>
                 <button class="btn btn-accent" type="submit">Guardar política ↗</button>
             </form>
