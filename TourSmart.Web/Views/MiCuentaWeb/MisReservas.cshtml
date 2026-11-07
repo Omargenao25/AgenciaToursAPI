@@ -1,0 +1,21 @@
+@model IReadOnlyList<ReservaPanel>
+@{ ViewData["Title"] = "Mis reservas"; }
+<section class="inner-hero dashboard-hero"><div class="container">
+<span class="eyebrow">MI ESPACIO · TOURSMART RD</span><h1>Mis <em>reservas.</em></h1>
+<p>Consulta tus experiencias y el estado de cada solicitud.</p>
+</div></section>
+<section class="section-space"><div class="container">
+@if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
+@if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+<div class="dashboard-head mb-4"><h2>Mis <em>viajes.</em></h2><a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Explorar tours ↗</a></div>
+<div class="dashboard-table"><div class="table-responsive"><table class="table align-middle">
+<thead><tr><th>Reserva</th><th>Excursión</th><th>Fecha</th><th>Personas</th><th>Total</th><th>Estado</th></tr></thead>
+<tbody>
+@foreach (var item in Model)
+{
+<tr><td>#@item.Id</td><td><strong>@item.Tour</strong></td><td>@(item.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</td><td>@item.CantidadPersonas</td><td>RD$ @item.Total.ToString("N2")</td><td><span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span></td></tr>
+}
+@if (!Model.Any()) { <tr><td colspan="6" class="text-secondary py-4">No tienes reservas registradas en tu cuenta.</td></tr> }
+</tbody></table></div></div>
+<p class="dashboard-footnote">Las nuevas reservas se crean como pendientes hasta su confirmación por la agencia. Tu cuenta solo muestra reservas de tu ficha vinculada.</p>
+</div></section>
