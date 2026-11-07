@@ -52,6 +52,12 @@ builder.Services.AddHttpClient<IToursAdminClient, ToursAdminClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(8);
 });
 
+builder.Services.AddHttpClient<IClientesAdminClient, ClientesAdminClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/");
+    client.Timeout = TimeSpan.FromSeconds(8);
+});
+
 var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
