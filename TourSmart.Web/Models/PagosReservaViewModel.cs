@@ -20,6 +20,9 @@ public sealed class EstadoPagosReserva
     public string Cliente { get; set; } = "";
     public string Tour { get; set; } = "";
     public string EstadoReserva { get; set; } = "";
+    public DateTime? VencePendienteUtc { get; set; }
+    public string? MotivoCancelacion { get; set; }
+    public bool RequiereRevision { get; set; }
     public DateTime? FechaTour { get; set; }
     public TimeSpan? HoraTour { get; set; }
     public decimal Total { get; set; }
