@@ -1,0 +1,61 @@
+@model TourFormularioViewModel
+@{ var editando = Model.Id > 0; ViewData["Title"] = editando ? "Editar tour" : "Crear tour"; }
+<section class="inner-hero dashboard-hero">
+ <div class="container">
+  <a class="back-link" asp-controller="ToursAdmin" asp-action="Index">← Volver a mis tours</a>
+  <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+  <h1>@(editando ? "Editar" : "Crear") <em>experiencia.</em></h1>
+  <p>@(editando ? "Actualiza la excursión respetando las reservas existentes." : "Agrega una nueva aventura al catálogo de la agencia.")</p>
+ </div>
+</section>
+<section class="section-space"><div class="container">
+ <div class="tour-admin-form">
+  <form method="post" asp-controller="ToursAdmin" asp-action="Guardar">
+   @Html.AntiForgeryToken()
+   <input type="hidden" asp-for="Id" />
+   <div asp-validation-summary="ModelOnly" class="text-danger mb-4" role="alert"></div>
+   @if(Model.TieneReservas)
+   {
+    <div class="service-alert mb-4"><strong>Este tour ya tiene @Model.CuposReservados plazas ocupadas.</strong><p class="mb-0 mt-2">No puedes cambiar país, destino, guía, transporte, fecha ni hora. La capacidad no puede ser menor que los cupos ocupados.</p></div>
+   }
+   <div class="eyebrow mb-3">INFORMACIÓN GENERAL</div>
+   <div class="row g-3">
+    <div class="col-12"><label asp-for="Nombre" class="form-label">Nombre del tour</label><input asp-for="Nombre" class="form-control" placeholder="Ej. Escapada a Samaná" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="PaisId" class="form-label">País</label><select asp-for="PaisId" asp-items="Model.Paises" class="form-select" id="paisSelect"><option value="0">Selecciona un país</option></select><span asp-validation-for="PaisId" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="DestinoId" class="form-label">Destino</label><select asp-for="DestinoId" asp-items="Model.Destinos" class="form-select" id="destinoSelect"><option value="0">Selecciona un destino</option></select><span asp-validation-for="DestinoId" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="CategoriaId" class="form-label">Categoría</label><select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-select"><option value="0">Selecciona una categoría</option></select><span asp-validation-for="CategoriaId" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="GuiaId" class="form-label">Guía turístico</label><select asp-for="GuiaId" asp-items="Model.Guias" class="form-select"><option value="0">Selecciona un guía</option></select><span asp-validation-for="GuiaId" class="text-danger small"></span></div>
+    <div class="col-12"><label asp-for="TransporteId" class="form-label">Transporte</label><select asp-for="TransporteId" asp-items="Model.Transportes" class="form-select"><option value="0">Selecciona un transporte</option></select><span asp-validation-for="TransporteId" class="text-danger small"></span></div>
+   </div>
+   <div class="eyebrow mt-5 mb-3">FECHA, PRECIO Y CAPACIDAD</div>
+   <div class="row g-3">
+    <div class="col-md-6"><label asp-for="Fecha" class="form-label">Fecha de salida</label><input asp-for="Fecha" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" /><span asp-validation-for="Fecha" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="Hora" class="form-label">Hora de salida</label><input asp-for="Hora" type="time" value="@Model.Hora.ToString(@"hh\:mm")" class="form-control" /><span asp-validation-for="Hora" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="Precio" class="form-label">Precio por persona (RD$)</label><input asp-for="Precio" type="number" step="0.01" min="0.01" max="10000000" class="form-control" /><span asp-validation-for="Precio" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="CapacidadMaxima" class="form-label">Capacidad máxima</label><input asp-for="CapacidadMaxima" type="number" min="1" max="100000" class="form-control" /><span asp-validation-for="CapacidadMaxima" class="text-danger small"></span></div>
+   </div>
+   <div class="d-flex flex-wrap gap-3 mt-5">
+    <button class="btn btn-accent" type="submit">@(editando ? "Guardar cambios" : "Crear tour") ↗</button>
+    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ToursAdmin" asp-action="Index">Cancelar</a>
+   </div>
+  </form>
+ </div>
+</div></section>
+@section Scripts {
+<script>
+const destinosPorPais = @Html.Raw(ViewBag.DestinosPorPais ?? "[]");
+const pais = document.getElementById("paisSelect");
+const destino = document.getElementById("destinoSelect");
+function actualizarDestinos() {
+    const paisId = Number(pais.value);
+    [...destino.options].forEach(option => {
+       if (!option.value || option.value === "0") return;
+       const registro = destinosPorPais.find(x => x.Id === Number(option.value));
+       option.hidden = !registro || registro.PaisId !== paisId;
+    });
+    if (destino.selectedOptions.length && destino.selectedOptions[0].hidden) destino.value = "0";
+}
+pais.addEventListener("change", actualizarDestinos);
+actualizarDestinos();
+</script>
+}
