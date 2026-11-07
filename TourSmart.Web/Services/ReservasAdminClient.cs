@@ -16,6 +16,40 @@ public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClien
         return await response.Content.ReadFromJsonAsync<List<ReservaPanel>>(cancellationToken)
             ?? new List<ReservaPanel>();
     }
+
+    private async Task<IReadOnlyList<T>> ObtenerCatalogoAsync<T>(string token, string route, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, route);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<T>>(cancellationToken: ct) ?? new List<T>();
+    }
+
+    public async Task<(IReadOnlyList<ClienteReserva> Clientes, IReadOnlyList<MetodoPagoReserva> Metodos)> CatalogosAsync(
+        string token, CancellationToken ct)
+    {
+        var clientes = await ObtenerCatalogoAsync<ClienteReserva>(token, "api/Clientes", ct);
+        var metodos = await ObtenerCatalogoAsync<MetodoPagoReserva>(token, "api/MetodosPago", ct);
+        return (clientes, metodos);
+    }
+
+    public async Task<(HttpStatusCode Estado, string Mensaje)> CrearAsync(
+        string token, CrearReservaViewModel model, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "api/Reservas")
+        {
+            Content = JsonContent.Create(new
+            {
+                model.ClienteId, model.TourId, model.MetodoPagoId, model.CantidadPersonas
+            })
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var response = await client.SendAsync(request, ct);
+        var message = response.IsSuccessStatusCode ? "" : await response.Content.ReadAsStringAsync(ct);
+        return (response.StatusCode, message);
+    }
+
     public async Task<HttpStatusCode> CambiarEstadoAsync(
         string token, int reservaId, string accion, CancellationToken cancellationToken)
     {
