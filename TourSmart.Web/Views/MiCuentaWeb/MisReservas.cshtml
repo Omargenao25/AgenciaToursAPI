@@ -7,7 +7,7 @@
 <section class="section-space"><div class="container">
 @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
 @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
-<div class="dashboard-head mb-4"><h2>Mis <em>viajes.</em></h2><a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Explorar tours ↗</a></div>
+<div class="dashboard-head mb-4"><h2>Mis <em>viajes.</em></h2><div class="d-flex gap-2 flex-wrap"><a class="btn btn-dark-pill" asp-controller="MiCuentaWeb" asp-action="Perfil">Mi perfil ↗</a><a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Explorar tours ↗</a></div></div>
 <div class="dashboard-table"><div class="table-responsive"><table class="table align-middle">
 <thead><tr><th>Reserva</th><th>Excursión</th><th>Fecha</th><th>Personas</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
 <tbody>
