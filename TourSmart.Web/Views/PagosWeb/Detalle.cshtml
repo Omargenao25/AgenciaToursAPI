@@ -18,6 +18,10 @@
         {
             <div class="alert alert-success" role="status">@exito</div>
         }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
         <div class="row g-3 mb-4">
             <div class="col-md-4"><div class="metric-card"><span>Total de reserva</span><strong>RD$ @Model.Resumen.Total.ToString("N2")</strong></div></div>
             <div class="col-md-4"><div class="metric-card"><span>Pagado</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
