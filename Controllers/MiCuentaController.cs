@@ -107,6 +107,51 @@ public sealed class MiCuentaController(
         return Ok(reservas);
     }
 
+    // La identidad procede del JWT y la vinculación Usuario.ClienteId.
+    // La API nunca acepta ClienteId desde el navegador para cancelar.
+    [Authorize(Roles = Roles.Cliente)]
+    [HttpPatch("reservas/{id:int}/cancelar")]
+    public async Task<IActionResult> CancelarMiReserva(int id)
+    {
+        if (id <= 0) return NotFound();
+
+        var clienteId = await ClienteAutenticado();
+        if (clienteId is null)
+            return Conflict("Tu cuenta no está vinculada a un cliente verificado.");
+
+        await using var transaccion = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+        // Solo buscamos la reserva del propio cliente. Para cualquier otra devolvemos 404
+        // sin revelar si pertenece a otra cuenta.
+        var reserva = await db.Reservas
+            .FromSqlInterpolated($"SELECT * FROM dbo.Reservas WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id} AND ClienteId = {clienteId.Value}")
+            .SingleOrDefaultAsync();
+        if (reserva is null) return NotFound("No se encontró la reserva solicitada.");
+
+        if (reserva.Estado == EstadosReserva.Cancelada)
+            return Conflict("Esta reserva ya estaba cancelada.");
+
+        if (reserva.Estado is not (EstadosReserva.Pendiente or EstadosReserva.Confirmada))
+            return Conflict("El estado de esta reserva no permite cancelación.");
+
+        // Protege las mismas reglas de tiempo y plazas que las operaciones administrativas.
+        var tour = await db.Tours
+            .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
+            .SingleOrDefaultAsync();
+        if (tour is null) return NotFound("El tour asociado ya no existe.");
+        if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+            return Conflict("No se puede cancelar después del inicio del tour.");
+
+        reserva.Estado = EstadosReserva.Cancelada;
+        reserva.FechaCambioEstado = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        await transaccion.CommitAsync();
+
+        // Al excluir las reservas canceladas del cálculo de ocupación, libera sus plazas.
+        // Conservar el registro permite auditar la operación.
+        return NoContent();
+    }
+
     [Authorize(Roles = Roles.Cliente)]
     [HttpGet("metodos-pago")]
     public async Task<IActionResult> MetodosPago()
