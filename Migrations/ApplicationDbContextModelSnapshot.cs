@@ -192,6 +192,62 @@ namespace AgenciaToursAPI.Migrations
                     b.ToTable("Paises");
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.PagoReserva", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("ClaveOperacion")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("FechaRegistroUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MetodoPagoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Observacion")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Referencia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("RegistradoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RegistradoPor")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ReservaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClaveOperacion")
+                        .IsUnique();
+
+                    b.HasIndex("MetodoPagoId");
+
+                    b.HasIndex("ReservaId");
+
+                    b.ToTable("PagosReserva", t =>
+                        {
+                            t.HasCheckConstraint("CK_PagosReserva_Monto", "[Monto] > 0");
+                        });
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.RecuperacionContrasena", b =>
                 {
                     b.Property<long>("Id")
@@ -435,6 +491,25 @@ namespace AgenciaToursAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Pais");
+                });
+
+            modelBuilder.Entity("AgenciaToursAPI.Models.PagoReserva", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.MetodoPago", "MetodoPago")
+                        .WithMany()
+                        .HasForeignKey("MetodoPagoId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("AgenciaToursAPI.Models.Reserva", "Reserva")
+                        .WithMany()
+                        .HasForeignKey("ReservaId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("MetodoPago");
+
+                    b.Navigation("Reserva");
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.RecuperacionContrasena", b =>
