@@ -46,6 +46,8 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
         return Ok(new EstadoPagosReservaDto {
             ReservaId = reserva.Id, Cliente = reserva.Cliente, Tour = reserva.Tour,
             EstadoReserva = reserva.Estado, Total = reserva.Total,
+            VencePendienteUtc = reserva.VencePendienteUtc,
+            MotivoCancelacion = reserva.MotivoCancelacion,
             FechaTour = reserva.FechaTour, HoraTour = reserva.HoraTour,
             PorcentajeAdelanto = reserva.PorcentajeAdelanto,
             Pagado = pagos.Sum(p => p.Monto), Pagos = pagos
