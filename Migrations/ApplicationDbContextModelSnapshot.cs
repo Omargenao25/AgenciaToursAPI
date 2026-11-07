@@ -365,6 +365,11 @@ namespace AgenciaToursAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("VersionSesion")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<string>("Rol")
                         .IsRequired()
                         .HasMaxLength(20)
