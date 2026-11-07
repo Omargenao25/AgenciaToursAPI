@@ -54,13 +54,27 @@ namespace AgenciaToursAPI.Migrations
                         .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("Cedula")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Correo")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TipoDocumento")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("NumeroDocumento")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("PaisEmisorDocumento")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -75,6 +89,10 @@ namespace AgenciaToursAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Cedula")
+                        .IsUnique()
+                        .HasFilter("[Cedula] IS NOT NULL");
+
+                    b.HasIndex("TipoDocumento", "PaisEmisorDocumento", "NumeroDocumento")
                         .IsUnique();
 
                     b.HasIndex("Correo")
