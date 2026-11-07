@@ -139,6 +139,7 @@ namespace AgenciaToursAPI.Controllers
                 MetodoPagoId = dto.MetodoPagoId,
                 CantidadPersonas = dto.CantidadPersonas,
                 FechaReserva = DateTime.Now,
+                VencePendienteUtc = DateTime.UtcNow.AddHours(tour.HorasLimiteAdelanto),
                 Estado = EstadosReserva.Pendiente,
 
                 Total = Math.Round(
