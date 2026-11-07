@@ -1,0 +1,73 @@
+@model ComprobanteReservaViewModel
+@{
+    ViewData["Title"] = "Comprobante de reserva #" + Model.Id;
+    var confirmada = Model.Estado == "Confirmada";
+    var cancelada = Model.Estado == "Cancelada";
+}
+<style>
+.receipt-page { max-width: 860px; margin: 0 auto; }
+.receipt-card { background: #fff; border: 1px solid #dce7e1; border-radius: 22px; padding: 2.5rem; color: #102b2c; }
+.receipt-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; border-bottom: 1px solid #dce7e1; padding-bottom: 1.5rem; }
+.receipt-brand { font-size: 1.6rem; font-weight: 800; }
+.receipt-brand span { color: #418868; }
+.receipt-number { text-align: right; }
+.receipt-label { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #58736e; }
+.receipt-title { font-size: clamp(1.5rem, 3vw, 2.6rem); font-weight: 800; margin: 1.75rem 0 .5rem; }
+.receipt-state { display: inline-block; border-radius: 999px; padding: .45rem 1rem; background: #f9eab2; font-weight: 700; }
+.receipt-state.confirmada { background: #d7f2df; color: #18653b; }
+.receipt-state.cancelada { background: #f4dddd; color: #8e3232; }
+.receipt-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1.5rem; margin-top: 2rem; }
+.receipt-value { font-size: 1.05rem; font-weight: 700; overflow-wrap: anywhere; }
+.receipt-total { margin-top: 2rem; border-top: 1px solid #dce7e1; padding-top: 1.25rem; display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.receipt-total strong { font-size: 1.7rem; }
+.receipt-note { margin: 1.5rem 0 0; padding: 1rem; border-radius: 12px; background: #eff5f0; font-size: .9rem; }
+@media(max-width: 600px) { .receipt-card { padding: 1.25rem; } .receipt-grid { grid-template-columns: 1fr; } }
+@media print {
+    @@page { size: A4; margin: 15mm; }
+    .site-header, .site-footer, .receipt-actions { display: none !important; }
+    body, main, .section-space { background: #fff !important; color: #102b2c !important; }
+    .section-space { padding: 0 !important; }
+    .receipt-page { max-width: none; }
+    .receipt-card { border: 0; border-radius: 0; padding: 0; box-shadow: none; }
+    .receipt-state, .receipt-note { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+<section class="section-space">
+    <div class="container receipt-page">
+        <div class="receipt-actions d-flex flex-wrap gap-3 mb-4">
+            <a class="btn btn-dark-pill" asp-controller="MiCuentaWeb" asp-action="MisReservas">← Mis reservas</a>
+            <button class="btn btn-accent" type="button" onclick="window.print()">Imprimir / Guardar PDF ↗</button>
+        </div>
+        <article class="receipt-card" aria-label="Comprobante de reserva">
+            <div class="receipt-head">
+                <div><div class="receipt-brand">✦ TourSmart<span>RD</span></div>
+                    <div class="receipt-label">Constancia de solicitud de reserva</div></div>
+                <div class="receipt-number"><div class="receipt-label">Número de reserva</div><strong>#@Model.Id</strong></div>
+            </div>
+            <h1 class="receipt-title">@Model.Tour</h1>
+            <span class="receipt-state @(confirmada ? "confirmada" : cancelada ? "cancelada" : "")">@Model.Estado</span>
+            <div class="receipt-grid">
+                <div><div class="receipt-label">Titular</div><div class="receipt-value">@Model.Cliente</div></div>
+                <div><div class="receipt-label">Fecha de solicitud</div><div class="receipt-value">@Model.FechaReserva.ToString("dd/MM/yyyy HH:mm")</div></div>
+                <div><div class="receipt-label">Fecha de excursión</div><div class="receipt-value">@(Model.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</div></div>
+                <div><div class="receipt-label">Hora prevista</div><div class="receipt-value">@(Model.HoraTour?.ToString(@"hh\:mm") ?? "Por confirmar")</div></div>
+                <div><div class="receipt-label">Cantidad de viajeros</div><div class="receipt-value">@Model.CantidadPersonas</div></div>
+                <div><div class="receipt-label">Método de pago indicado</div><div class="receipt-value">@Model.MetodoPago</div></div>
+            </div>
+            <div class="receipt-total"><div><div class="receipt-label">Importe total de la reserva</div><small>Pesos dominicanos · RD$</small></div><strong>RD$ @Model.Total.ToString("N2")</strong></div>
+            @if (cancelada)
+            {
+                <p class="receipt-note"><strong>Reserva cancelada.</strong> Este comprobante se conserva únicamente como constancia histórica. No es válido para acceder al tour.</p>
+            }
+            else if (!confirmada)
+            {
+                <p class="receipt-note"><strong>Solicitud pendiente.</strong> La agencia todavía debe confirmar la reserva. Este documento no garantiza acceso al tour ni acredita pago realizado.</p>
+            }
+            else
+            {
+                <p class="receipt-note"><strong>Reserva confirmada por la agencia.</strong> Presenta este comprobante junto con tu identificación cuando el operador lo solicite. Este documento no acredita que se haya recibido un pago.</p>
+            }
+            <p class="mt-3 mb-0 text-secondary small">Comprobante informativo generado a partir del estado actual de la reserva en TourSmart RD. No es una factura fiscal ni un recibo de pago.</p>
+        </article>
+    </div>
+</section>
