@@ -40,7 +40,8 @@ public sealed class ClientesAdminClient(HttpClient client) : IClientesAdminClien
             nuevo ? "api/Clientes" : $"api/Clientes/{cliente.Id}", token);
         request.Content = JsonContent.Create(new
         {
-            cliente.Id, cliente.Nombre, cliente.Apellido, cliente.Cedula,
+            cliente.Id, cliente.Nombre, cliente.Apellido,
+            cliente.TipoDocumento, cliente.NumeroDocumento, cliente.PaisEmisorDocumento,
             cliente.Telefono, cliente.Correo
         });
         using var response = await client.SendAsync(request, ct);
