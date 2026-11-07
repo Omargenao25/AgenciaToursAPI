@@ -16,6 +16,27 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
         return await resp.Content.ReadFromJsonAsync<List<T>>(cancellationToken: ct) ?? new();
     }
 
+    public async Task<AdelantoTourViewModel> ObtenerAdelantoAsync(string token, int id, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"api/Tours/{id}/adelanto");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<AdelantoTourViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("No se recibió la política de adelanto.");
+    }
+
+    public async Task<HttpStatusCode> ConfigurarAdelantoAsync(string token, AdelantoTourViewModel model, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Put, $"api/Tours/{model.Id}/adelanto")
+        {
+            Content = JsonContent.Create(new { model.PorcentajeAdelanto })
+        };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        return resp.StatusCode;
+    }
+
     public async Task<TourAdminCatalogos> CatalogosAsync(string token, CancellationToken ct) => new()
     {
         Paises = await ObtenerAsync<OpcionCatalogo>("api/Paises", token, ct),
