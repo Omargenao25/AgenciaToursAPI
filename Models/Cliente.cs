@@ -18,7 +18,8 @@ namespace AgenciaToursAPI.Models
 
 
         [Required(ErrorMessage = "La cédula es obligatoria.")]
-        [MaxLength(20,ErrorMessage = "La cédula no puede superar los 20 caracteres.")]
+        [StringLength(11, MinimumLength = 11, ErrorMessage = "La cédula debe tener exactamente 11 dígitos.")]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "La cédula debe contener exactamente 11 dígitos numéricos, sin guiones ni letras.")]
         public string Cedula { get; set; } = string.Empty;
 
 
