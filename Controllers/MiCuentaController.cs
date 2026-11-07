@@ -65,6 +65,8 @@ public sealed class MiCuentaController(
         var telefono = dto.Telefono.Trim();
         if (nombre.Length == 0 || apellido.Length == 0 || telefono.Length == 0)
             return BadRequest("Nombre, apellido y teléfono son obligatorios.");
+        if ((nombre + " " + apellido).Length > 100)
+            return BadRequest("El nombre completo no puede superar los 100 caracteres.");
 
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         var usuario = await db.Usuarios
