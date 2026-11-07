@@ -33,6 +33,9 @@ public sealed class EstadoPagosReservaDto
     public string Cliente { get; set; } = "";
     public string Tour { get; set; } = "";
     public string EstadoReserva { get; set; } = "";
+    public DateTime? VencePendienteUtc { get; set; }
+    public string? MotivoCancelacion { get; set; }
+    public bool RequiereRevision => EstadoReserva == "Pendiente" && VencePendienteUtc.HasValue && VencePendienteUtc <= DateTime.UtcNow && Pagado > 0;
     public DateTime? FechaTour { get; set; }
     public TimeSpan? HoraTour { get; set; }
     public decimal Total { get; set; }
