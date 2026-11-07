@@ -192,6 +192,41 @@ namespace AgenciaToursAPI.Migrations
                     b.ToTable("Paises");
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.RecuperacionContrasena", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("ConsumidoUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreadoUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiraUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId", "CreadoUtc");
+
+                    b.ToTable("RecuperacionesContrasena");
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.Reserva", b =>
                 {
                     b.Property<int>("Id")
@@ -400,6 +435,17 @@ namespace AgenciaToursAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Pais");
+                });
+
+            modelBuilder.Entity("AgenciaToursAPI.Models.RecuperacionContrasena", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Reserva", b =>
