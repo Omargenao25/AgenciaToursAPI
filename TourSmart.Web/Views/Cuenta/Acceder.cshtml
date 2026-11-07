@@ -15,6 +15,10 @@
                 <span class="eyebrow">TU CUENTA</span>
                 <h2>Bienvenido <em>de nuevo.</em></h2>
                 <p class="text-secondary mb-4">Introduce tus credenciales para continuar.</p>
+                @if (TempData["ContrasenaActualizada"] is string aviso)
+                {
+                    <div class="alert alert-success" role="status">@aviso</div>
+                }
                 <form asp-controller="Cuenta" asp-action="Acceder" method="post">
                     @Html.AntiForgeryToken()
                     <input asp-for="ReturnUrl" type="hidden" />
