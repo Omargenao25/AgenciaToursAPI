@@ -1,0 +1,23 @@
+@model SolicitarRecuperacionViewModel
+@{ ViewData["Title"] = "Recuperar contraseña"; }
+<section class="auth-section"><div class="container"><div class="auth-shell">
+<div class="auth-intro">
+<span class="eyebrow">TOURSMART RD · SEGURIDAD</span>
+<h1>Recupera tu <em>acceso.</em></h1>
+<p>Si tienes una cuenta de viajero, te enviaremos un enlace temporal para establecer otra contraseña.</p>
+</div>
+<div class="auth-form-panel">
+<span class="eyebrow">RECUPERACIÓN DE ACCESO</span>
+<h2>¿Olvidaste tu <em>contraseña?</em></h2>
+<p class="text-secondary mb-4">Escribe el correo con el que te registraste.</p>
+@if (TempData["Recuperacion"] is string aviso) { <div class="alert alert-success" role="status">@aviso</div> }
+<form method="post" asp-controller="Cuenta" asp-action="Recuperar">
+ @Html.AntiForgeryToken()
+ <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+ <div class="mb-4"><label asp-for="Correo" class="form-label">Correo electrónico</label>
+ <input asp-for="Correo" type="email" class="form-control" autocomplete="email" maxlength="150" />
+ <span asp-validation-for="Correo" class="text-danger small"></span></div>
+ <button class="btn btn-accent w-100" type="submit">Enviar instrucciones ↗</button>
+</form>
+<p class="auth-help mt-3">¿Recordaste tu contraseña? <a asp-controller="Cuenta" asp-action="Acceder">Iniciar sesión</a></p>
+</div></div></div></section>
