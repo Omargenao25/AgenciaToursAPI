@@ -41,3 +41,11 @@
 .dashboard-table-title a{font-size:.8rem;font-weight:750;color:#235b4b}
 .dashboard-table-title a:hover{color:#448c60}
 @media(max-width:575px){.reservation-filters{padding:1rem}.reservation-pagination{justify-content:center}}
+
+
+/* Fase 2.6: administración de tours */
+.tour-admin-form{max-width:900px;margin:auto;padding:2.8rem;background:#fff;border:1px solid var(--line);border-radius:25px;box-shadow:0 12px 40px #142e3110}
+.tour-admin-form .form-label{font-size:.85rem;font-weight:750;color:var(--ink)}
+.tour-admin-form .form-control,.tour-admin-form .form-select{border-radius:12px;border-color:#dbe5dc;padding:.85rem 1rem}
+.tour-admin-form .form-control:focus,.tour-admin-form .form-select:focus{border-color:#719d81;box-shadow:0 0 0 .2rem #d7eddf}
+@media(max-width:575px){.tour-admin-form{padding:1.45rem}}
