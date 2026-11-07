@@ -22,7 +22,27 @@
       <div class="row g-3">
         <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" maxlength="80" autocomplete="given-name" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
         <div class="col-md-6"><label asp-for="Apellido" class="form-label">Apellido</label><input asp-for="Apellido" class="form-control" maxlength="80" autocomplete="family-name" /><span asp-validation-for="Apellido" class="text-danger small"></span></div>
-        <div class="col-md-6"><label asp-for="Cedula" class="form-label">Cédula / documento</label><input asp-for="Cedula" class="form-control" maxlength="11" minlength="11" pattern="[0-9]{11}" inputmode="numeric" autocomplete="off" title="Introduce exactamente 11 dígitos numéricos" /><span asp-validation-for="Cedula" class="text-danger small"></span></div>
+        <div class="col-md-6">
+          <label asp-for="TipoDocumento" class="form-label">Tipo de documento</label>
+          <select asp-for="TipoDocumento" class="form-select" id="tipoDocumento">
+            <option value="CedulaDominicana">Cédula dominicana</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="Residencia">Carné de residencia</option>
+            <option value="Otro">Otro documento</option>
+          </select>
+          <span asp-validation-for="TipoDocumento" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+          <label asp-for="PaisEmisorDocumento" class="form-label">País emisor</label>
+          <input asp-for="PaisEmisorDocumento" id="paisEmisor" class="form-control" maxlength="80" placeholder="Ej. México" />
+          <span asp-validation-for="PaisEmisorDocumento" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+          <label asp-for="NumeroDocumento" class="form-label">Número de documento</label>
+          <input asp-for="NumeroDocumento" id="numeroDocumento" class="form-control" maxlength="40" autocomplete="off" />
+          <span asp-validation-for="NumeroDocumento" class="text-danger small"></span>
+          <small class="text-secondary" id="ayudaDocumento">La cédula requiere exactamente 11 dígitos.</small>
+        </div>
         <div class="col-md-6"><label asp-for="Telefono" class="form-label">Teléfono</label><input asp-for="Telefono" class="form-control" maxlength="20" autocomplete="tel" /><span asp-validation-for="Telefono" class="text-danger small"></span></div>
         <div class="col-12"><label asp-for="Correo" class="form-label">Correo electrónico</label><input asp-for="Correo" type="email" class="form-control" maxlength="150" autocomplete="email" /><span asp-validation-for="Correo" class="text-danger small"></span></div>
       </div>
@@ -31,11 +51,38 @@
         <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ClientesAdmin" asp-action="Index">Cancelar</a>
       </div>
     </form>
-    <p class="dashboard-footnote">La cédula y el correo deben ser únicos. Los cambios se validan nuevamente en la API antes de guardarse.</p>
+    <p class="dashboard-footnote">El tipo, país emisor y número de documento deben identificar a un solo cliente; el correo también debe ser único. Los cambios se validan nuevamente en la API antes de guardarse.</p>
   </div>
 </div></section>
 @section Scripts {
 <script>
+const tipoDocumento = document.getElementById("tipoDocumento");
+const paisEmisor = document.getElementById("paisEmisor");
+const numeroDocumento = document.getElementById("numeroDocumento");
+const ayudaDocumento = document.getElementById("ayudaDocumento");
+function actualizarReglasDocumento() {
+    const cedula = tipoDocumento.value === "CedulaDominicana";
+    numeroDocumento.maxLength = cedula ? 11 : 40;
+    numeroDocumento.minLength = cedula ? 11 : 5;
+    numeroDocumento.pattern = cedula ? "[0-9]{11}" : "[A-Za-z0-9-]{5,40}";
+    numeroDocumento.inputMode = cedula ? "numeric" : "text";
+    ayudaDocumento.textContent = cedula
+      ? "Exactamente 11 dígitos numéricos, sin guiones."
+      : "De 5 a 40 caracteres: letras, números y guiones.";
+    if (cedula) {
+        paisEmisor.value = "República Dominicana";
+        paisEmisor.readOnly = true;
+    } else {
+        paisEmisor.readOnly = false;
+    }
+}
+tipoDocumento.addEventListener("change", () => {
+    if (tipoDocumento.value !== "CedulaDominicana" && paisEmisor.value === "República Dominicana")
+        paisEmisor.value = "";
+    numeroDocumento.value = "";
+    actualizarReglasDocumento();
+});
+actualizarReglasDocumento();
 document.getElementById("clienteForm").addEventListener("submit", function(event) {
     if (!this.checkValidity()) return;
     const boton = document.getElementById("guardarCliente");
