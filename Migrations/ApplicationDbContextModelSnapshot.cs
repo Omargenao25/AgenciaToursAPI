@@ -312,6 +312,13 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<int>("MetodoPagoId")
                         .HasColumnType("int");
 
+                    b.Property<string>("MotivoCancelacion")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("VencePendienteUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
@@ -325,6 +332,8 @@ namespace AgenciaToursAPI.Migrations
                     b.HasIndex("MetodoPagoId");
 
                     b.HasIndex("TourId");
+
+                    b.HasIndex("Estado", "VencePendienteUtc");
 
                     b.ToTable("Reservas", t =>
                         {
@@ -366,6 +375,10 @@ namespace AgenciaToursAPI.Migrations
 
                     b.Property<DateTime>("FechaFin")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("HorasLimiteAdelanto")
+                        .HasColumnType("int")
+                        .HasDefaultValue(24);
 
                     b.Property<int>("GuiaId")
                         .HasColumnType("int");
@@ -409,6 +422,8 @@ namespace AgenciaToursAPI.Migrations
                     b.ToTable("Tours", t =>
                         {
                             t.HasCheckConstraint("CK_Tours_CapacidadMaxima", "[CapacidadMaxima] >= 1");
+
+                            t.HasCheckConstraint("CK_Tours_HorasLimiteAdelanto", "[HorasLimiteAdelanto] BETWEEN 1 AND 168");
 
                             t.HasCheckConstraint("CK_Tours_PorcentajeAdelanto", "[PorcentajeAdelanto] BETWEEN 0 AND 100");
                         });
