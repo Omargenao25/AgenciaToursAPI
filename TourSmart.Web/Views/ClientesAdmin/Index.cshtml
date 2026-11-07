@@ -17,7 +17,7 @@
   </div>
   <form method="get" asp-controller="ClientesAdmin" asp-action="Index" class="reservation-filters row g-3 align-items-end mb-4">
     <div class="col-lg-10">
-      <label for="busqueda" class="form-label">Buscar por nombre, apellido, cédula, correo o ID</label>
+      <label for="busqueda" class="form-label">Buscar por nombre, apellido, documento, correo o ID</label>
       <input class="form-control" id="busqueda" name="busqueda" maxlength="100" value="@Model.Busqueda" placeholder="Ej. Luis, nombre@correo.com o 5" />
     </div>
     <div class="col-lg-2 d-grid"><button class="btn btn-dark-pill" type="submit">Buscar ↗</button></div>
@@ -32,7 +32,7 @@
       <div class="dashboard-table-title"><h3>Clientes registrados</h3><span>@Model.Total resultado(s)</span></div>
       <div class="table-responsive">
         <table class="table align-middle">
-          <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Cédula</th><th>Acciones</th></tr></thead>
+          <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Documento</th><th>Acciones</th></tr></thead>
           <tbody>
           @foreach (var cliente in Model.Clientes)
           {
@@ -41,7 +41,7 @@
               <td><strong>@cliente.Nombre @cliente.Apellido</strong></td>
               <td>@cliente.Telefono</td>
               <td>@cliente.Correo</td>
-              <td>@cliente.Cedula</td>
+              <td><strong>@cliente.NumeroDocumento</strong><small class="d-block text-secondary">@cliente.TipoDocumento · @cliente.PaisEmisorDocumento</small></td>
               <td><a class="btn btn-sm btn-outline-success" asp-controller="ClientesAdmin" asp-action="Editar" asp-route-id="@cliente.Id">Editar</a></td>
             </tr>
           }
