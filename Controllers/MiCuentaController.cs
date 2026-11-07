@@ -27,6 +27,63 @@ public sealed class MiCuentaController(
             .SingleOrDefaultAsync();
     }
 
+    // Las consultas y cambios se basan exclusivamente en la identidad JWT;
+    // no se acepta un IdCliente arbitrario enviado por el navegador.
+    [Authorize(Roles = Roles.Cliente)]
+    [HttpGet("perfil")]
+    public async Task<IActionResult> MiPerfil()
+    {
+        var clienteId = await ClienteAutenticado();
+        if (clienteId is null)
+            return Conflict("Esta cuenta no está vinculada a una ficha de cliente verificada.");
+
+        var perfil = await db.Clientes.AsNoTracking()
+            .Where(c => c.Id == clienteId.Value)
+            .Select(c => new MiPerfilRespuestaDto
+            {
+                Nombre = c.Nombre,
+                Apellido = c.Apellido,
+                Telefono = c.Telefono,
+                Correo = c.Correo,
+                TipoDocumento = c.TipoDocumento,
+                NumeroDocumento = c.NumeroDocumento,
+                PaisEmisorDocumento = c.PaisEmisorDocumento
+            }).SingleOrDefaultAsync();
+
+        return perfil is null ? NotFound("No se encontró tu ficha de cliente.") : Ok(perfil);
+    }
+
+    [Authorize(Roles = Roles.Cliente)]
+    [HttpPut("perfil")]
+    public async Task<IActionResult> ActualizarMiPerfil(ActualizarMiPerfilDto dto)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var usuarioId))
+            return Unauthorized();
+
+        var nombre = dto.Nombre.Trim();
+        var apellido = dto.Apellido.Trim();
+        var telefono = dto.Telefono.Trim();
+        if (nombre.Length == 0 || apellido.Length == 0 || telefono.Length == 0)
+            return BadRequest("Nombre, apellido y teléfono son obligatorios.");
+
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        var usuario = await db.Usuarios
+            .Include(u => u.Cliente)
+            .SingleOrDefaultAsync(u => u.Id == usuarioId && u.Rol == Roles.Cliente);
+
+        if (usuario?.ClienteId is null || usuario.Cliente is null)
+            return Conflict("Esta cuenta no está vinculada a una ficha de cliente verificada.");
+
+        // Ni el documento ni el correo ni el rol pueden modificarse mediante este endpoint.
+        usuario.Cliente.Nombre = nombre;
+        usuario.Cliente.Apellido = apellido;
+        usuario.Cliente.Telefono = telefono;
+        usuario.Nombre = nombre + " " + apellido;
+        await db.SaveChangesAsync();
+        await tx.CommitAsync();
+        return NoContent();
+    }
+
     [HttpPost("registrar")]
     [AllowAnonymous]
     public async Task<IActionResult> Registrar(RegistroClienteWebDto dto)
