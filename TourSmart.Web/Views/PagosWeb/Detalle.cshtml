@@ -48,9 +48,13 @@
                             <button type="submit" class="btn btn-accent w-100">Confirmar reserva ↗</button>
                         </form>
                     }
-                    else if (Model.Resumen.EstadoReserva == "Pendiente")
+                    else if (Model.Resumen.EstadoReserva == "Pendiente" && Model.Resumen.FaltanteParaConfirmar > 0)
                     {
                         <span class="text-secondary">Pendiente de adelanto. Registra y verifica el pago antes de confirmar.</span>
+                    }
+                    else if (Model.Resumen.EstadoReserva == "Pendiente")
+                    {
+                        <span class="text-secondary">El adelanto está cubierto, pero el tour ya comenzó o no tiene fecha válida. No se puede confirmar.</span>
                     }
                     else
                     {
