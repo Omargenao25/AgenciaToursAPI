@@ -61,6 +61,75 @@
                 </div>
             </div>
         </div>
+        <div class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <section class="dashboard-table h-100">
+                    <div class="dashboard-table-title">
+                        <h3>Rendimiento financiero por tour</h3>
+                        <span>@Model.PorTour.Count tours con movimientos</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr><th>Tour</th><th>Cobrado</th><th>Devuelto</th><th>Neto</th></tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var item in Model.PorTour)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.Nombre</strong>
+                                        <small class="d-block text-secondary">ID @item.Id · @item.CantidadPagos cobro(s) · @item.CantidadReembolsos devolución(es)</small>
+                                    </td>
+                                    <td>RD$ @item.Cobrado.ToString("N2")</td>
+                                    <td>RD$ @item.Devuelto.ToString("N2")</td>
+                                    <td><strong>RD$ @item.Neto.ToString("N2")</strong></td>
+                                </tr>
+                            }
+                            @if (!Model.PorTour.Any())
+                            {
+                                <tr><td colspan="4" class="text-secondary py-4">No hay movimientos en el período.</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+            <div class="col-xl-6">
+                <section class="dashboard-table h-100">
+                    <div class="dashboard-table-title">
+                        <h3>Movimientos por método</h3>
+                        <span>@Model.PorMetodoPago.Count métodos utilizados</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr><th>Método</th><th>Cobrado</th><th>Devuelto</th><th>Neto</th></tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var item in Model.PorMetodoPago)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.Nombre</strong>
+                                        <small class="d-block text-secondary">ID @item.Id · @item.CantidadPagos cobro(s) · @item.CantidadReembolsos devolución(es)</small>
+                                    </td>
+                                    <td>RD$ @item.Cobrado.ToString("N2")</td>
+                                    <td>RD$ @item.Devuelto.ToString("N2")</td>
+                                    <td><strong>RD$ @item.Neto.ToString("N2")</strong></td>
+                                </tr>
+                            }
+                            @if (!Model.PorMetodoPago.Any())
+                            {
+                                <tr><td colspan="4" class="text-secondary py-4">No hay movimientos en el período.</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <p class="text-secondary small mb-3">Los desgloses agrupan todos los movimientos del período seleccionado, incluso cuando el historial visual supera 500 filas. El método de una devolución puede ser distinto del método del pago original.</p>
         <p class="text-secondary small mb-3">El CSV incluye todos los movimientos del período seleccionado, aunque el listado visual muestre solamente los 500 más recientes. Primero aplica las fechas que quieras exportar.</p>
         <div class="alert alert-info mb-4">
             Este reporte registra movimientos introducidos por el personal: <strong>no es una conciliación bancaria</strong>
