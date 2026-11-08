@@ -73,6 +73,11 @@ public sealed class ReservasWebController(IReservasAdminClient reservasApi, ITou
         try
         {
             await CargarOpciones(model, token, cancellationToken);
+            if (model.Pasajeros is null || model.Pasajeros.Count != model.CantidadPersonas ||
+                model.Pasajeros.Any(n => string.IsNullOrWhiteSpace(n) || n.Trim().Length < 3 || n.Trim().Length > 120))
+                ModelState.AddModelError(nameof(model.Pasajeros),
+                    "Introduce un nombre válido (3-120 caracteres) para cada plaza solicitada.");
+
             if (ModelState.IsValid)
             {
                 if (!model.Clientes.Any(x => x.Value == model.ClienteId.ToString()))
