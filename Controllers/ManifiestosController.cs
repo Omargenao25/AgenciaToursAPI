@@ -43,6 +43,15 @@ public sealed class ManifiestosController(ApplicationDbContext db) : ControllerB
             })
             .ToListAsync(ct);
 
+        var ids = reservas.Select(r => r.Id).ToArray();
+        var nombres = await db.PasajerosReserva.AsNoTracking()
+            .Where(p => ids.Contains(p.ReservaId))
+            .OrderBy(p => p.Orden)
+            .Select(p => new { p.ReservaId, p.NombreCompleto })
+            .ToListAsync(ct);
+        var porReserva = nombres.GroupBy(p => p.ReservaId)
+            .ToDictionary(g => g.Key, g => g.Select(p => p.NombreCompleto).ToList());
+
         var filas = reservas.Select(r => new ManifiestoReservaDto {
             ReservaId = r.Id, Titular = r.Titular, Telefono = r.Telefono,
             CantidadPersonas = r.CantidadPersonas, Estado = r.Estado,
