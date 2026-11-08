@@ -5,6 +5,8 @@ namespace TourSmart.Web.Services;
 
 public interface IReservasAdminClient
 {
+    Task<IReadOnlyList<ReembolsoReservaItem>> ReembolsosAsync(string jwt, int reservaId, CancellationToken ct);
+    Task<(HttpStatusCode Estado, string Mensaje)> RegistrarReembolsoAsync(string jwt, RegistrarReembolsoViewModel model, CancellationToken ct);
     Task<EstadoPagosReserva> EstadoPagosAsync(string jwt, int reservaId, CancellationToken ct);
     Task<(HttpStatusCode Estado, string Mensaje)> RegistrarPagoAsync(string jwt, RegistrarPagoViewModel model, CancellationToken ct);
     Task<IReadOnlyList<ReservaPanel>> ListarAsync(string token, CancellationToken cancellationToken);
