@@ -127,6 +127,19 @@ namespace AgenciaToursAPI.Data
                 .HasForeignKey(r => r.MetodoPagoId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<PasajeroReserva>()
+                .HasOne(p => p.Reserva)
+                .WithMany()
+                .HasForeignKey(p => p.ReservaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PasajeroReserva>()
+                .HasIndex(p => new { p.ReservaId, p.Orden })
+                .IsUnique();
+
+            modelBuilder.Entity<PasajeroReserva>()
+                .ToTable(t => t.HasCheckConstraint("CK_PasajerosReserva_Orden", "[Orden] BETWEEN 1 AND 100"));
+
             modelBuilder.Entity<PagoReserva>()
                 .HasOne(p => p.Reserva)
                 .WithMany()
