@@ -7,6 +7,30 @@ namespace TourSmart.Web.Services;
 
 public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClient
 {
+    public async Task<IReadOnlyList<ReembolsoReservaItem>> ReembolsosAsync(string jwt, int reservaId, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"api/reservas/{reservaId}/reembolsos");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var resp = await client.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<List<ReembolsoReservaItem>>(cancellationToken: ct)
+            ?? new List<ReembolsoReservaItem>();
+    }
+
+    public async Task<(HttpStatusCode Estado, string Mensaje)> RegistrarReembolsoAsync(string jwt, RegistrarReembolsoViewModel model, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post, $"api/reservas/{model.ReservaId}/reembolsos")
+        {
+            Content = JsonContent.Create(new {
+                model.Monto, model.MetodoPagoId, model.Motivo,
+                model.Referencia, model.Observacion, model.ClaveOperacion
+            })
+        };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var resp = await client.SendAsync(req, ct);
+        return (resp.StatusCode, resp.IsSuccessStatusCode ? "" : await resp.Content.ReadAsStringAsync(ct));
+    }
+
     public async Task<EstadoPagosReserva> EstadoPagosAsync(string jwt, int reservaId, CancellationToken ct)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, $"api/reservas/{reservaId}/pagos");
