@@ -65,7 +65,8 @@
                             <td>@item.CantidadPersonas</td>
                             <td>RD$ @item.NetoRecibido.ToString("N2")</td>
                             <td>RD$ @item.Saldo.ToString("N2")</td>
-                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Pagos / saldo</a></td>
+                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Pagos / saldo</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-controller="ToursAdmin" asp-action="Pasajeros" asp-route-reservaId="@item.ReservaId">Editar nombres</a></td>
                         </tr>
                     }
                     @if (!Model.Confirmadas.Any())
@@ -101,7 +102,8 @@
                             <td>@item.Telefono</td>
                             <td>@item.CantidadPersonas</td>
                             <td>RD$ @item.Saldo.ToString("N2")</td>
-                            <td><a class="btn btn-sm btn-outline-secondary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Revisar adelanto</a></td>
+                            <td><a class="btn btn-sm btn-outline-secondary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Revisar adelanto</a>
+                            <a class="btn btn-sm btn-outline-primary" asp-controller="ToursAdmin" asp-action="Pasajeros" asp-route-reservaId="@item.ReservaId">Editar nombres</a></td>
                         </tr>
                     }
                     @if (!Model.Pendientes.Any())
