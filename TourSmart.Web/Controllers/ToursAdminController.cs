@@ -39,6 +39,77 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         ViewBag.DestinosPorPais = System.Text.Json.JsonSerializer.Serialize(catalogos.Destinos.Select(x => new { x.Id, x.PaisId }));
     }
 
+    [HttpGet("reservas/{reservaId:int}/pasajeros")]
+    public async Task<IActionResult> Pasajeros(int reservaId, CancellationToken ct)
+    {
+        if (reservaId <= 0) return NotFound();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var model = await adminApi.ObtenerPasajerosAsync(jwt, reservaId, ct);
+            if (model.Estado == "Cancelada" ||
+                DateTime.Now >= model.InicioTour.Date.Add(model.Hora))
+            {
+                TempData["Error"] = "Esta reserva ya no permite modificar pasajeros.";
+                return RedirectToAction(nameof(Index));
+            }
+            Response.Headers.CacheControl = "private, no-store";
+            return View(model);
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "No se pudieron consultar los pasajeros.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("reservas/{reservaId:int}/pasajeros")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Pasajeros(int reservaId, EditarPasajerosViewModel model, CancellationToken ct)
+    {
+        if (reservaId <= 0 || model.Id != reservaId) return BadRequest();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var actual = await adminApi.ObtenerPasajerosAsync(jwt, reservaId, ct);
+            model.Tour = actual.Tour;
+            model.CantidadPersonas = actual.CantidadPersonas;
+            model.Estado = actual.Estado;
+            model.InicioTour = actual.InicioTour;
+            model.Hora = actual.Hora;
+            if (model.Pasajeros is null || model.Pasajeros.Count != actual.CantidadPersonas ||
+                model.Pasajeros.Any(n => string.IsNullOrWhiteSpace(n) || n.Trim().Length < 3 || n.Trim().Length > 120))
+                ModelState.AddModelError(nameof(model.Pasajeros),
+                    "Registra un nombre válido por cada plaza reservada.");
+
+            if (ModelState.IsValid)
+            {
+                var status = await adminApi.ActualizarPasajerosAsync(jwt, model, ct);
+                if (status == HttpStatusCode.NoContent)
+                {
+                    TempData["Exito"] = "Lista de pasajeros actualizada correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", status switch
+                {
+                    HttpStatusCode.Conflict => "No se puede editar: el tour ya comenzó o la reserva está cancelada.",
+                    HttpStatusCode.BadRequest => "Los nombres no coinciden con las plazas reservadas.",
+                    _ => $"La API rechazó la actualización (HTTP {(int)status})."
+                });
+            }
+        }
+        catch (HttpRequestException) { ModelState.AddModelError("", "La API no está disponible."); }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        { ModelState.AddModelError("", "La operación tardó demasiado. Consulta la lista antes de reintentar."); }
+        return View(model);
+    }
+
     [HttpGet("{id:int}/manifiesto")]
     public async Task<IActionResult> Manifiesto(int id, CancellationToken ct)
     {
