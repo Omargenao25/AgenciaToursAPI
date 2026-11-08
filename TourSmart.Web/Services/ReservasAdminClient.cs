@@ -121,7 +121,7 @@ public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClien
         {
             Content = JsonContent.Create(new
             {
-                model.ClienteId, model.TourId, model.MetodoPagoId, model.CantidadPersonas
+                model.ClienteId, model.TourId, model.MetodoPagoId, model.CantidadPersonas, model.Pasajeros
             })
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
