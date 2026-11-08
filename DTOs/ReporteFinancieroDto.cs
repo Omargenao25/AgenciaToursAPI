@@ -14,6 +14,17 @@ public sealed class MovimientoFinancieroDto
     public string Cliente { get; set; } = "";
 }
 
+public sealed class DesgloseFinancieroDto
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = "";
+    public decimal Cobrado { get; set; }
+    public decimal Devuelto { get; set; }
+    public decimal Neto => Cobrado - Devuelto;
+    public int CantidadPagos { get; set; }
+    public int CantidadReembolsos { get; set; }
+}
+
 public sealed class ReporteFinancieroDto
 {
     public DateTime DesdeUtc { get; set; }
@@ -27,4 +38,6 @@ public sealed class ReporteFinancieroDto
     public int LimiteListado { get; set; } = 500;
     public bool ListadoTruncado => MovimientosTotales > Movimientos.Count;
     public List<MovimientoFinancieroDto> Movimientos { get; set; } = new();
+    public List<DesgloseFinancieroDto> PorTour { get; set; } = new();
+    public List<DesgloseFinancieroDto> PorMetodoPago { get; set; } = new();
 }
