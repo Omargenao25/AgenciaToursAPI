@@ -336,8 +336,14 @@ namespace AgenciaToursAPI.Controllers
                 .FromSqlInterpolated($"SELECT * FROM dbo.Reservas WITH (UPDLOCK, HOLDLOCK) WHERE Id = {id}")
                 .SingleOrDefaultAsync();
             if (reserva == null) return NotFound("La reserva no existe.");
-            if (await _context.PagosReserva.AnyAsync(p => p.ReservaId == id))
-                return Conflict("Esta reserva tiene pagos registrados. Se requiere conciliación o reembolso antes de cancelar.");
+            // Solo puede cancelarse después de registrar todas las devoluciones.
+            // Los pagos originales permanecen inmutables para auditoría.
+            var cobrado = await _context.PagosReserva.Where(p => p.ReservaId == id)
+                .SumAsync(p => (decimal?)p.Monto) ?? 0m;
+            var devuelto = await _context.ReembolsosReserva.Where(p => p.ReservaId == id)
+                .SumAsync(p => (decimal?)p.Monto) ?? 0m;
+            if (cobrado != devuelto)
+                return Conflict($"No se puede cancelar: falta conciliar RD$ {cobrado - devuelto:N2} de pagos registrados.");
 
             var tour = await _context.Tours
                 .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
@@ -349,6 +355,7 @@ namespace AgenciaToursAPI.Controllers
                 return Conflict("No se puede cancelar una reserva después del inicio del tour.");
 
             reserva.Estado = EstadosReserva.Cancelada;
+            reserva.MotivoCancelacion = cobrado > 0m ? "ReembolsoConciliado" : "CancelacionManual";
             reserva.FechaCambioEstado = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             await transaccion.CommitAsync();
