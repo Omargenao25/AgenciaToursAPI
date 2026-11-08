@@ -27,6 +27,8 @@ public sealed class EstadoPagosReserva
     public TimeSpan? HoraTour { get; set; }
     public decimal Total { get; set; }
     public decimal Pagado { get; set; }
+    public decimal Devuelto { get; set; }
+    public decimal NetoRecibido { get; set; }
     public int PorcentajeAdelanto { get; set; }
     public decimal AdelantoMinimo { get; set; }
     public decimal FaltanteParaConfirmar { get; set; }
