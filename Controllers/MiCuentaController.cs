@@ -311,6 +311,7 @@ public sealed class MiCuentaController(
         [Range(1, int.MaxValue)] public int TourId { get; set; }
         [Range(1, int.MaxValue)] public int MetodoPagoId { get; set; }
         [Range(1, 100)] public int CantidadPersonas { get; set; }
+        public List<string> Pasajeros { get; set; } = new();
     }
 
     [Authorize(Roles = Roles.Cliente)]
