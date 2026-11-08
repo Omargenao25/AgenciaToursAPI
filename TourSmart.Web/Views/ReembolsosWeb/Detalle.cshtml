@@ -1,0 +1,114 @@
+@model RegistrarReembolsoViewModel
+@{
+    ViewData["Title"] = "Conciliación de reserva #" + Model.ReservaId;
+    var editable = User.IsInRole("Administrador") && Model.Resumen.EstadoReserva != "Cancelada" && Model.DisponibleParaDevolver > 0m;
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@Model.ReservaId">← Pagos / saldo</a>
+        <span class="eyebrow">CONTROL FINANCIERO · TOURSMART RD</span>
+        <h1>Reembolsos y <em>conciliación.</em></h1>
+        <p>Reserva #@Model.ReservaId · @Model.Resumen.Cliente · @Model.Resumen.Tour</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Exito"] is string exito) { <div class="alert alert-success">@exito</div> }
+        @if (TempData["Error"] is string error) { <div class="alert alert-warning">@error</div> }
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="metric-card"><span>Total recibido</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
+            <div class="col-md-4"><div class="metric-card"><span>Total devuelto</span><strong>RD$ @Model.Devuelto.ToString("N2")</strong></div></div>
+            <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Pendiente de devolver</span><strong>RD$ @Model.DisponibleParaDevolver.ToString("N2")</strong></div></div>
+        </div>
+        @if (Model.Resumen.Pagado > 0 && Model.DisponibleParaDevolver == 0 && Model.Resumen.EstadoReserva != "Cancelada")
+        {
+            <div class="alert alert-success">
+                Conciliación completa. La agencia puede cancelar esta reserva desde «Gestión de reservas», siempre que el tour no haya iniciado.
+            </div>
+        }
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="tour-admin-form">
+                    <span class="eyebrow">MOVIMIENTO DE DEVOLUCIÓN</span>
+                    <h2 class="mt-2 mb-3">Registrar <em>reembolso.</em></h2>
+                    @if (!User.IsInRole("Administrador"))
+                    {
+                        <div class="alert alert-info">Solo el Administrador puede registrar devoluciones. Puedes consultar el historial.</div>
+                    }
+                    else if (Model.Resumen.EstadoReserva == "Cancelada")
+                    {
+                        <div class="alert alert-secondary">Esta reserva ya está cancelada.</div>
+                    }
+                    else if (Model.DisponibleParaDevolver <= 0m)
+                    {
+                        <div class="alert alert-info">No existe importe pendiente de devolver.</div>
+                    }
+                    else if (editable)
+                    {
+                        <form method="post" asp-controller="ReembolsosWeb" asp-action="Registrar" asp-route-reservaId="@Model.ReservaId">
+                            @Html.AntiForgeryToken()
+                            <input asp-for="ReservaId" type="hidden" />
+                            <input asp-for="ClaveOperacion" type="hidden" />
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            <div class="mb-3">
+                                <label asp-for="Monto" class="form-label">Importe ya devuelto (RD$)</label>
+                                <input asp-for="Monto" class="form-control" type="number" min="0.01"
+                                       max="@Model.DisponibleParaDevolver.ToString(System.Globalization.CultureInfo.InvariantCulture)" step="0.01" />
+                                <span asp-validation-for="Monto" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="MetodoPagoId" class="form-label">Medio utilizado para devolver</label>
+                                <select asp-for="MetodoPagoId" asp-items="Model.Metodos" class="form-select">
+                                    <option value="">Selecciona un método</option>
+                                </select>
+                                <span asp-validation-for="MetodoPagoId" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Motivo" class="form-label">Motivo obligatorio</label>
+                                <textarea asp-for="Motivo" class="form-control" maxlength="200" rows="3" placeholder="Explica el motivo de la devolución efectuada"></textarea>
+                                <span asp-validation-for="Motivo" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Referencia" class="form-label">Referencia del reembolso</label>
+                                <input asp-for="Referencia" class="form-control" maxlength="100" placeholder="Número de transferencia, comprobante..." />
+                                <span asp-validation-for="Referencia" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Observacion" class="form-label">Observación (opcional)</label>
+                                <textarea asp-for="Observacion" class="form-control" maxlength="200" rows="2"></textarea>
+                            </div>
+                            <div class="alert alert-warning">Esta acción <strong>no transfiere dinero</strong>. Registra únicamente reembolsos que la agencia ya efectuó y verificó fuera de TourSmart RD.</div>
+                            <button class="btn btn-accent" type="submit">Registrar devolución realizada ↗</button>
+                        </form>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="dashboard-table">
+                    <div class="dashboard-table-title"><h3>Historial de devoluciones</h3><span>@Model.Reembolsos.Count movimiento(s)</span></div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead><tr><th>ID</th><th>Fecha UTC</th><th>Método / referencia</th><th>Importe</th><th>Responsable</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in Model.Reembolsos)
+                                {
+                                    <tr>
+                                        <td>#@item.Id</td>
+                                        <td>@item.FechaRegistroUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td><strong>@item.MetodoPago</strong><small class="d-block text-secondary">@item.Referencia</small><small class="d-block">@item.Motivo</small></td>
+                                        <td>RD$ @item.Monto.ToString("N2")</td>
+                                        <td>@item.RegistradoPor</td>
+                                    </tr>
+                                }
+                                @if (!Model.Reembolsos.Any())
+                                {
+                                    <tr><td colspan="5" class="text-secondary py-4">No hay devoluciones registradas.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
