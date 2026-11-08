@@ -54,6 +54,7 @@ public sealed class ManifiestosController(ApplicationDbContext db) : ControllerB
 
         var filas = reservas.Select(r => new ManifiestoReservaDto {
             ReservaId = r.Id, Titular = r.Titular, Telefono = r.Telefono,
+            Pasajeros = porReserva.TryGetValue(r.Id, out var lista) ? lista : new List<string>(),
             CantidadPersonas = r.CantidadPersonas, Estado = r.Estado,
             Total = r.Total, NetoRecibido = r.Cobrado - r.Devuelto
         }).ToList();
