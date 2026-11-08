@@ -40,6 +40,10 @@
         {
             <div class="alert alert-warning">La reserva se canceló automáticamente por vencimiento del plazo sin pagos. Sus plazas fueron liberadas.</div>
         }
+        <div class="mb-4">
+            <a class="btn btn-dark-pill" asp-controller="ReembolsosWeb" asp-action="Detalle" asp-route-reservaId="@Model.ReservaId">Reembolsos / conciliación ↗</a>
+            <small class="d-block text-secondary mt-2">El total «Pagado» corresponde al importe histórico recibido. Las devoluciones se consultan por separado.</small>
+        </div>
         <div class="row g-3 mb-4">
             <div class="col-md-4"><div class="metric-card"><span>Total de reserva</span><strong>RD$ @Model.Resumen.Total.ToString("N2")</strong></div></div>
             <div class="col-md-4"><div class="metric-card"><span>Pagado</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
