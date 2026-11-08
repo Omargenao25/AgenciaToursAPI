@@ -48,6 +48,6 @@ public sealed class EstadoPagosReservaDto
     public bool PuedeConfirmar => EstadoReserva == "Pendiente" && NetoRecibido >= AdelantoMinimo &&
         FechaTour.HasValue && HoraTour.HasValue && DateTime.Now < FechaTour.Value.Date.Add(HoraTour.Value);
     public decimal Saldo => Math.Max(0m, Total - NetoRecibido);
-    public string EstadoFinanciero => Pagado <= 0 ? "Sin pagos" : Pagado >= Total ? "Pagada" : "Pago parcial";
+    public string EstadoFinanciero => NetoRecibido <= 0 ? "Sin saldo recibido" : NetoRecibido >= Total ? "Pagada" : "Pago parcial";
     public List<PagoReservaRespuestaDto> Pagos { get; set; } = new();
 }
