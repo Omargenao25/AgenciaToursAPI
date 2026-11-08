@@ -1,0 +1,118 @@
+@model ReporteFinancieroViewModel
+@{
+    ViewData["Title"] = "Reporte financiero";
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al dashboard</a>
+        <span class="eyebrow">ADMINISTRACIÓN · TOURSMART RD</span>
+        <h1>Resumen <em>financiero.</em></h1>
+        <p>Cobros, devoluciones y flujo neto registrado en la agencia.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+        <form method="get" asp-controller="ReportesWeb" asp-action="Finanzas" class="row g-3 align-items-end mb-4">
+            <div class="col-md-4">
+                <label class="form-label" for="desde">Desde (fecha UTC)</label>
+                <input id="desde" name="desde" type="date" class="form-control"
+                       value="@Model.DesdeUtc.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="hasta">Hasta (fecha UTC)</label>
+                <input id="hasta" name="hasta" type="date" class="form-control"
+                       value="@Model.HastaIncluido.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-accent w-100" type="submit">Aplicar período ↗</button>
+            </div>
+        </form>
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span>Cobros registrados</span>
+                    <strong>RD$ @Model.TotalCobrado.ToString("N2")</strong>
+                    <small>@Model.CantidadPagos movimiento(s)</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span>Devoluciones registradas</span>
+                    <strong>RD$ @Model.TotalDevuelto.ToString("N2")</strong>
+                    <small>@Model.CantidadReembolsos movimiento(s)</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card metric-card-accent">
+                    <span>Flujo neto registrado</span>
+                    <strong>RD$ @Model.Neto.ToString("N2")</strong>
+                    <small>Cobros menos devoluciones</small>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info mb-4">
+            Este reporte registra movimientos introducidos por el personal: <strong>no es una conciliación bancaria</strong>
+            ni una medición de utilidades. El período se calcula por fecha de registro UTC,
+            y los reembolsos descuentan en el día en que fueron registrados, incluso si el pago original fue anterior.
+        </div>
+        <div class="dashboard-table">
+            <div class="dashboard-table-title">
+                <h3>Historial de movimientos</h3>
+                <span>@Model.Movimientos.Count de @Model.MovimientosTotales</span>
+            </div>
+            @if (Model.ListadoTruncado)
+            {
+                <div class="alert alert-warning mx-3">
+                    Se muestran los @Model.LimiteListado movimientos más recientes. Los totales incluyen todos los movimientos del período.
+                    Reduce el rango de fechas para consultar movimientos anteriores.
+                </div>
+            }
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Fecha UTC</th>
+                            <th>Tipo</th>
+                            <th>Reserva</th>
+                            <th>Cliente / tour</th>
+                            <th>Medio / ref.</th>
+                            <th>Importe</th>
+                            <th>Responsable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var mov in Model.Movimientos)
+                    {
+                        <tr>
+                            <td>@mov.FechaRegistroUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <span class="reservation-status @(mov.Tipo == "Pago" ? "is-confirmed" : "is-cancelled")">@mov.Tipo</span>
+                            </td>
+                            <td>
+                                <a asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@mov.ReservaId">#@mov.ReservaId</a>
+                            </td>
+                            <td><strong>@mov.Cliente</strong><small class="d-block text-secondary">@mov.Tour</small></td>
+                            <td>@mov.MetodoPago<small class="d-block text-secondary">@mov.Referencia</small></td>
+                            <td><strong>@(mov.Tipo == "Reembolso" ? "−" : "+") RD$ @mov.Monto.ToString("N2")</strong></td>
+                            <td>@mov.RegistradoPor</td>
+                        </tr>
+                    }
+                    @if (!Model.Movimientos.Any())
+                    {
+                        <tr><td colspan="7" class="text-secondary py-4">No hay movimientos registrados en el período seleccionado.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p class="dashboard-footnote">
+            El listado es de solo lectura. Los pagos y reembolsos se gestionan desde la reserva correspondiente.
+            Solo las cuentas con rol Administrador pueden abrir este reporte.
+        </p>
+    </div>
+</section>
