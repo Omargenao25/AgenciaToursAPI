@@ -16,6 +16,16 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
         return await resp.Content.ReadFromJsonAsync<List<T>>(cancellationToken: ct) ?? new();
     }
 
+    public async Task<ManifiestoTourViewModel> ObtenerManifiestoAsync(string token, int tourId, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"api/tours/{tourId}/manifiesto");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<ManifiestoTourViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("No se recibió el manifiesto del tour.");
+    }
+
     public async Task<AdelantoTourViewModel> ObtenerAdelantoAsync(string token, int id, CancellationToken ct)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, $"api/Tours/{id}/adelanto");
