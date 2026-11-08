@@ -28,8 +28,14 @@
                 <input id="hasta" name="hasta" type="date" class="form-control"
                        value="@Model.HastaIncluido.ToString("yyyy-MM-dd")" required />
             </div>
-            <div class="col-md-4">
-                <button class="btn btn-accent w-100" type="submit">Aplicar período ↗</button>
+            <div class="col-md-4 d-grid gap-2">
+                <button class="btn btn-accent" type="submit">Aplicar período ↗</button>
+                <a class="btn btn-outline-secondary rounded-pill"
+                   asp-controller="ReportesWeb" asp-action="ExportarCsv"
+                   asp-route-desde="@Model.DesdeUtc.ToString("yyyy-MM-dd")"
+                   asp-route-hasta="@Model.HastaIncluido.ToString("yyyy-MM-dd")">
+                    Descargar CSV del período ↓
+                </a>
             </div>
         </form>
         <div class="row g-3 mb-4">
@@ -55,6 +61,7 @@
                 </div>
             </div>
         </div>
+        <p class="text-secondary small mb-3">El CSV incluye todos los movimientos del período seleccionado, aunque el listado visual muestre solamente los 500 más recientes. Primero aplica las fechas que quieras exportar.</p>
         <div class="alert alert-info mb-4">
             Este reporte registra movimientos introducidos por el personal: <strong>no es una conciliación bancaria</strong>
             ni una medición de utilidades. El período se calcula por fecha de registro UTC,
