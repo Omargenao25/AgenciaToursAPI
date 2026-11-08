@@ -16,6 +16,7 @@ public sealed class CrearReservaViewModel
 
     [Range(1, 100, ErrorMessage = "La reserva debe tener entre 1 y 100 personas.")]
     public int CantidadPersonas { get; set; } = 1;
+    public List<string> Pasajeros { get; set; } = new();
 
     public IReadOnlyList<SelectListItem> Clientes { get; set; } = Array.Empty<SelectListItem>();
     public IReadOnlyList<SelectListItem> Tours { get; set; } = Array.Empty<SelectListItem>();
