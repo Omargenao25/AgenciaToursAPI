@@ -1,0 +1,87 @@
+@model ManifiestoTourViewModel
+@{
+    ViewData["Title"] = "Manifiesto del tour";
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="ToursAdmin" asp-action="Index">← Administrar tours</a>
+        <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+        <h1>Lista de <em>pasajeros.</em></h1>
+        <p>@Model.Tour · @Model.Fecha.ToString("dd/MM/yyyy") · @Model.Hora.ToString(@"hh\:mm")</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="metric-card metric-card-accent"><span>Plazas confirmadas</span><strong>@Model.CuposConfirmados</strong><small>@Model.Confirmadas.Count reserva(s) confirmada(s)</small></div></div>
+            <div class="col-md-3"><div class="metric-card"><span>Plazas pendientes</span><strong>@Model.CuposPendientes</strong><small>@Model.Pendientes.Count solicitud(es)</small></div></div>
+            <div class="col-md-3"><div class="metric-card"><span>Plazas comprometidas</span><strong>@Model.CuposComprometidos</strong><small>Confirmadas + pendientes</small></div></div>
+            <div class="col-md-3"><div class="metric-card"><span>Disponibles</span><strong>@Model.CuposDisponibles</strong><small>Capacidad máxima: @Model.CapacidadMaxima</small></div></div>
+        </div>
+        <div class="alert alert-info mb-4">
+            <strong>Lista operativa de titulares.</strong> Cada reserva identifica al titular y el número de plazas que contrató.
+            Los nombres de acompañantes individuales aún no se registran en TourSmart RD.
+            Las solicitudes pendientes no deben tratarse como pasajeros confirmados.
+        </div>
+        <div class="dashboard-head mb-3">
+            <div><span class="eyebrow">LOGÍSTICA DE LA SALIDA</span><h2>Información del <em>tour.</em></h2></div>
+            <a class="btn btn-outline-secondary rounded-pill" asp-controller="ToursAdmin" asp-action="Manifiesto" asp-route-id="@Model.TourId">Actualizar lista ↗</a>
+        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-6"><div class="info-tile"><small>Guía asignado</small><strong>@Model.Guia</strong></div></div>
+            <div class="col-md-6"><div class="info-tile"><small>Transporte</small><strong>@Model.Transporte</strong></div></div>
+        </div>
+        <section class="dashboard-table mb-4">
+            <div class="dashboard-table-title"><h3>Reservas confirmadas</h3><span>@Model.CuposConfirmados plaza(s)</span></div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr><th>Reserva</th><th>Titular</th><th>Teléfono</th><th>Personas</th><th>Recibido neto</th><th>Saldo</th><th>Detalle</th></tr></thead>
+                    <tbody>
+                    @foreach (var item in Model.Confirmadas)
+                    {
+                        <tr>
+                            <td>#@item.ReservaId</td>
+                            <td><strong>@item.Titular</strong></td>
+                            <td>@item.Telefono</td>
+                            <td>@item.CantidadPersonas</td>
+                            <td>RD$ @item.NetoRecibido.ToString("N2")</td>
+                            <td>RD$ @item.Saldo.ToString("N2")</td>
+                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Pagos / saldo</a></td>
+                        </tr>
+                    }
+                    @if (!Model.Confirmadas.Any())
+                    {
+                        <tr><td colspan="7" class="text-secondary py-4">Todavía no existen reservas confirmadas para este tour.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="dashboard-table">
+            <div class="dashboard-table-title"><h3>Solicitudes pendientes de confirmación</h3><span>@Model.CuposPendientes plaza(s) reservada(s) provisionalmente</span></div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr><th>Reserva</th><th>Titular</th><th>Teléfono</th><th>Personas</th><th>Saldo</th><th>Acción</th></tr></thead>
+                    <tbody>
+                    @foreach (var item in Model.Pendientes)
+                    {
+                        <tr>
+                            <td>#@item.ReservaId</td>
+                            <td>@item.Titular</td>
+                            <td>@item.Telefono</td>
+                            <td>@item.CantidadPersonas</td>
+                            <td>RD$ @item.Saldo.ToString("N2")</td>
+                            <td><a class="btn btn-sm btn-outline-secondary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Revisar adelanto</a></td>
+                        </tr>
+                    }
+                    @if (!Model.Pendientes.Any())
+                    {
+                        <tr><td colspan="6" class="text-secondary py-4">No hay solicitudes pendientes para este tour.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <p class="dashboard-footnote">Información de uso interno. Protege los datos de contacto y verifica el estado de cada reserva antes de la salida. Este módulo es de solo lectura.</p>
+    </div>
+</section>
