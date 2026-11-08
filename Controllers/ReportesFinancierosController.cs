@@ -28,9 +28,9 @@ public sealed class ReportesFinancierosController(ApplicationDbContext db) : Con
 
         var finExclusivo = fin.AddDays(1);
         Response.Headers.CacheControl = "private, no-store";
-        Response.Headers.XContentTypeOptions = "nosniff";
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
         Response.ContentType = "text/csv; charset=utf-8";
-        Response.Headers.ContentDisposition =
+        Response.Headers["Content-Disposition"] =
             $"attachment; filename=\"TourSmart_Finanzas_{inicio:yyyyMMdd}_{fin:yyyyMMdd}.csv\"";
 
         // Escribir directamente al flujo HTTP evita el límite visual de 500
@@ -90,7 +90,10 @@ public sealed class ReportesFinancierosController(ApplicationDbContext db) : Con
             m.Cliente, m.Tour, m.MetodoPago, m.Referencia, m.RegistradoPor,
             neto.ToString("0.00", CultureInfo.InvariantCulture)
         ];
-        await writer.WriteLineAsync(string.Join(";", celdas.Select(EscaparCelda)).AsMemory(), ct);
+        // MontoNetoRD es un número calculado por la API, no contenido del usuario:
+        // se emite sin comillas para conservar valores negativos numéricos.
+        var linea = string.Join(";", celdas.Take(9).Select(EscaparCelda)) + ";" + celdas[9];
+        await writer.WriteLineAsync(linea.AsMemory(), ct);
     }
 
     private static string EscaparCelda(string? valor)
