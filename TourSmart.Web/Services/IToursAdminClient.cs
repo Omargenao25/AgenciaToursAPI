@@ -5,6 +5,8 @@ namespace TourSmart.Web.Services;
 
 public interface IToursAdminClient
 {
+    Task<EditarPasajerosViewModel> ObtenerPasajerosAsync(string token, int reservaId, CancellationToken ct);
+    Task<HttpStatusCode> ActualizarPasajerosAsync(string token, EditarPasajerosViewModel model, CancellationToken ct);
     Task<ManifiestoTourViewModel> ObtenerManifiestoAsync(string token, int tourId, CancellationToken ct);
     Task<AdelantoTourViewModel> ObtenerAdelantoAsync(string token, int id, CancellationToken ct);
     Task<HttpStatusCode> ConfigurarAdelantoAsync(string token, AdelantoTourViewModel model, CancellationToken ct);
