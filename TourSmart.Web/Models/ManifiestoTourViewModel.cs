@@ -4,6 +4,7 @@ public sealed class ManifiestoReserva
 {
     public int ReservaId { get; set; }
     public string Titular { get; set; } = "";
+    public List<string> Pasajeros { get; set; } = new();
     public string Telefono { get; set; } = "";
     public int CantidadPersonas { get; set; }
     public string Estado { get; set; } = "";
