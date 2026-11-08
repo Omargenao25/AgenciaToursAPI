@@ -12,6 +12,57 @@ namespace TourSmart.Web.Controllers;
 [Route("panel/reportes")]
 public sealed class ReportesWebController(IReservasAdminClient api, IMemoryCache cache) : Controller
 {
+    [HttpGet("finanzas/exportar-csv")]
+    public async Task<IActionResult> ExportarCsv(DateTime? desde, DateTime? hasta, CancellationToken ct)
+    {
+        var hoy = DateTime.UtcNow.Date;
+        var inicio = (desde ?? new DateTime(hoy.Year, hoy.Month, 1)).Date;
+        var fin = (hasta ?? hoy).Date;
+
+        if (inicio.Year < 2000 || fin < inicio || fin >= DateTime.MaxValue.Date ||
+            (fin - inicio).TotalDays > 366)
+            return BadRequest("Selecciona un período válido de hasta 366 días, a partir del año 2000.");
+
+        var sid = User.FindFirstValue("SessionId");
+        if (sid is null || !cache.TryGetValue("jwt:" + sid, out object? value) ||
+            value is not string jwt || string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+
+        try
+        {
+            using var respuesta = await api.ExportarFinanzasCsvAsync(jwt, inicio, fin, ct);
+            if (!respuesta.IsSuccessStatusCode)
+            {
+                TempData["Error"] = respuesta.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized
+                    ? "La API no autorizó la exportación financiera."
+                    : "La API no pudo generar el archivo CSV.";
+                return RedirectToAction(nameof(Finanzas), new { desde = inicio.ToString("yyyy-MM-dd"), hasta = fin.ToString("yyyy-MM-dd") });
+            }
+
+            Response.ContentType = "text/csv; charset=utf-8";
+            Response.Headers["Cache-Control"] = "private, no-store";
+            Response.Headers["X-Content-Type-Options"] = "nosniff";
+            Response.Headers["Content-Disposition"] =
+                $"attachment; filename=\"TourSmart_Finanzas_{inicio:yyyyMMdd}_{fin:yyyyMMdd}.csv\"";
+            await using var archivo = await respuesta.Content.ReadAsStreamAsync(ct);
+            await archivo.CopyToAsync(Response.Body, ct);
+            return new EmptyResult();
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "No se pudo descargar el CSV. Comprueba la conexión con la API.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La descarga tardó demasiado. Prueba con un intervalo más corto.";
+        }
+
+        return RedirectToAction(nameof(Finanzas), new {
+            desde = inicio.ToString("yyyy-MM-dd"),
+            hasta = fin.ToString("yyyy-MM-dd")
+        });
+    }
+
     [HttpGet("finanzas")]
     public async Task<IActionResult> Finanzas(DateTime? desde, DateTime? hasta, CancellationToken ct)
     {
