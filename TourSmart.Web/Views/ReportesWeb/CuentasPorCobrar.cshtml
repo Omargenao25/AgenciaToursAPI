@@ -1,0 +1,103 @@
+@model CuentasPorCobrarViewModel
+@{ ViewData["Title"] = "Cuentas por cobrar"; }
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Dashboard</a>
+        <span class="eyebrow">OPERACIONES FINANCIERAS · TOURSMART RD</span>
+        <h1>Cuentas <em>por cobrar.</em></h1>
+        <p>Seguimiento del saldo de reservas activas de excursiones futuras.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="metric-card metric-card-accent">
+                    <span>Saldo de reservas confirmadas</span>
+                    <strong>RD$ @Model.TotalSaldoConfirmado.ToString("N2")</strong>
+                    <small>@Model.ReservasConfirmadas reserva(s)</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span>Saldo de solicitudes pendientes</span>
+                    <strong>RD$ @Model.TotalSaldoPendienteSinConfirmar.ToString("N2")</strong>
+                    <small>@Model.ReservasPendientes solicitud(es) · aún no confirmadas</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span>Reservas que requieren revisión</span>
+                    <strong>@Model.RequierenAtencion</strong>
+                    <small>Plazos vencidos sin procesar o con pagos parciales</small>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info mb-4">
+            <strong>Importante:</strong> las solicitudes Pendientes no son cuentas por cobrar confirmadas.
+            Los totales muestran únicamente excursiones que aún no han comenzado, sin reservas canceladas.
+            Saldo = importe de reserva − (pagos registrados − devoluciones).
+            Esta información no comprueba transferencias bancarias reales ni determina ganancias.
+        </div>
+        <div class="dashboard-head mb-3">
+            <div>
+                <span class="eyebrow">SEGUIMIENTO DE COBROS</span>
+                <h2>Reservas <em>activas.</em></h2>
+            </div>
+            <a class="btn btn-dark-pill" asp-controller="ReportesWeb" asp-action="Finanzas">Ver reporte financiero ↗</a>
+        </div>
+        <div class="dashboard-table">
+            <div class="dashboard-table-title">
+                <h3>Ordenado por salida próxima</h3>
+                <span>@Model.TotalReservasActivas reservas</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Reserva</th><th>Tour / salida</th><th>Cliente</th>
+                            <th>Estado</th><th>Total</th><th>Recibido neto</th><th>Saldo</th><th>Situación</th><th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Reservas)
+                    {
+                        <tr>
+                            <td>#@item.ReservaId</td>
+                            <td>
+                                <strong>@item.Tour</strong>
+                                <small class="d-block text-secondary">@item.InicioTour.ToString("dd/MM/yyyy HH:mm")</small>
+                            </td>
+                            <td>@item.Cliente</td>
+                            <td><span class="reservation-status @(item.EstadoReserva == "Confirmada" ? "is-confirmed" : "is-pending")">@item.EstadoReserva</span></td>
+                            <td>RD$ @item.Total.ToString("N2")</td>
+                            <td>RD$ @item.Neto.ToString("N2")</td>
+                            <td><strong>RD$ @item.Saldo.ToString("N2")</strong></td>
+                            <td>
+                                @item.Situacion
+                                @if (item.EstadoReserva == "Pendiente" && item.FaltaAdelanto > 0)
+                                {
+                                    <small class="d-block text-secondary">Faltan RD$ @item.FaltaAdelanto.ToString("N2") de adelanto</small>
+                                }
+                            </td>
+                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Pagos / saldo</a></td>
+                        </tr>
+                    }
+                    @if (!Model.Reservas.Any())
+                    {
+                        <tr><td colspan="9" class="text-secondary py-4">No hay reservas activas de tours futuros.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p class="dashboard-footnote">
+            Los saldos se calculan en la API sobre pagos y devoluciones. No se realizan cargos automáticos desde este reporte.
+            Fecha de consulta: @Model.ConsultadoUtc.ToString("dd/MM/yyyy HH:mm") UTC.
+        </p>
+    </div>
+</section>
