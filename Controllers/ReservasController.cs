@@ -271,6 +271,11 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
+            var cantidadPasajerosRegistrados = await _context.PasajerosReserva
+                .CountAsync(p => p.ReservaId == id);
+            if (cantidadPasajerosRegistrados > 0 && cantidadPasajerosRegistrados != dto.CantidadPersonas)
+                return Conflict("No puedes cambiar la cantidad de plazas sin actualizar los pasajeros registrados.");
+
             reservaActual.ClienteId = dto.ClienteId;
             reservaActual.TourId = dto.TourId;
             reservaActual.MetodoPagoId = dto.MetodoPagoId;
