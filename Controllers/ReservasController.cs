@@ -322,8 +322,8 @@ namespace AgenciaToursAPI.Controllers
                 vencimiento <= DateTime.UtcNow && pagado == 0m)
                 return Conflict("El plazo de adelanto venció sin pagos. Esta solicitud será cancelada automáticamente.");
 
-            if (pagado < minimo)
-                return Conflict($"Se requiere un adelanto del {tour.PorcentajeAdelanto}% (RD$ {minimo:N2}) para confirmar. Pagado: RD$ {pagado:N2}; faltante: RD$ {minimo - pagado:N2}.");
+            if (neto < minimo)
+                return Conflict($"Se requiere un adelanto neto del {tour.PorcentajeAdelanto}% (RD$ {minimo:N2}) para confirmar. Neto registrado: RD$ {neto:N2}; faltante: RD$ {minimo - neto:N2}.");
 
             reserva.Estado = EstadosReserva.Confirmada;
             reserva.FechaCambioEstado = DateTime.UtcNow;
