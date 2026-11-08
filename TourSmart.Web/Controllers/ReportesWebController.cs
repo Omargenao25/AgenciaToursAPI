@@ -12,6 +12,33 @@ namespace TourSmart.Web.Controllers;
 [Route("panel/reportes")]
 public sealed class ReportesWebController(IReservasAdminClient api, IMemoryCache cache) : Controller
 {
+    [HttpGet("cuentas-por-cobrar")]
+    public async Task<IActionResult> CuentasPorCobrar(CancellationToken ct)
+    {
+        var sid = User.FindFirstValue("SessionId");
+        if (sid is null || !cache.TryGetValue("jwt:" + sid, out object? value) ||
+            value is not string jwt || string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+
+        try
+        {
+            var modelo = await api.CuentasPorCobrarAsync(jwt, ct);
+            Response.Headers.CacheControl = "private, no-store";
+            return View(modelo);
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized
+                ? "No tienes autorización para consultar los saldos."
+                : "No se pudo consultar el reporte. Comprueba que la API está encendida.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado. Intenta nuevamente.";
+        }
+        return View(new CuentasPorCobrarViewModel());
+    }
+
     [HttpGet("finanzas/exportar-csv")]
     public async Task<IActionResult> ExportarCsv(DateTime? desde, DateTime? hasta, CancellationToken ct)
     {
