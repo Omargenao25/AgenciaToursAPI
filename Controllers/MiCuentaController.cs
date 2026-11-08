@@ -351,6 +351,9 @@ public sealed class MiCuentaController(
         };
         db.Reservas.Add(reserva);
         await db.SaveChangesAsync();
+        foreach (var pasajero in pasajeros) pasajero.ReservaId = reserva.Id;
+        db.PasajerosReserva.AddRange(pasajeros);
+        await db.SaveChangesAsync();
         await transaccion.CommitAsync();
         return StatusCode(StatusCodes.Status201Created, new { reserva.Id, reserva.Estado });
     }
