@@ -1,0 +1,33 @@
+@model EditarPasajerosViewModel
+@{ ViewData["Title"] = "Editar pasajeros"; }
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="ToursAdmin" asp-action="Index">← Gestionar tours</a>
+        <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+        <h1>Datos de <em>pasajeros.</em></h1>
+        <p>Reserva #@Model.Id · @Model.Tour · @Model.CantidadPersonas plazas.</p>
+    </div>
+</section>
+<section class="section-space"><div class="container">
+    <div class="tour-admin-form">
+        <h2>Lista nominal de pasajeros</h2>
+        <p class="text-secondary">Añade o corrige los nombres de los viajeros. La cantidad de plazas reservadas no cambia.</p>
+        <form method="post" asp-controller="ToursAdmin" asp-action="Pasajeros" asp-route-reservaId="@Model.Id">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <span asp-validation-for="Pasajeros" class="text-danger small"></span>
+            @for (var i = 0; i < Model.CantidadPersonas; i++)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="pasajero_@i">Nombre completo del pasajero @(i + 1)</label>
+                    <input class="form-control" id="pasajero_@i" name="Pasajeros[@i]"
+                           value="@(i < Model.Pasajeros.Count ? Model.Pasajeros[i] : "")"
+                           minlength="3" maxlength="120" required />
+                </div>
+            }
+            <div class="alert alert-info">Los nombres pueden corregirse antes de que empiece la excursión. No se permiten cambios en reservas canceladas.</div>
+            <button type="submit" class="btn btn-accent">Guardar nombres ↗</button>
+        </form>
+    </div>
+</div></section>
