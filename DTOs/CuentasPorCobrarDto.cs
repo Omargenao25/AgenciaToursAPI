@@ -19,6 +19,19 @@ public sealed class CuentaPorCobrarFilaDto
     public string Situacion { get; set; } = "";
 }
 
+public sealed class AlertaCobroDto
+{
+    public int ReservaId { get; set; }
+    public string Cliente { get; set; } = "";
+    public string Tour { get; set; } = "";
+    public string Categoria { get; set; } = "";
+    public string Mensaje { get; set; } = "";
+    public string Prioridad { get; set; } = "Media";
+    public DateTime InicioTour { get; set; }
+    public DateTime? VenceAdelantoUtc { get; set; }
+    public decimal ImportePendiente { get; set; }
+}
+
 public sealed class CuentasPorCobrarDto
 {
     public DateTime ConsultadoUtc { get; set; }
@@ -30,4 +43,5 @@ public sealed class CuentasPorCobrarDto
     public decimal TotalSaldoPotencial => TotalSaldoConfirmado + TotalSaldoPendienteSinConfirmar;
     public int RequierenAtencion { get; set; }
     public List<CuentaPorCobrarFilaDto> Reservas { get; set; } = new();
+    public List<AlertaCobroDto> Alertas { get; set; } = new();
 }
