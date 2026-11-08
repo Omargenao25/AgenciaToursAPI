@@ -248,6 +248,20 @@ namespace AgenciaToursAPI.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.PasajeroReserva", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("NombreCompleto").IsRequired().HasMaxLength(120).HasColumnType("nvarchar(120)");
+                    b.Property<int>("Orden").HasColumnType("int");
+                    b.Property<int>("ReservaId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("ReservaId", "Orden").IsUnique();
+                    b.ToTable("PasajerosReserva", t => {
+                        t.HasCheckConstraint("CK_PasajerosReserva_Orden", "[Orden] BETWEEN 1 AND 100");
+                    });
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.ReembolsoReserva", b =>
                 {
                     b.Property<int>("Id")
@@ -572,6 +586,16 @@ namespace AgenciaToursAPI.Migrations
 
                     b.Navigation("MetodoPago");
 
+                    b.Navigation("Reserva");
+                });
+
+            modelBuilder.Entity("AgenciaToursAPI.Models.PasajeroReserva", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.Reserva", "Reserva")
+                        .WithMany()
+                        .HasForeignKey("ReservaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                     b.Navigation("Reserva");
                 });
 
