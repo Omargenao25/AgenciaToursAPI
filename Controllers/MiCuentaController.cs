@@ -321,6 +321,9 @@ public sealed class MiCuentaController(
         var clienteId = await ClienteAutenticado();
         if (clienteId is null) return Conflict("Tu cuenta no está vinculada a un cliente verificado.");
 
+        if (!ValidacionPasajeros.IntentarNormalizar(dto.CantidadPersonas, dto.Pasajeros, out var pasajeros, out var error))
+            return BadRequest(error);
+
         await using var transaccion = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         var tour = await db.Tours
             .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {dto.TourId}")
