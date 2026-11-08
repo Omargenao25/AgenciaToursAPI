@@ -43,6 +43,57 @@
             Saldo = importe de reserva − (pagos registrados − devoluciones).
             Esta información no comprueba transferencias bancarias reales ni determina ganancias.
         </div>
+        <section id="alertas" class="mb-5" aria-labelledby="titulo-alertas">
+            <div class="dashboard-head mb-3">
+                <div>
+                    <span class="eyebrow">AGENDA OPERATIVA</span>
+                    <h2 id="titulo-alertas">Centro de <em>alertas.</em></h2>
+                </div>
+                <a class="btn btn-outline-secondary rounded-pill" asp-controller="ReportesWeb"
+                   asp-action="CuentasPorCobrar" asp-fragment="alertas">Actualizar alertas ↗</a>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4"><div class="metric-card"><span>Alertas de alta prioridad</span><strong>@Model.Alertas.Count(a => a.Prioridad == "Alta")</strong><small>Necesitan revisión antes de la próxima salida o vencimiento</small></div></div>
+                <div class="col-md-4"><div class="metric-card"><span>Otras alertas</span><strong>@Model.Alertas.Count(a => a.Prioridad != "Alta")</strong><small>Solicitudes de adelanto y confirmaciones pendientes</small></div></div>
+                <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Total alertas activas</span><strong>@Model.Alertas.Count</strong><small>Calculadas al abrir esta pantalla</small></div></div>
+            </div>
+            <div class="dashboard-table">
+                <div class="dashboard-table-title">
+                    <h3>Acciones recomendadas</h3>
+                    <span>@Model.Alertas.Count aviso(s)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th>Prioridad</th><th>Reserva</th><th>Cliente / tour</th><th>Situación</th><th>Importe</th><th>Revisar</th></tr></thead>
+                        <tbody>
+                        @foreach (var alerta in Model.Alertas)
+                        {
+                            <tr>
+                                <td><span class="reservation-status @(alerta.Prioridad == "Alta" ? "is-cancelled" : "is-pending")">@alerta.Prioridad</span></td>
+                                <td>#@alerta.ReservaId</td>
+                                <td><strong>@alerta.Cliente</strong><small class="d-block text-secondary">@alerta.Tour</small><small class="d-block text-secondary">Salida: @alerta.InicioTour.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                <td>
+                                    <strong>@alerta.Categoria</strong>
+                                    <small class="d-block text-secondary">@alerta.Mensaje</small>
+                                    @if (alerta.VenceAdelantoUtc is DateTime vence)
+                                    {
+                                        <small class="d-block text-secondary">Límite de adelanto: @vence.ToString("dd/MM/yyyy HH:mm") UTC</small>
+                                    }
+                                </td>
+                                <td>RD$ @alerta.ImportePendiente.ToString("N2")</td>
+                                <td><a class="btn btn-sm btn-outline-primary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@alerta.ReservaId">Abrir reserva</a></td>
+                            </tr>
+                        }
+                        @if (!Model.Alertas.Any())
+                        {
+                            <tr><td colspan="6" class="text-secondary py-4">Sin alertas operativas para las reservas futuras.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="dashboard-footnote">Avisos internos de solo lectura: no envían mensajes, no registran pagos ni cambian automáticamente estados. Antes de actuar, verifica la reserva y cualquier pago con la agencia.</p>
+        </section>
         <div class="dashboard-head mb-3">
             <div>
                 <span class="eyebrow">SEGUIMIENTO DE COBROS</span>
