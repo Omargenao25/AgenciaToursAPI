@@ -18,5 +18,6 @@ namespace AgenciaToursAPI.DTOs
 
         [Range( 1,100, ErrorMessage = "La cantidad de personas debe estar entre 1 y 100.")]
         public int CantidadPersonas { get; set; }
+        public List<string> Pasajeros { get; set; } = new();
     }
 }
