@@ -32,6 +32,7 @@ public sealed class ReembolsosReservaController(ApplicationDbContext db) : Contr
         return Ok(items);
     }
 
+    [Authorize(Roles = Roles.Administrador)]
     [HttpPost]
     public async Task<IActionResult> Registrar(int reservaId, RegistrarReembolsoDto dto, CancellationToken ct)
     {
@@ -52,7 +53,7 @@ public sealed class ReembolsosReservaController(ApplicationDbContext db) : Contr
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var operadorId))
             return Unauthorized();
         var operador = await db.Usuarios.AsNoTracking()
-            .Where(u => u.Id == operadorId && (u.Rol == Roles.Administrador || u.Rol == Roles.Operador))
+            .Where(u => u.Id == operadorId && u.Rol == Roles.Administrador)
             .Select(u => u.Nombre).SingleOrDefaultAsync(ct);
         if (operador is null) return Forbid();
 
