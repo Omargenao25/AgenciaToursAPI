@@ -53,7 +53,7 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
             MotivoCancelacion = reserva.MotivoCancelacion,
             FechaTour = reserva.FechaTour, HoraTour = reserva.HoraTour,
             PorcentajeAdelanto = reserva.PorcentajeAdelanto,
-            Pagado = pagos.Sum(p => p.Monto), Pagos = pagos
+            Pagado = pagos.Sum(p => p.Monto), Devuelto = devuelto, Pagos = pagos
         });
     }
 
