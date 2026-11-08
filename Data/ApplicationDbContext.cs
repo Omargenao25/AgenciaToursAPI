@@ -28,6 +28,7 @@ namespace AgenciaToursAPI.Data
         public DbSet<MetodoPago> MetodosPago { get; set; }
 
         public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<PasajeroReserva> PasajerosReserva { get; set; }
 
         public DbSet<PagoReserva> PagosReserva { get; set; }
         public DbSet<ReembolsoReserva> ReembolsosReserva { get; set; }
