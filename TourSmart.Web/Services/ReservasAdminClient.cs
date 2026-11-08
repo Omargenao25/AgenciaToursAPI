@@ -7,6 +7,17 @@ namespace TourSmart.Web.Services;
 
 public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClient
 {
+    public async Task<ReporteFinancieroViewModel> ReporteFinancieroAsync(string jwt, DateTime desde, DateTime hasta, CancellationToken ct)
+    {
+        var url = $"api/reportes/finanzas?desde={desde:yyyy-MM-dd}&hasta={hasta:yyyy-MM-dd}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ReporteFinancieroViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("No se recibió el reporte financiero.");
+    }
+
     public async Task<IReadOnlyList<ReembolsoReservaItem>> ReembolsosAsync(string jwt, int reservaId, CancellationToken ct)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, $"api/reservas/{reservaId}/reembolsos");
