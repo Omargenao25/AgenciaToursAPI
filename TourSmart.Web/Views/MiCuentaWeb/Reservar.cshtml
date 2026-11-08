@@ -19,6 +19,20 @@
 <div class="col-md-6"><label asp-for="MetodoPagoId" class="form-label">Método de pago</label>
 <select asp-for="MetodoPagoId" asp-items="Model.Metodos" class="form-select"><option value="0">Selecciona un método</option></select><span asp-validation-for="MetodoPagoId" class="text-danger small"></span></div>
 </div>
+                <div class="mt-4">
+                    <h3 class="h5">Nombres de los pasajeros</h3>
+                    <p class="text-secondary small">Introduce el nombre completo de cada persona, incluido el titular solo si viajará.</p>
+                    <div id="listaPasajeros">
+                    @for (var i = 0; i < Model.Pasajeros.Count; i++)
+                    {
+                        <div class="mb-2">
+                            <label class="form-label" for="pasajero_@i">Pasajero @(i+1)</label>
+                            <input id="pasajero_@i" name="Pasajeros[@i]" value="@Model.Pasajeros[i]" class="form-control" maxlength="120" minlength="3" required autocomplete="off" />
+                        </div>
+                    }
+                    </div>
+                    <span asp-validation-for="Pasajeros" class="text-danger small"></span>
+                </div>
 @if (Model.Tour is not null)
 {
     var totalEstimado = Model.Tour.Precio * Model.CantidadPersonas;
@@ -39,6 +53,39 @@
 </div></div></section>
 @section Scripts {
 <script>
+(function () {
+  const cantidad = document.getElementById("CantidadPersonas");
+  const lista = document.getElementById("listaPasajeros");
+  if (!cantidad || !lista) return;
+  const actualizarNombres = () => {
+    const n = Math.min(100, Math.max(1, Number(cantidad.value) || 1));
+    const valores = Array.from(lista.querySelectorAll('input[name^="Pasajeros["]')).map(x => x.value);
+    lista.replaceChildren();
+    for (let i=0; i<n; i++) {
+      const grupo=document.createElement("div");
+      grupo.className="mb-2";
+      const label=document.createElement("label");
+      label.className="form-label";
+      label.htmlFor="pasajero_"+i;
+      label.textContent="Pasajero "+(i+1);
+      const campo=document.createElement("input");
+      campo.id="pasajero_"+i;
+      campo.name="Pasajeros["+i+"]";
+      campo.value=valores[i] || "";
+      campo.className="form-control";
+      campo.required=true;
+      campo.minLength=3;
+      campo.maxLength=120;
+      campo.autocomplete="off";
+      grupo.append(label,campo);
+      lista.append(grupo);
+    }
+  };
+  cantidad.addEventListener("change", actualizarNombres);
+  cantidad.addEventListener("input", actualizarNombres);
+  actualizarNombres();
+})();
+
 const campoPersonas = document.getElementById("CantidadPersonas");
 const adelantoResumen = document.getElementById("adelantoResumen");
 if (campoPersonas && adelantoResumen) {
