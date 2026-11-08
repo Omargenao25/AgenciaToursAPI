@@ -14,6 +14,17 @@ public sealed class MovimientoFinanciero
     public string Cliente { get; set; } = "";
 }
 
+public sealed class DesgloseFinanciero
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = "";
+    public decimal Cobrado { get; set; }
+    public decimal Devuelto { get; set; }
+    public decimal Neto { get; set; }
+    public int CantidadPagos { get; set; }
+    public int CantidadReembolsos { get; set; }
+}
+
 public sealed class ReporteFinancieroViewModel
 {
     public DateTime DesdeUtc { get; set; }
@@ -27,5 +38,7 @@ public sealed class ReporteFinancieroViewModel
     public int LimiteListado { get; set; } = 500;
     public bool ListadoTruncado { get; set; }
     public List<MovimientoFinanciero> Movimientos { get; set; } = new();
+    public List<DesgloseFinanciero> PorTour { get; set; } = new();
+    public List<DesgloseFinanciero> PorMetodoPago { get; set; } = new();
     public DateTime HastaIncluido => HastaExclusivoUtc.AddDays(-1);
 }
