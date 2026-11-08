@@ -156,10 +156,71 @@ public sealed class ReportesFinancierosController(ApplicationDbContext db) : Con
                     ? p.Reserva.Cliente.Nombre + " " + p.Reserva.Cliente.Apellido : ""
             }).ToListAsync(ct);
 
+        // Agregación completa en SQL, sin depender del límite de 500 movimientos.
+        // Agrupar por ID evita mezclar tours o métodos con nombres iguales.
+        var pagosTour = await pagos
+            .GroupBy(p => new { p.Reserva.TourId, Nombre = p.Reserva.Tour!.Nombre })
+            .Select(g => new {
+                Id = g.Key.TourId, g.Key.Nombre,
+                Cobrado = g.Sum(p => p.Monto), Cantidad = g.Count()
+            }).ToListAsync(ct);
+        var devolucionesTour = await reembolsos
+            .GroupBy(p => new { p.Reserva.TourId, Nombre = p.Reserva.Tour!.Nombre })
+            .Select(g => new {
+                Id = g.Key.TourId, g.Key.Nombre,
+                Devuelto = g.Sum(p => p.Monto), Cantidad = g.Count()
+            }).ToListAsync(ct);
+
+        var porTour = pagosTour.Select(x => x.Id)
+            .Union(devolucionesTour.Select(x => x.Id))
+            .Select(id => {
+                var cobro = pagosTour.FirstOrDefault(x => x.Id == id);
+                var devolucion = devolucionesTour.FirstOrDefault(x => x.Id == id);
+                return new DesgloseFinancieroDto {
+                    Id = id, Nombre = cobro?.Nombre ?? devolucion?.Nombre ?? "Tour sin nombre",
+                    Cobrado = cobro?.Cobrado ?? 0m,
+                    Devuelto = devolucion?.Devuelto ?? 0m,
+                    CantidadPagos = cobro?.Cantidad ?? 0,
+                    CantidadReembolsos = devolucion?.Cantidad ?? 0
+                };
+            })
+            .OrderByDescending(x => x.Neto).ThenBy(x => x.Nombre).ThenBy(x => x.Id)
+            .ToList();
+
+        var pagosMetodo = await pagos
+            .GroupBy(p => new { p.MetodoPagoId, Nombre = p.MetodoPago.Nombre })
+            .Select(g => new {
+                Id = g.Key.MetodoPagoId, g.Key.Nombre,
+                Cobrado = g.Sum(p => p.Monto), Cantidad = g.Count()
+            }).ToListAsync(ct);
+        var devolucionesMetodo = await reembolsos
+            .GroupBy(p => new { p.MetodoPagoId, Nombre = p.MetodoPago.Nombre })
+            .Select(g => new {
+                Id = g.Key.MetodoPagoId, g.Key.Nombre,
+                Devuelto = g.Sum(p => p.Monto), Cantidad = g.Count()
+            }).ToListAsync(ct);
+
+        var porMetodo = pagosMetodo.Select(x => x.Id)
+            .Union(devolucionesMetodo.Select(x => x.Id))
+            .Select(id => {
+                var cobro = pagosMetodo.FirstOrDefault(x => x.Id == id);
+                var devolucion = devolucionesMetodo.FirstOrDefault(x => x.Id == id);
+                return new DesgloseFinancieroDto {
+                    Id = id, Nombre = cobro?.Nombre ?? devolucion?.Nombre ?? "Método sin nombre",
+                    Cobrado = cobro?.Cobrado ?? 0m,
+                    Devuelto = devolucion?.Devuelto ?? 0m,
+                    CantidadPagos = cobro?.Cantidad ?? 0,
+                    CantidadReembolsos = devolucion?.Cantidad ?? 0
+                };
+            })
+            .OrderByDescending(x => x.Neto).ThenBy(x => x.Nombre).ThenBy(x => x.Id)
+            .ToList();
+
         var reporte = new ReporteFinancieroDto {
             DesdeUtc = inicio, HastaExclusivoUtc = finExclusivo,
             TotalCobrado = totalCobrado, TotalDevuelto = totalDevuelto,
             CantidadPagos = cantidadPagos, CantidadReembolsos = cantidadReembolsos,
+            PorTour = porTour, PorMetodoPago = porMetodo,
             Movimientos = movimientosPagos.Concat(movimientosReembolsos)
                 .OrderByDescending(x => x.FechaRegistroUtc)
                 .ThenByDescending(x => x.Tipo).ThenByDescending(x => x.Id)
