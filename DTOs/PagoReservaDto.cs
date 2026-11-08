@@ -44,7 +44,7 @@ public sealed class EstadoPagosReservaDto
     public decimal NetoRecibido => Pagado - Devuelto;
     public int PorcentajeAdelanto { get; set; }
     public decimal AdelantoMinimo => Math.Ceiling(Total * PorcentajeAdelanto) / 100m;
-    public decimal FaltanteParaConfirmar => Math.Max(0m, AdelantoMinimo - Pagado);
+    public decimal FaltanteParaConfirmar => Math.Max(0m, AdelantoMinimo - NetoRecibido);
     public bool PuedeConfirmar => EstadoReserva == "Pendiente" && Pagado >= AdelantoMinimo &&
         FechaTour.HasValue && HoraTour.HasValue && DateTime.Now < FechaTour.Value.Date.Add(HoraTour.Value);
     public decimal Saldo => Math.Max(0m, Total - Pagado);
