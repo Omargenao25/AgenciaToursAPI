@@ -77,6 +77,71 @@ public sealed class CuentasPorCobrarController(ApplicationDbContext db) : Contro
 
         var pendientes = filas.Where(x => x.EstadoReserva == "Pendiente").ToList();
         var confirmadas = filas.Where(x => x.EstadoReserva == "Confirmada").ToList();
+        // Centro de alertas: calculado al consultar, sin enviar mensajes,
+        // sin modificar reservas y sin crear notificaciones duplicadas.
+        var alertas = new List<AlertaCobroDto>();
+        foreach (var fila in filas)
+        {
+            var restanteHastaSalida = fila.InicioTour - ahoraLocal;
+            string? categoria = null;
+            string? mensaje = null;
+            var prioridad = "Media";
+            var importe = fila.Saldo;
+
+            if (fila.EstadoReserva == "Pendiente")
+            {
+                if (fila.VenceAdelantoUtc is DateTime vence && vence <= ahoraUtc)
+                {
+                    categoria = fila.Pagos > 0m ? "RevisionManual" : "PlazoVencido";
+                    mensaje = fila.Pagos > 0m
+                        ? "El plazo del adelanto venció con pagos registrados. Revisar y conciliar manualmente."
+                        : "Plazo vencido sin pagos: comprobar que el servicio automático procese la cancelación.";
+                    prioridad = "Alta";
+                    importe = fila.FaltaAdelanto;
+                }
+                else if (fila.FaltaAdelanto > 0m &&
+                         fila.VenceAdelantoUtc is DateTime plazo &&
+                         plazo <= ahoraUtc.AddHours(6))
+                {
+                    categoria = "AdelantoProximo";
+                    mensaje = "Faltan seis horas o menos para vencer el plazo del adelanto.";
+                    prioridad = "Alta";
+                    importe = fila.FaltaAdelanto;
+                }
+                else if (fila.FaltaAdelanto > 0m)
+                {
+                    categoria = "FaltaAdelanto";
+                    mensaje = "Solicitud sin adelanto suficiente para confirmar.";
+                    importe = fila.FaltaAdelanto;
+                }
+                else
+                {
+                    categoria = "ListaParaConfirmar";
+                    mensaje = "El adelanto neto está cubierto. La agencia puede revisar la confirmación.";
+                }
+            }
+            else if (fila.EstadoReserva == "Confirmada" &&
+                     fila.Saldo > 0m && restanteHastaSalida <= TimeSpan.FromHours(48))
+            {
+                categoria = "SaldoProximo";
+                mensaje = "Salida en 48 horas o menos con saldo pendiente de cobrar.";
+                prioridad = "Alta";
+            }
+
+            if (categoria is not null && mensaje is not null)
+                alertas.Add(new AlertaCobroDto
+                {
+                    ReservaId = fila.ReservaId, Cliente = fila.Cliente,
+                    Tour = fila.Tour, InicioTour = fila.InicioTour,
+                    VenceAdelantoUtc = fila.VenceAdelantoUtc,
+                    Categoria = categoria, Mensaje = mensaje,
+                    Prioridad = prioridad, ImportePendiente = importe
+                });
+        }
+        alertas = alertas.OrderByDescending(a => a.Prioridad == "Alta")
+            .ThenBy(a => a.VenceAdelantoUtc ?? DateTime.MaxValue)
+            .ThenBy(a => a.InicioTour).ThenBy(a => a.ReservaId).ToList();
+
         var reporte = new CuentasPorCobrarDto
         {
             ConsultadoUtc = ahoraUtc,
@@ -88,7 +153,8 @@ public sealed class CuentasPorCobrarController(ApplicationDbContext db) : Contro
             RequierenAtencion = pendientes.Count(x =>
                 x.Situacion.StartsWith("Revisión manual") ||
                 x.Situacion.StartsWith("Vencimiento sin pagos")),
-            Reservas = filas
+            Reservas = filas,
+            Alertas = alertas
         };
         Response.Headers.CacheControl = "private, no-store";
         return Ok(reporte);
