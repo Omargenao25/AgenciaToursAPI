@@ -46,7 +46,7 @@
         </div>
         <div class="row g-3 mb-4">
             <div class="col-md-4"><div class="metric-card"><span>Total de reserva</span><strong>RD$ @Model.Resumen.Total.ToString("N2")</strong></div></div>
-            <div class="col-md-4"><div class="metric-card"><span>Pagado</span><strong>RD$ @Model.Resumen.Pagado.ToString("N2")</strong></div></div>
+            <div class="col-md-4"><div class="metric-card"><span>Recibido neto</span><strong>RD$ @Model.Resumen.NetoRecibido.ToString("N2")</strong><small>Pagos brutos RD$ @Model.Resumen.Pagado.ToString("N2") · Devuelto RD$ @Model.Resumen.Devuelto.ToString("N2")</small></div></div>
             <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Saldo pendiente</span><strong>RD$ @Model.Resumen.Saldo.ToString("N2")</strong></div></div>
         </div>
         <div class="dashboard-table mb-4 p-4">
