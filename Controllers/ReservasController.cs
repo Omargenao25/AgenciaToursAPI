@@ -312,6 +312,10 @@ namespace AgenciaToursAPI.Controllers
             var pagado = await _context.PagosReserva
                 .Where(p => p.ReservaId == id)
                 .SumAsync(p => (decimal?)p.Monto) ?? 0m;
+            var devuelto = await _context.ReembolsosReserva
+                .Where(x => x.ReservaId == id)
+                .SumAsync(x => (decimal?)x.Monto) ?? 0m;
+            var neto = pagado - devuelto;
             // Si venció sin que se registrara ningún pago, no permitir
             // confirmación manual mientras el proceso periódico libera los cupos.
             if (reserva.VencePendienteUtc is DateTime vencimiento &&
