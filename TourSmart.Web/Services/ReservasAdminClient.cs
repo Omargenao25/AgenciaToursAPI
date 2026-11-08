@@ -7,6 +7,16 @@ namespace TourSmart.Web.Services;
 
 public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClient
 {
+    public async Task<CuentasPorCobrarViewModel> CuentasPorCobrarAsync(string jwt, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "api/reportes/cuentas-por-cobrar");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CuentasPorCobrarViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("La API no devolvió el seguimiento de cobros.");
+    }
+
     public async Task<HttpResponseMessage> ExportarFinanzasCsvAsync(
         string jwt, DateTime desde, DateTime hasta, CancellationToken ct)
     {
