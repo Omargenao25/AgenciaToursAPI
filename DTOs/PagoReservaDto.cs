@@ -40,6 +40,8 @@ public sealed class EstadoPagosReservaDto
     public TimeSpan? HoraTour { get; set; }
     public decimal Total { get; set; }
     public decimal Pagado { get; set; }
+    public decimal Devuelto { get; set; }
+    public decimal NetoRecibido => Pagado - Devuelto;
     public int PorcentajeAdelanto { get; set; }
     public decimal AdelantoMinimo => Math.Ceiling(Total * PorcentajeAdelanto) / 100m;
     public decimal FaltanteParaConfirmar => Math.Max(0m, AdelantoMinimo - Pagado);
