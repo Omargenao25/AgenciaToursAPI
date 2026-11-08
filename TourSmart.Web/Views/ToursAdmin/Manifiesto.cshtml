@@ -20,7 +20,7 @@
         </div>
         <div class="alert alert-info mb-4">
             <strong>Lista operativa de titulares.</strong> Cada reserva identifica al titular y el número de plazas que contrató.
-            Los nombres de acompañantes individuales aún no se registran en TourSmart RD.
+            Las reservas nuevas incluyen nombres individuales. Las reservas históricas anteriores a la Fase 5.0 pueden estar pendientes de completar.
             Las solicitudes pendientes no deben tratarse como pasajeros confirmados.
         </div>
         <div class="dashboard-head mb-3">
@@ -41,7 +41,26 @@
                     {
                         <tr>
                             <td>#@item.ReservaId</td>
-                            <td><strong>@item.Titular</strong></td>
+                            <td><strong>@item.Titular</strong>
+                                @if (item.Pasajeros.Count > 0)
+                                {
+                                    <small class="d-block text-secondary">Pasajeros nominales:</small>
+                                    <ol class="small mb-0 ps-3">
+                                        @foreach (var nombre in item.Pasajeros)
+                                        {
+                                            <li>@nombre</li>
+                                        }
+                                    </ol>
+                                }
+                                else
+                                {
+                                    <small class="d-block text-warning">Reserva antigua sin nombres individuales.</small>
+                                }
+                                @if (item.Pasajeros.Count > 0 && item.Pasajeros.Count != item.CantidadPersonas)
+                                {
+                                    <small class="d-block text-danger">Revisar: cantidad de nombres no coincide con plazas.</small>
+                                }
+                            </td>
                             <td>@item.Telefono</td>
                             <td>@item.CantidadPersonas</td>
                             <td>RD$ @item.NetoRecibido.ToString("N2")</td>
@@ -67,7 +86,18 @@
                     {
                         <tr>
                             <td>#@item.ReservaId</td>
-                            <td>@item.Titular</td>
+                            <td>@item.Titular
+                                @if (item.Pasajeros.Count > 0)
+                                {
+                                    <ol class="small mb-0 ps-3">
+                                        @foreach (var nombre in item.Pasajeros) { <li>@nombre</li> }
+                                    </ol>
+                                }
+                                else
+                                {
+                                    <small class="d-block text-warning">Sin nombres individuales (reserva anterior).</small>
+                                }
+                            </td>
                             <td>@item.Telefono</td>
                             <td>@item.CantidadPersonas</td>
                             <td>RD$ @item.Saldo.ToString("N2")</td>
