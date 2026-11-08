@@ -39,6 +39,35 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         ViewBag.DestinosPorPais = System.Text.Json.JsonSerializer.Serialize(catalogos.Destinos.Select(x => new { x.Id, x.PaisId }));
     }
 
+    [HttpGet("{id:int}/manifiesto")]
+    public async Task<IActionResult> Manifiesto(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var token = Token();
+        if (string.IsNullOrWhiteSpace(token)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var model = await adminApi.ObtenerManifiestoAsync(token, id, ct);
+            Response.Headers.CacheControl = "private, no-store";
+            return View(model);
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode switch
+            {
+                HttpStatusCode.NotFound => "No existe el tour solicitado.",
+                HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden =>
+                    "No tienes permiso para consultar el manifiesto.",
+                _ => "No fue posible consultar las reservas del tour."
+            };
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado en responder.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpGet("{id:int}/adelanto")]
     public async Task<IActionResult> Adelanto(int id, CancellationToken ct)
     {
