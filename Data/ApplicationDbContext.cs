@@ -30,6 +30,7 @@ namespace AgenciaToursAPI.Data
         public DbSet<Reserva> Reservas { get; set; }
 
         public DbSet<PagoReserva> PagosReserva { get; set; }
+        public DbSet<ReembolsoReserva> ReembolsosReserva { get; set; }
 
         public DbSet<Usuario> Usuarios { get; set; }
 
@@ -143,6 +144,25 @@ namespace AgenciaToursAPI.Data
 
             modelBuilder.Entity<PagoReserva>()
                 .ToTable(t => t.HasCheckConstraint("CK_PagosReserva_Monto", "[Monto] > 0"));
+
+            modelBuilder.Entity<ReembolsoReserva>()
+                .HasOne(r => r.Reserva)
+                .WithMany()
+                .HasForeignKey(r => r.ReservaId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReembolsoReserva>()
+                .HasOne(r => r.MetodoPago)
+                .WithMany()
+                .HasForeignKey(r => r.MetodoPagoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ReembolsoReserva>()
+                .HasIndex(r => r.ClaveOperacion)
+                .IsUnique();
+
+            modelBuilder.Entity<ReembolsoReserva>()
+                .ToTable(t => t.HasCheckConstraint("CK_ReembolsosReserva_Monto", "[Monto] > 0"));
 
             modelBuilder.Entity<RecuperacionContrasena>()
                 .HasOne(r => r.Usuario)
