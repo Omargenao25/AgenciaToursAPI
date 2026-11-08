@@ -16,6 +16,26 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
         return await resp.Content.ReadFromJsonAsync<List<T>>(cancellationToken: ct) ?? new();
     }
 
+    public async Task<EditarPasajerosViewModel> ObtenerPasajerosAsync(string token, int reservaId, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"api/reservas/{reservaId}/pasajeros");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<EditarPasajerosViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("No se recibieron los pasajeros.");
+    }
+
+    public async Task<HttpStatusCode> ActualizarPasajerosAsync(string token, EditarPasajerosViewModel model, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Put, $"api/reservas/{model.Id}/pasajeros") {
+            Content = JsonContent.Create(new { model.Pasajeros })
+        };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        return resp.StatusCode;
+    }
+
     public async Task<ManifiestoTourViewModel> ObtenerManifiestoAsync(string token, int tourId, CancellationToken ct)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, $"api/tours/{tourId}/manifiesto");
