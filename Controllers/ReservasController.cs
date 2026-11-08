@@ -83,6 +83,8 @@ namespace AgenciaToursAPI.Controllers
         public async Task<ActionResult<ReservaRespuestaDto>>
             PostReserva(CrearReservaDto dto)
         {
+            if (!ValidacionPasajeros.IntentarNormalizar(dto.CantidadPersonas, dto.Pasajeros, out var pasajeros, out var error))
+                return BadRequest(error);
             await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
             var clienteExiste = await _context.Clientes
