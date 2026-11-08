@@ -36,7 +36,7 @@
 11. Ejecutar la prueba de vencimiento seguro de Fase 4.2, aún pendiente, siguiendo `docs/VENCIMIENTO_RESERVAS_4_2.md`.
 
 ## Pendientes
-- Exportación a CSV/PDF con permisos y protección anti-inyección en hojas de cálculo.
+- Exportación CSV añadida en Fase 4.5: consulta `docs/EXPORTACION_CSV_4_5.md`. La exportación PDF todavía está pendiente.
 - Agrupación por tour, método, cliente y períodos; indicadores de cobros por cobrar.
 - Conciliación bancaria contra extractos reales, comprobantes y autorizaciones de reembolsos.
 - Pruebas automatizadas de integración y performance; compilación y prueba real en la PC del usuario pendientes.
