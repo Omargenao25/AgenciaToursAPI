@@ -7,6 +7,16 @@ namespace TourSmart.Web.Services;
 
 public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClient
 {
+    public async Task<HttpResponseMessage> ExportarFinanzasCsvAsync(
+        string jwt, DateTime desde, DateTime hasta, CancellationToken ct)
+    {
+        var url = $"api/reportes/finanzas/exportar-csv?desde={desde:yyyy-MM-dd}&hasta={hasta:yyyy-MM-dd}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        // ResponseHeadersRead permite retransmitir el CSV sin cargarlo entero en memoria.
+        return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+    }
+
     public async Task<ReporteFinancieroViewModel> ReporteFinancieroAsync(string jwt, DateTime desde, DateTime hasta, CancellationToken ct)
     {
         var url = $"api/reportes/finanzas?desde={desde:yyyy-MM-dd}&hasta={hasta:yyyy-MM-dd}";
