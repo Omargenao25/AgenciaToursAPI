@@ -152,6 +152,9 @@ namespace AgenciaToursAPI.Controllers
 
             _context.Reservas.Add(reserva);
             await _context.SaveChangesAsync();
+            foreach (var pasajero in pasajeros) pasajero.ReservaId = reserva.Id;
+            _context.PasajerosReserva.AddRange(pasajeros);
+            await _context.SaveChangesAsync();
             await transaccion.CommitAsync();
 
             var respuesta = await ObtenerReservaRespuesta(reserva.Id);
