@@ -43,6 +43,9 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
                 Observacion = p.Observacion,
                 RegistradoPor = p.RegistradoPor
             }).ToListAsync(ct);
+        var devuelto = await db.ReembolsosReserva.AsNoTracking()
+            .Where(x => x.ReservaId == reservaId)
+            .SumAsync(x => (decimal?)x.Monto, ct) ?? 0m;
         return Ok(new EstadoPagosReservaDto {
             ReservaId = reserva.Id, Cliente = reserva.Cliente, Tour = reserva.Tour,
             EstadoReserva = reserva.Estado, Total = reserva.Total,
