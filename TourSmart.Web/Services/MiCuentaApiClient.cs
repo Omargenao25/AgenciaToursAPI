@@ -90,7 +90,7 @@ public sealed class MiCuentaApiClient(HttpClient client) : IMiCuentaApiClient
     public async Task<(HttpStatusCode Estado, string Mensaje)> ReservarAsync(string jwt, MiReservaFormulario model, CancellationToken ct)
     {
         using var request = Autorizar(HttpMethod.Post, "api/MiCuenta/reservas", jwt);
-        request.Content = JsonContent.Create(new { model.TourId, model.MetodoPagoId, model.CantidadPersonas });
+        request.Content = JsonContent.Create(new { model.TourId, model.MetodoPagoId, model.CantidadPersonas, model.Pasajeros });
         using var response = await client.SendAsync(request, ct);
         var mensaje = response.IsSuccessStatusCode ? "" : await response.Content.ReadAsStringAsync(ct);
         return (response.StatusCode, mensaje);
