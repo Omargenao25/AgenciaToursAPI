@@ -360,7 +360,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         {
             var tour = await toursApi.GetTourAsync(id, ct);
             if (tour is null) return NotFound();
-            if (tour.Estado != "Disponible")
+            if (tour.Estado != "Disponible" || tour.CerradoOperativo)
             {
                 TempData["Error"] = "Solo se pueden editar tours que todavía no han comenzado.";
                 return RedirectToAction(nameof(Index));
