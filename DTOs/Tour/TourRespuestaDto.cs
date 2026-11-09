@@ -37,6 +37,7 @@
 
         public string Estado { get; set; } = string.Empty;
         public int CapacidadMaxima { get; set; }
+        public bool CerradoOperativo { get; set; }
         public int CuposReservados { get; set; }
         public int CuposDisponibles => Math.Max(0, CapacidadMaxima - CuposReservados);
     }
