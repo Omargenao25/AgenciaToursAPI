@@ -1,0 +1,207 @@
+/* TourSmart RD | Experiencia visual v3. Una capa comun para todas las vistas MVC.
+   Sin afectar nombres de campos, rutas ni comportamiento de negocio. */
+:root {
+ --ink:#183c3a; --pine:#102d32; --forest:#194b47; --lime:#e6f28f;
+ --mint:#e3efe7; --cream:#f7f7f2; --sand:#edf2ea; --muted:#657a76;
+ --line:#dce6e0; --brand:#16856c; --brand-deep:#116651;
+ --surface:#fff; --ts-shadow:0 18px 48px rgba(20,64,58,.08);
+ --ts-radius:22px; --ts-ease:cubic-bezier(.2,.8,.2,1);
+}
+html{scroll-padding-top:96px}
+body{background:var(--cream);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;letter-spacing:-.006em}
+main{overflow:clip;min-height:65vh}
+h1,h2,h3,h4{letter-spacing:-.053em}
+h1,h2{font-weight:810}
+.container{max-width:1260px}
+a,button,.btn{touch-action:manipulation}
+a{transition:color .2s ease,background-color .2s ease}
+:focus-visible{outline:3px solid #dfaa47!important;outline-offset:3px}
+.ts-v3-header{background:rgba(12,39,43,.98);border-bottom:1px solid #ffffff1a;box-shadow:0 8px 32px #09262729}
+.ts-v3-header .navbar{min-height:78px;gap:1rem}
+.ts-v3-header .navbar-brand{display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}
+.ts-v3-header .brand-name{display:flex;flex-direction:column;line-height:1.02;font-weight:820;letter-spacing:-.07em}
+.ts-v3-header .brand-rd{font-size:.7rem;vertical-align:top;letter-spacing:.01em;margin-left:.2rem}
+.ts-v3-header .brand-subtitle{font-size:.52rem;letter-spacing:.16em;font-weight:720;color:#b2cebf;margin-top:.37rem}
+.ts-v3-header .brand-mark{flex-shrink:0;width:40px;height:40px;background:var(--lime);color:#173f39;border-radius:13px;display:grid;place-items:center;font-size:1.25rem;margin-right:.2rem;box-shadow:inset 0 -3px 0 #0000000d}
+.ts-v3-header .nav-link{font-weight:730;letter-spacing:.005em;padding:.62rem .85rem!important;border-radius:12px;color:#e6f0e9!important}
+.ts-v3-header .nav-link[aria-current="page"]{color:var(--lime)!important;background:#ffffff13}
+.ts-v3-header .nav-link:hover{background:#ffffff16;color:#e8f7bb!important}
+.nav-login{background:var(--lime);border:none;color:var(--pine)!important;border-radius:12px;font-weight:800;min-height:43px;padding:.58rem 1.05rem}
+.nav-login:hover{background:#d9ee72!important}
+.site-footer{border-top:5px solid var(--lime);background:#0e2b2d}
+.ts-footer-eyebrow{display:block;color:var(--lime);letter-spacing:.14em;font-weight:800;font-size:.7rem;margin-bottom:1.1rem}
+.ts-footer-links{display:flex;gap:1.2rem;flex-wrap:wrap}
+.site-footer .brand-name{display:inline}
+.site-footer .footer-copy{color:#c1d5cb}
+.site-footer a.footer-copy:hover{color:var(--lime)}
+.section-space{padding-top:5rem;padding-bottom:5rem}
+.eyebrow{letter-spacing:.18em;color:#317c64;font-size:.71rem}
+.btn{font-weight:750;border-radius:13px;transition:background .2s ease,box-shadow .2s ease,transform .2s var(--ts-ease);white-space:normal}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn-accent{background:var(--lime);border-color:var(--lime);color:#153b33;padding:.85rem 1.35rem;box-shadow:0 7px 16px #183e391a}
+.btn-accent:hover{background:#d7eb71;border-color:#d7eb71;color:#153b33;box-shadow:0 12px 20px #183e3923}
+.btn-dark-pill{background:var(--pine);color:#fff;border:1px solid var(--pine);border-radius:13px;padding:.84rem 1.3rem}
+.btn-dark-pill:hover{background:#246058;color:#fff}
+.btn-sm{padding:.52rem .82rem;min-height:36px}
+.rounded-pill.btn{border-radius:13px!important}
+.form-label{font-weight:780;color:#284f49;font-size:.86rem}
+.form-control,.form-select{background-color:#fff;border:1px solid #ceddd4;border-radius:12px;min-height:47px;padding:.75rem 1rem;font-size:.95rem;color:#163a36}
+.form-control:focus,.form-select:focus,.form-check-input:focus{border-color:#29836c;box-shadow:0 0 0 .22rem #a5dfca65}
+textarea.form-control{min-height:125px}
+.form-control::placeholder{color:#91a39d}
+.form-check-input:checked{background:#16745f;border-color:#16745f}
+.alert,.service-alert,.empty-box{border-radius:16px}
+.alert{padding:1.1rem 1.3rem}
+.service-alert,.empty-box{padding:1.5rem 1.75rem}
+.inner-hero{background:radial-gradient(circle at 87% -10%,#5da18b60,transparent 34%),linear-gradient(135deg,#112e34,#205a4b);padding:4.1rem 0 4.4rem}
+.inner-hero .container{position:relative;z-index:1}
+.inner-hero h1{font-size:clamp(2.7rem,4.7vw,4.8rem);line-height:1.06;max-width:920px;margin:1rem 0}
+.inner-hero p{max-width:670px;color:#d1e2d7}
+.inner-hero .eyebrow{color:var(--lime)}
+.back-link{display:inline-flex;margin-bottom:1.8rem;font-weight:750}
+.ts-v3-hero{position:relative;background:radial-gradient(ellipse at 74% 38%,#487c6366,transparent 45%),linear-gradient(135deg,#0d2c33 10%,#184c45 90%);overflow:hidden}
+.ts-v3-hero:before{content:"";position:absolute;width:520px;height:520px;border:1px solid #ffffff12;border-radius:50%;right:-120px;top:-190px;pointer-events:none}
+.ts-v3-hero .hero-content{grid-template-columns:1.1fr .9fr;min-height:680px;gap:3rem;padding:4.1rem 0 4rem}
+.ts-v3-hero .hero-text{position:relative;z-index:2}
+.ts-v3-hero .hero-eyebrow{letter-spacing:.17em;font-size:.72rem}
+.ts-v3-hero h1{font-weight:830;font-size:clamp(3.3rem,5.8vw,6.2rem);line-height:1.045;max-width:790px;margin:1.3rem 0 1.6rem}
+.ts-v3-hero h1 em{color:var(--lime);font-style:italic}
+.ts-v3-hero .hero-description{color:#cee2d6;font-size:1.14rem;max-width:560px}
+.ts-v3-hero .hero-actions{display:flex;align-items:center;gap:1.3rem}
+.ts-v3-hero .hero-actions .btn{min-height:54px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem}
+.ts-v3-hero .hero-secondary-link{color:#eaf4ea;border-bottom:1px solid #bcd6c9;padding:.5rem 0;font-weight:750}
+.ts-v3-hero .hero-secondary-link:hover{color:var(--lime)}
+.ts-v3-hero .hero-proof{border-top:1px solid #ffffff29;padding-top:1.6rem;margin-top:3rem}
+.ts-v3-hero .hero-visual{height:510px;transform:rotate(0);border-radius:45% 45% 27px 27px;box-shadow:22px 22px 0 #ffffff14;background:linear-gradient(165deg,#bbdcd1 8%,#e8ebc9 57%,#6b9987 100%)}
+.ts-v3-visual .sun-orb{width:172px;height:172px;left:57%;top:13%}
+.ts-v3-visual .landscape-back{background:#74ac8e}
+.ts-v3-visual .landscape-front{background:linear-gradient(130deg,#275e56,#143b39)}
+.ts-v3-visual-orbit{position:absolute;width:360px;height:360px;top:23%;left:-24%;border:24px solid #ffffff28;border-radius:50%;pointer-events:none}
+.ts-v3-visual .floating-tag{background:#ffffffed;border:1px solid #ffffffc2;font-size:.79rem}
+.ts-v3-visual .floating-tag-one{top:19%;left:-2%}
+.ts-v3-visual .floating-tag-two{bottom:13%;right:-1%}
+.ts-v3-hero .hero-bottom{border-top:1px solid #ffffff24;color:#bcd7c9}
+.ts-v3-benefits{background:#e9f0e8;border-bottom:1px solid #d8e5dc}
+.ts-v3-benefits-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.ts-v3-benefits-grid>div{display:flex;flex-direction:column;gap:.45rem;padding:1.55rem 2rem;border-right:1px solid #cadbcf}
+.ts-v3-benefits-grid>div:first-child{padding-left:0}
+.ts-v3-benefits-grid>div:last-child{border:0}
+.ts-v3-benefits-grid span{color:#45826c;font-size:.67rem;letter-spacing:.13em;font-weight:830}
+.ts-v3-benefits-grid strong{font-size:1.02rem;font-weight:820}
+.ts-v3-benefits-grid small{color:#647e74;font-size:.82rem}
+.section-heading h2{font-size:clamp(2.2rem,4vw,3.65rem)}
+.ts-banner{background:linear-gradient(125deg,#163a3b,#27735e);border:1px solid #ffffff16;border-radius:22px;padding:1.6rem 2rem}
+.ts-banner h3{font-size:1.5rem}
+.tour-card.ts-v3-tour-card{background:#fff;border-radius:23px;box-shadow:0 10px 28px #1e59450e;overflow:hidden;border:1px solid #dfe8df}
+.tour-card.ts-v3-tour-card:hover{transform:translateY(-6px);box-shadow:0 22px 44px #19513c20}
+.ts-v3-tour-cover{min-height:235px;background:linear-gradient(130deg,#91c9b3,#4e8d80)}
+.ts-v3-tour-card:nth-child(3n+2) .ts-v3-tour-cover{background:linear-gradient(130deg,#b5cbd1,#497a8c)}
+.ts-v3-tour-card:nth-child(3n) .ts-v3-tour-cover{background:linear-gradient(130deg,#d4d6a0,#6c9a7a)}
+.ts-v3-tour-cover .place-icon{font-size:6rem;left:12%;top:18%;color:#ecffd9;opacity:.86;text-shadow:0 5px 15px #00000012}
+.ts-v3-tour-cover .tour-art-line{border-color:#ffffff23}
+.ts-v3-tour-cover .tour-destination{font-size:1.02rem;left:22px;bottom:22px}
+.ts-v3-pill-available{background:#ecffdb;color:#285f40}
+.ts-v3-pill-full{background:#fff1dd;color:#815226}
+.ts-v3-tour-card .tour-card-content{padding:1.55rem}
+.ts-v3-tour-card .tour-title{font-size:1.5rem;line-height:1.25;margin:.85rem 0;min-height:0}
+.ts-v3-tour-card .tour-meta{color:#54816e;font-size:.72rem;font-weight:800}
+.ts-v3-tour-card .tour-subline{color:#698179;line-height:1.65;font-size:.84rem}
+.ts-v3-dot{padding:.0 .25rem;color:#9bad9f}
+.ts-v3-tour-card .tour-card-bottom{margin-top:1.5rem;padding-top:1.25rem;align-items:center}
+.ts-v3-tour-card .price{color:#173d38;font-size:1.45rem}
+.ts-v3-tour-card .tour-arrow{width:48px;height:48px;background:#153e39;border-radius:14px}
+.ts-v3-tour-card .tour-arrow:hover{background:#247a61;color:#fff}
+.step-card{border-radius:20px;border:1px solid #dce7dc;box-shadow:0 8px 24px #11352f09}
+.step-card span{font-size:2.6rem;color:#1c806b}
+.how-section{background:#e9f1ea}
+.search-bar{border:1px solid var(--line);border-radius:23px;box-shadow:var(--ts-shadow);padding:1.8rem}
+.search-bar.row,.reservation-filters.row{margin-left:0;margin-right:0}
+.search-bar .form-select,.search-bar .form-control{min-height:49px}
+.catalog-count{border-top:1px solid var(--line);padding-top:1.2rem;font-weight:650}
+.booking-summary{top:6.5rem;border:1px solid #dbe8dd;border-radius:23px;box-shadow:var(--ts-shadow)}
+.detail-poster{border-radius:23px}
+.info-tile{border:1px solid var(--line);border-radius:18px;background:#fff}
+.dashboard-hero{padding:3rem 0}
+.dashboard-head.ts-v3-dashboard-head{align-items:center}
+.ts-v3-primary-actions{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
+.ts-v3-dashboard-head h2{font-size:clamp(2.1rem,3.8vw,3.4rem)}
+.ts-v3-dashboard-head p{color:var(--muted);max-width:500px}
+.ts-v3-admin-nav{background:#fff;border:1px solid var(--line);padding:1.1rem;border-radius:20px;box-shadow:0 8px 30px #15452f0a;gap:.6rem}
+.ts-v3-admin-nav a{background:#f2f7f2;border:1px solid transparent;border-radius:12px;padding:.83rem 1.08rem;flex:1 1 auto;text-align:center}
+.ts-v3-admin-nav a:hover{background:#e1efdf;border-color:#bcd9c7}
+.metric-card{background:#fff;box-shadow:0 10px 32px #15452f0b;min-height:157px;border-radius:21px}
+.ts-v3-metrics .metric-card{height:100%}
+.metric-card strong{color:#163e37;font-size:2.75rem;font-weight:850}
+.metric-card span{color:#4c7669}
+.metric-card-accent{background:linear-gradient(150deg,#e4f3d1,#d5ecc7)}
+.dashboard-table,.panel-feature,.tour-admin-form,.geo-panel,.reservation-filters{background:#fff;border-radius:22px;border:1px solid var(--line);box-shadow:var(--ts-shadow)}
+.dashboard-table{padding:1.6rem;min-width:0;height:auto;min-height:100%}
+.dashboard-table-title h3{font-size:1.28rem}
+.table-responsive{max-width:100%;overscroll-behavior-x:contain}
+.table{--bs-table-bg:transparent;border-collapse:separate;border-spacing:0}
+.table thead th{background:#edf4ed;color:#48685c!important;padding:.95rem .9rem;border-bottom:1px solid #dce8dd!important;font-size:.74rem}
+.table thead th:first-child{border-radius:12px 0 0 0}
+.table thead th:last-child{border-radius:0 12px 0 0}
+.table tbody td{padding:.95rem .9rem;border-bottom-color:#edf1eb}
+.table tbody tr:hover{background:#f5f9f4}
+.table tbody td:last-child{min-width:120px}
+.reservation-filters{padding:1.5rem}
+.reservation-status{font-size:.72rem;padding:.38rem .7rem;border-radius:9px}
+.tour-admin-form{padding:2.3rem;max-width:980px}
+.tour-admin-form .eyebrow{padding-bottom:.7rem;border-bottom:1px solid #e6ece6}
+.geo-panel{min-width:0}
+.auth-section{background:radial-gradient(circle at 16% 15%,#3d806755,transparent 34%),linear-gradient(140deg,#123739 0%,#246456 55%,#edf4ec 55.1%,#f7f7f2 100%);padding:4.8rem 0}
+.auth-shell{border-radius:26px;box-shadow:0 30px 78px #082d2833}
+.auth-intro{background:linear-gradient(135deg,#14383d,#20604f);padding:4rem}
+.auth-form-panel{padding:3.5rem 3.4rem}
+.auth-form-panel .btn-accent{min-height:52px}
+.ts-quicklinks a{border-radius:12px}
+.ts-footer-links a{white-space:nowrap}
+@media(max-width:1100px){
+ .ts-v3-header .nav-link{padding:.58rem .6rem!important;font-size:.85rem}
+ .ts-v3-hero h1{font-size:clamp(3rem,5vw,5rem)}
+ .ts-v3-hero .hero-content{gap:1.75rem}
+}
+@media(max-width:991px){
+ .ts-v3-header .navbar-collapse{background:#133e3e;border-radius:16px;margin-top:1rem;padding:.9rem;border:1px solid #ffffff20}
+ .ts-v3-hero .hero-content{grid-template-columns:1fr;gap:2.7rem;min-height:0;padding:4rem 0}
+ .ts-v3-hero h1{max-width:760px}
+ .ts-v3-hero .hero-visual{height:390px;max-width:600px;width:100%;margin:0 auto;box-shadow:none}
+ .ts-v3-benefits-grid{grid-template-columns:1fr}
+ .ts-v3-benefits-grid>div{padding:1.2rem 0;border:0;border-bottom:1px solid #cadbcf}
+ .ts-v3-benefits-grid>div:last-child{border:0}
+ .section-space{padding-top:4rem;padding-bottom:4rem}
+ .booking-summary{position:static}
+ .auth-shell{grid-template-columns:1fr}
+ .auth-intro,.auth-form-panel{padding:2.5rem}
+}
+@media(max-width:575px){
+ .container{padding-left:1.1rem;padding-right:1.1rem}
+ .ts-v3-header .navbar{min-height:70px}
+ .ts-v3-header .brand-mark{width:35px;height:35px}
+ .ts-v3-header .brand-name{font-size:1.38rem}
+ .ts-v3-header .brand-subtitle{font-size:.45rem}
+ .ts-v3-hero .hero-content{padding:3rem 0}
+ .ts-v3-hero h1{font-size:clamp(2.85rem,11vw,4.2rem)}
+ .ts-v3-hero .hero-description{font-size:1rem}
+ .ts-v3-hero .hero-actions{align-items:stretch;gap:1rem}
+ .ts-v3-hero .hero-actions .btn{width:100%}
+ .ts-v3-hero .hero-visual{height:290px;border-radius:28px}
+ .ts-v3-visual .floating-tag{font-size:.64rem;padding:.7rem}
+ .ts-v3-hero .hero-bottom{font-size:.55rem}
+ .inner-hero{padding:2.8rem 0 3.1rem}
+ .inner-hero h1{font-size:2.7rem}
+ .section-space{padding:3rem 0}
+ .search-bar,.reservation-filters,.dashboard-table,.geo-panel{padding:1rem}
+ .ts-v3-primary-actions{width:100%}
+ .ts-v3-primary-actions .btn{flex:1}
+ .ts-v3-admin-nav a{flex-basis:100%}
+ .metric-card{min-height:130px;padding:1rem}
+ .metric-card strong{font-size:2.25rem}
+ .auth-intro,.auth-form-panel{padding:1.75rem}
+ .tour-admin-form{padding:1.2rem}
+ .ts-footer-links{gap:.7rem}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
