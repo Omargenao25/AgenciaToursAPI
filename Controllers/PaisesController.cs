@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using AgenciaToursAPI.Security;
 using AgenciaToursAPI.Data;
 using AgenciaToursAPI.Models;
@@ -72,7 +73,18 @@ namespace AgenciaToursAPI.Controllers
 
             _context.Paises.Add(pais);
 
-            await _context.SaveChangesAsync();
+try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && (sql.Number == 2601 || sql.Number == 2627))
+            {
+                return Conflict("Ya existe un país con esos datos.");
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && sql.Number == 547)
+            {
+                return Conflict("No se puede realizar la operación porque existen registros relacionados.");
+            }
 
 
             return CreatedAtAction(
@@ -127,7 +139,18 @@ namespace AgenciaToursAPI.Controllers
             paisActual.Nombre = pais.Nombre;
 
 
-            await _context.SaveChangesAsync();
+try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && (sql.Number == 2601 || sql.Number == 2627))
+            {
+                return Conflict("Ya existe un país con esos datos.");
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && sql.Number == 547)
+            {
+                return Conflict("No se puede realizar la operación porque existen registros relacionados.");
+            }
 
 
             return NoContent();
@@ -165,7 +188,18 @@ namespace AgenciaToursAPI.Controllers
 
             _context.Paises.Remove(pais);
 
-            await _context.SaveChangesAsync();
+try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && (sql.Number == 2601 || sql.Number == 2627))
+            {
+                return Conflict("Ya existe un país con esos datos.");
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sql && sql.Number == 547)
+            {
+                return Conflict("No se puede realizar la operación porque existen registros relacionados.");
+            }
 
 
             return NoContent();
