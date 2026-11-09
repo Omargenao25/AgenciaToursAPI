@@ -37,7 +37,10 @@
         </div>
         <div class="dashboard-head mb-3">
             <div><span class="eyebrow">LOGÍSTICA DE LA SALIDA</span><h2>Información del <em>tour.</em></h2></div>
-            <a class="btn btn-outline-secondary rounded-pill" asp-controller="ToursAdmin" asp-action="Manifiesto" asp-route-id="@Model.TourId">Actualizar lista ↗</a>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-accent" asp-controller="ToursAdmin" asp-action="HojaSalida" asp-route-id="@Model.TourId" target="_blank" rel="noopener noreferrer">Hoja de salida / Imprimir ↗</a>
+                <a class="btn btn-outline-secondary rounded-pill" asp-controller="ToursAdmin" asp-action="Manifiesto" asp-route-id="@Model.TourId">Actualizar lista ↗</a>
+            </div>
         </div>
         <div class="row g-3 mb-4">
             <div class="col-md-6"><div class="info-tile"><small>Guía asignado</small><strong>@Model.Guia</strong></div></div>
