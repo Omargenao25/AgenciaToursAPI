@@ -54,7 +54,9 @@ namespace AgenciaToursAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Pais>> PostPais(Pais pais)
         {
-            pais.Nombre = pais.Nombre.Trim();
+            pais.Nombre = pais.Nombre?.Trim() ?? string.Empty;
+            if (pais.Nombre.Length < 2)
+                return BadRequest("El nombre del país debe contener al menos dos caracteres.");
 
 
             var existe = await _context.Paises
@@ -64,7 +66,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (existe)
             {
-                return BadRequest("Ya existe un país con ese nombre." );
+                return Conflict("Ya existe un país con ese nombre.");
             }
 
 
@@ -103,7 +105,9 @@ namespace AgenciaToursAPI.Controllers
             }
 
 
-            pais.Nombre = pais.Nombre.Trim();
+            pais.Nombre = pais.Nombre?.Trim() ?? string.Empty;
+            if (pais.Nombre.Length < 2)
+                return BadRequest("El nombre del país debe contener al menos dos caracteres.");
 
 
             var existe = await _context.Paises
@@ -116,7 +120,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (existe)
             {
-                return BadRequest( "Ya existe otro país con ese nombre.");
+                return Conflict("Ya existe otro país con ese nombre.");
             }
 
 
@@ -155,7 +159,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (tieneDestinos || tieneTours)
             {
-                return BadRequest("No se puede eliminar el país porque tiene destinos o tours asociados.");
+                return Conflict("No se puede eliminar el país porque tiene destinos o tours asociados.");
             }
 
 
