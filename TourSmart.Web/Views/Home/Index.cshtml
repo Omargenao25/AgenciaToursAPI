@@ -2,33 +2,34 @@
 @{
     ViewData["Title"] = "Descubre tu próxima aventura";
 }
-<section class="hero">
+<section class="hero ts-v3-hero">
     <div class="container hero-content">
         <div class="hero-text">
-            <div class="hero-eyebrow"><span class="live-dot"></span> EXPERIENCIAS QUE DEJAN HUELLAS</div>
-            <h1>El mundo está<br />esperando por <em>ti.</em></h1>
-            <p class="hero-description">Viajar empieza con una buena idea. Explora destinos, compara experiencias y organiza tu próxima salida desde un solo lugar.</p>
+            <div class="hero-eyebrow"><span class="live-dot"></span> UNA NUEVA FORMA DE EXPLORAR</div>
+            <h1>La aventura comienza <em>antes de partir.</em></h1>
+            <p class="hero-description">Descubre lugares increíbles, encuentra la excursión ideal y organiza cada detalle sin complicaciones. Tu próxima historia empieza aquí.</p>
             <div class="hero-actions">
-                <a asp-controller="Tours" asp-action="Index" class="btn btn-accent btn-lg">Explorar experiencias <span>↗</span></a>
-                <a href="#como-funciona" class="hero-secondary-link">Descubre cómo funciona <span>↓</span></a>
+                <a asp-controller="Tours" asp-action="Index" class="btn btn-accent btn-lg">Descubrir excursiones <span>↗</span></a>
+                <a href="#como-funciona" class="hero-secondary-link">Así funciona <span>↓</span></a>
             </div>
-            <div class="hero-proof"><div class="avatar-group"><span>☼</span><span>✈</span><span>✦</span></div><p><strong>Explora. Compara. Reserva.</strong><br />Experiencias y disponibilidad en una plataforma.</p></div>
+            <div class="hero-proof"><div class="avatar-group"><span>☼</span><span>✈</span><span>✦</span></div><p><strong>Viaja con más confianza.</strong><br />Países, destinos, plazas y reservas en un solo lugar.</p></div>
         </div>
-        <div class="hero-visual" aria-hidden="true">
-            <div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div>
-            <div class="floating-tag floating-tag-one">✦ Tu próxima historia comienza aquí</div>
-            <div class="floating-tag floating-tag-two">↗ Explora sin límites</div>
+        <div class="hero-visual ts-v3-visual" aria-hidden="true">
+            <div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div><div class="ts-v3-visual-orbit"></div>
+            <div class="floating-tag floating-tag-one">✦ Rutas que inspiran</div>
+            <div class="floating-tag floating-tag-two">↗ Tu próxima escapada</div>
             <div class="vertical-word">DISCOVER MORE · TOURSMART RD</div>
         </div>
     </div>
-    <div class="hero-bottom container"><span>01 / 03 — DESCUBRE</span><span>EXPERIENCIAS CON PROPÓSITO <span>↗</span></span></div>
+    <div class="hero-bottom container"><span>TOURSMART RD · EXPLORA MÁS</span><span>TU PRÓXIMA HISTORIA ESTÁ AFUERA <span>↗</span></span></div>
 </section>
 
+<section class="ts-v3-benefits" aria-label="Ventajas de TourSmart RD"><div class="container"><div class="ts-v3-benefits-grid"><div><span>01 / DESCUBRE</span><strong>Destinos que emocionan</strong><small>Explora opciones de viaje por país y lugar.</small></div><div><span>02 / ORGANIZA</span><strong>Todo más sencillo</strong><small>Consulta fechas, precios y disponibilidad.</small></div><div><span>03 / DISFRUTA</span><strong>Viaja a tu manera</strong><small>Prepara tu experiencia desde un solo lugar.</small></div></div></div></section>
 <section class="section-space" id="destacados">
     <div class="container">
-        <div class="ts-banner mb-5"><div><h3>¿Ya sabes a dónde quieres viajar?</h3><p>Encuentra excursiones según el país, el destino y las plazas disponibles.</p></div><a asp-controller="Tours" asp-action="Index" class="btn btn-accent">Buscar una experiencia ↗</a></div>
+        <div class="ts-banner mb-5"><div><h3>¿Listo para descubrir tu próxima escapada?</h3><p>Encuentra excursiones según el país, el destino y las plazas disponibles.</p></div><a asp-controller="Tours" asp-action="Index" class="btn btn-accent">Buscar una experiencia ↗</a></div>
         <div class="section-heading d-flex flex-wrap justify-content-between align-items-end gap-3">
-            <div><span class="eyebrow">DESTINOS Y EXPERIENCIAS</span><h2>Tu próxima aventura <em>empieza aquí.</em></h2><p>Explora excursiones disponibles en nuestro catálogo.</p></div>
+            <div><span class="eyebrow">NUESTRA SELECCIÓN</span><h2>Experiencias para <em>recordar.</em></h2><p>Explora excursiones disponibles en nuestro catálogo.</p></div>
             <a asp-controller="Tours" asp-action="Index" class="section-link">Ver todos los tours <span>↗</span></a>
         </div>
         @if (!Model.ServicioDisponible)
@@ -53,7 +54,7 @@
 <section class="how-section section-space" id="como-funciona">
     <div class="container">
         <div class="row align-items-center g-5">
-            <div class="col-lg-5"><span class="eyebrow">VIAJAR, MÁS FÁCIL</span><h2>Menos planificación.<br /><em>Más aventura.</em></h2><p>Estamos construyendo una experiencia que combina un catálogo claro con disponibilidad y recomendaciones según tus intereses.</p><a asp-controller="Tours" asp-action="Index" class="btn btn-dark-pill">Explorar tours ↗</a></div>
+            <div class="col-lg-5"><span class="eyebrow">VIAJAR, MÁS FÁCIL</span><h2>Tres pasos.<br /><em>Muchos recuerdos.</em></h2><p>Una forma práctica de descubrir excursiones, revisar sus detalles y preparar tu próxima salida.</p><a asp-controller="Tours" asp-action="Index" class="btn btn-dark-pill">Explorar tours ↗</a></div>
             <div class="col-lg-7"><div class="row g-3">
                 <div class="col-md-4"><div class="step-card"><span>01</span><strong>Explora</strong><p>Descubre tours y destinos disponibles.</p></div></div>
                 <div class="col-md-4"><div class="step-card"><span>02</span><strong>Compara</strong><p>Consulta precios, duración y cupos.</p></div></div>
