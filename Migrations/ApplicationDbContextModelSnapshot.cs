@@ -145,9 +145,14 @@ namespace AgenciaToursAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaisId");
+                    b.HasIndex("PaisId", "Nombre")
+                        .IsUnique();
 
-                    b.ToTable("Destinos");
+                    b.ToTable("Destinos", t =>
+                    {
+                        t.HasCheckConstraint("CK_Destinos_DuracionPositiva",
+                            "[DuracionDias] BETWEEN 0 AND 365 AND [DuracionHoras] BETWEEN 0 AND 23 AND ([DuracionDias] > 0 OR [DuracionHoras] > 0)");
+                    });
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Guia", b =>
@@ -208,6 +213,8 @@ namespace AgenciaToursAPI.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Nombre").IsUnique();
 
                     b.ToTable("Paises");
                 });
