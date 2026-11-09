@@ -16,6 +16,18 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
         return await resp.Content.ReadFromJsonAsync<List<T>>(cancellationToken: ct) ?? new();
     }
 
+    public async Task<HttpStatusCode> MarcarAsistenciaAsync(
+        string token, int tourId, int pasajeroId, bool presente, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Put,
+            $"api/tours/{tourId}/check-in/pasajeros/{pasajeroId}") {
+            Content = JsonContent.Create(new { Presente = presente })
+        };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        return resp.StatusCode;
+    }
+
     public async Task<EditarPasajerosViewModel> ObtenerPasajerosAsync(string token, int reservaId, CancellationToken ct)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, $"api/reservas/{reservaId}/pasajeros");
