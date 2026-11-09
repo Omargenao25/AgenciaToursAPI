@@ -1,0 +1,31 @@
+name: Validar TourSmart RD
+
+on:
+  push:
+    branches:
+      - feature/toursmart-integrador-ii
+  pull_request:
+    branches:
+      - master
+      - feature/toursmart-integrador-ii
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Compilación Release (.NET 8)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restaurar dependencias
+        run: dotnet restore AgenciaToursAPI.sln
+      - name: Compilar solución
+        run: dotnet build AgenciaToursAPI.sln --configuration Release --no-restore -warnaserror
+      - name: Verificar formatos y problemas básicos
+        run: dotnet format AgenciaToursAPI.sln --verify-no-changes --no-restore --severity error
