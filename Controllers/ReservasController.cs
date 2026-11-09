@@ -108,6 +108,9 @@ namespace AgenciaToursAPI.Controllers
                 );
             }
 
+            if (await _context.CierresOperativosTour.AnyAsync(c => c.TourId == tour.Id))
+                return Conflict("La salida ya fue cerrada operativamente. No se permiten reservas nuevas.");
+
             var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
 
             if (DateTime.Now >= fechaInicioTour)
