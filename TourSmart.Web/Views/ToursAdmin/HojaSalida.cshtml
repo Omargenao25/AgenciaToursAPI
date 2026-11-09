@@ -1,0 +1,135 @@
+@model ManifiestoTourViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Hoja de salida · TourSmart RD";
+    var fechaImpresion = DateTime.Now;
+    var registrados = Model.Confirmadas.Sum(r => r.Asistentes.Count);
+    var faltanNombres = Model.CuposConfirmados - registrados;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <title>Hoja de salida · @Model.Tour · TourSmart RD</title>
+    <style>
+        :root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; }
+        * { box-sizing: border-box; }
+        body { color: #162534; background: #f4f6f8; margin: 0; font-size: 13px; }
+        .pagina { max-width: 1050px; margin: 22px auto; padding: 30px; background: #fff; box-shadow: 0 1px 12px #0001; }
+        h1 { margin: 4px 0 8px; font-size: 25px; }
+        h2 { margin: 26px 0 10px; font-size: 16px; }
+        .marca { text-transform: uppercase; font-size: 11px; letter-spacing: 2px; font-weight: bold; color: #276375; }
+        .muted { color: #556675; }
+        .datos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 28px; margin: 18px 0; }
+        .datos div { border-bottom: 1px solid #d8e0e5; padding: 7px 0; }
+        .datos strong { display: block; margin-top: 3px; font-size: 14px; }
+        .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+        .kpi { border: 1px solid #ced9df; padding: 12px; border-radius: 6px; }
+        .kpi b { display: block; font-size: 25px; margin-top: 4px; }
+        .alerta { background: #fef8e8; border: 1px solid #e9d1a0; padding: 12px; margin-top: 17px; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        th, td { border: 1px solid #cad4dd; padding: 9px; text-align: left; vertical-align: top; }
+        th { background: #ecf2f5; font-size: 12px; }
+        tr { break-inside: avoid; page-break-inside: avoid; }
+        .estado { font-weight: bold; }
+        .firma { margin-top: 32px; display: flex; gap: 38px; }
+        .firma div { flex: 1; border-top: 1px solid #586671; padding-top: 7px; }
+        .pie { font-size: 11px; line-height: 1.5; margin-top: 23px; color: #526472; }
+        .toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; }
+        .boton { background: #183c4d; color: white; border: none; padding: 11px 18px; border-radius: 5px; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .boton.secundario { background: #e5ecf1; color: #142e3d; }
+        @@media print {
+            @@page { size: A4; margin: 14mm; }
+            body { background: white; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .pagina { box-shadow: none; padding: 0; margin: 0; max-width: none; }
+            .toolbar { display: none !important; }
+            h1 { font-size: 20px; }
+            .kpi b { font-size: 18px; }
+            th, td { padding: 5px; }
+            h2 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <main class="pagina">
+        <nav class="toolbar" aria-label="Acciones de la hoja de salida">
+            <a class="boton secundario" asp-controller="ToursAdmin" asp-action="Manifiesto" asp-route-id="@Model.TourId">← Volver al manifiesto</a>
+            <button class="boton" type="button" onclick="window.print()">Imprimir / Guardar como PDF</button>
+        </nav>
+        <div class="marca">TourSmart RD · Documento operativo interno</div>
+        <h1>Hoja de salida de excursión</h1>
+        <p class="muted">Generada el @fechaImpresion.ToString("dd/MM/yyyy HH:mm") (hora del equipo servidor). Esta es una instantánea: vuelve a generarla para consultar cambios posteriores.</p>
+        <section class="datos" aria-label="Información de la excursión">
+            <div>Excursión<strong>@Model.Tour</strong></div>
+            <div>Referencia del tour<strong>#@Model.TourId</strong></div>
+            <div>Fecha y hora de salida<strong>@Model.Fecha.ToString("dd/MM/yyyy") · @Model.Hora.ToString(@"hh\:mm")</strong></div>
+            <div>Guía asignado<strong>@Model.Guia</strong></div>
+            <div>Transporte<strong>@Model.Transporte</strong></div>
+            <div>Capacidad máxima<strong>@Model.CapacidadMaxima plazas</strong></div>
+        </section>
+        <section class="kpis" aria-label="Resumen de asistencia">
+            <div class="kpi">Pasajeros confirmados<b>@Model.CuposConfirmados</b></div>
+            <div class="kpi">Presentes<b>@Model.Llegaron</b></div>
+            <div class="kpi">Faltantes<b>@Model.Faltan</b></div>
+        </section>
+        @if (faltanNombres > 0)
+        {
+            <div class="alerta" role="alert">
+                <strong>Atención: faltan @faltanNombres nombres individuales.</strong>
+                Algunas reservas confirmadas son antiguas o están incompletas. Se indican más abajo; completa los nombres antes de usar la lista para verificar personas.
+            </div>
+        }
+        <h2>Listado nominal de reservas confirmadas</h2>
+        <table>
+            <thead>
+                <tr><th>N.º</th><th>Pasajero</th><th>Reserva</th><th>Titular</th><th>Asistencia</th></tr>
+            </thead>
+            <tbody>
+                @{
+                    var numero = 0;
+                }
+                @foreach (var reserva in Model.Confirmadas)
+                {
+                    @foreach (var pasajero in reserva.Asistentes)
+                    {
+                        numero++;
+                        <tr>
+                            <td>@numero</td>
+                            <td>@pasajero.NombreCompleto</td>
+                            <td>#@reserva.ReservaId</td>
+                            <td>@reserva.Titular</td>
+                            <td class="estado">@(pasajero.LlegadaUtc.HasValue ? "PRESENTE" : "PENDIENTE")</td>
+                        </tr>
+                    }
+                    @if (reserva.Asistentes.Count < reserva.CantidadPersonas)
+                    {
+                        @for (var i = reserva.Asistentes.Count; i < reserva.CantidadPersonas; i++)
+                        {
+                            numero++;
+                            <tr>
+                                <td>@numero</td>
+                                <td><strong>Nombre pendiente de completar</strong></td>
+                                <td>#@reserva.ReservaId</td>
+                                <td>@reserva.Titular</td>
+                                <td>NO IDENTIFICADO</td>
+                            </tr>
+                        }
+                    }
+                }
+                @if (Model.CuposConfirmados == 0)
+                {
+                    <tr><td colspan="5">Todavía no hay plazas confirmadas para este tour.</td></tr>
+                }
+            </tbody>
+        </table>
+        <p><strong>Reservas pendientes:</strong> @Model.Pendientes.Count solicitud(es), @Model.CuposPendientes plaza(s). No se incluyen en la lista nominal de viajeros confirmados.</p>
+        <section class="firma" aria-label="Firmas de control">
+            <div>Revisado por (operaciones)</div>
+            <div>Recibido por (guía)</div>
+        </section>
+        <p class="pie">Documento confidencial para logística de TourSmart RD. No contiene números de identificación, teléfonos ni importes financieros. Manejar únicamente con personal autorizado y destruir copias impresas cuando dejen de ser necesarias. El check-in oficial se actualiza desde el manifiesto digital; imprimir o firmar esta hoja no cambia los registros del sistema.</p>
+    </main>
+</body>
+</html>
