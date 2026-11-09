@@ -137,7 +137,9 @@ public sealed class GeografiaAdminController(IHttpClientFactory httpClientFactor
                 HttpStatusCode.NoContent => $"{tipo} actualizado correctamente.",
                 HttpStatusCode.BadRequest => "Datos inválidos, duplicados o cambios incompatibles con tours existentes.",
                 HttpStatusCode.NotFound => "El registro o país seleccionado no existe.",
-                HttpStatusCode.Conflict => "No se puede realizar esta operación mientras existen relaciones asociadas.",
+                HttpStatusCode.Conflict => tipo == "Destino"
+                    ? "El destino ya existe en ese país o tiene tours asociados que impiden cambiar su país o duración."
+                    : "El país ya existe o tiene relaciones que impiden realizar el cambio.",
                 HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized => "No tienes permisos para actualizar el catálogo.",
                 _ => $"No se pudo guardar el registro (HTTP {(int)response.StatusCode})."
             };
