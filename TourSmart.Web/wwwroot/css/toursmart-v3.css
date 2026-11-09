@@ -9,7 +9,7 @@
 }
 html{scroll-padding-top:96px}
 body{background:var(--cream);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;letter-spacing:-.006em}
-main{overflow:clip;min-height:65vh}
+main{min-height:65vh}
 h1,h2,h3,h4{letter-spacing:-.053em}
 h1,h2{font-weight:810}
 .container{max-width:1260px}
@@ -205,3 +205,13 @@ textarea.form-control{min-height:125px}
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
 }
+
+/* Páginas de catálogo y gestión: encabezados y filtros */
+.ts-v3-catalog-hero{padding-bottom:4.8rem}
+.ts-v3-filter-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1.35rem}
+.ts-v3-filter-heading h2{font-size:clamp(1.9rem,3.2vw,2.7rem);margin:.4rem 0 0}
+.ts-v3-filter-hint{font-size:.85rem;color:var(--muted);max-width:270px}
+.ts-v3-admin-table{padding-top:1.9rem}
+.ts-v3-admin-table .table td:last-child{min-width:275px}
+.ts-v3-admin-table .table td:last-child .btn{margin:.2rem .15rem .2rem 0}
+@media(max-width:575px){.ts-v3-filter-hint{max-width:none}.ts-v3-admin-table .table td:last-child{min-width:220px}}
