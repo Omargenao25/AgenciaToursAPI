@@ -40,6 +40,26 @@ namespace AgenciaToursAPI.Migrations
                     b.ToTable("Categorias");
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.CierreOperativoTour", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("CerradoPor").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<DateTime>("FechaCierreUtc").HasColumnType("datetime2");
+                    b.Property<string>("Incidencias").HasMaxLength(1000).HasColumnType("nvarchar(1000)");
+                    b.Property<int>("PasajerosAusentes").HasColumnType("int");
+                    b.Property<int>("PasajerosPresentes").HasColumnType("int");
+                    b.Property<int>("PlazasConfirmadas").HasColumnType("int");
+                    b.Property<int>("TourId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("TourId").IsUnique();
+                    b.ToTable("CierresOperativosTour", t =>
+                    {
+                        t.HasCheckConstraint("CK_CierresOperativosTour_Contadores",
+                            "[PlazasConfirmadas] >= 0 AND [PasajerosPresentes] >= 0 AND [PasajerosAusentes] >= 0 AND [PlazasConfirmadas] = [PasajerosPresentes] + [PasajerosAusentes]");
+                    });
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.Cliente", b =>
                 {
                     b.Property<int>("Id")
@@ -714,6 +734,16 @@ namespace AgenciaToursAPI.Migrations
             modelBuilder.Entity("AgenciaToursAPI.Models.Categoria", b =>
                 {
                     b.Navigation("Tours");
+                });
+
+            modelBuilder.Entity("AgenciaToursAPI.Models.CierreOperativoTour", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.Tour", "Tour")
+                        .WithMany()
+                        .HasForeignKey("TourId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                    b.Navigation("Tour");
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Cliente", b =>
