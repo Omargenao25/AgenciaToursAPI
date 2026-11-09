@@ -2,15 +2,16 @@
 @{
     ViewData["Title"] = "Explora nuestros tours";
 }
-<section class="inner-hero">
+<section class="inner-hero ts-v3-catalog-hero">
     <div class="container">
-        <span class="eyebrow">TU SIGUIENTE DESTINO</span>
-        <h1>Explora nuevas <em>experiencias.</em></h1>
-        <p>Encuentra la excursión ideal y consulta la disponibilidad en tiempo real de nuestra plataforma.</p>
+        <span class="eyebrow">DESCUBRE TU PRÓXIMA AVENTURA</span>
+        <h1>Elige el viaje que <em>va contigo.</em></h1>
+        <p>Filtra por país, destino y categoría. Compara opciones y encuentra la experiencia que quieres vivir.</p>
     </div>
 </section>
 <section class="section-space catalog-section">
     <div class="container">
+        <div class="ts-v3-filter-heading"><div><span class="eyebrow">ENCUENTRA TU EXPERIENCIA</span><h2>Explora a tu ritmo.</h2></div><span class="ts-v3-filter-hint">Ajusta los filtros y descubre los tours disponibles.</span></div>
         <form method="get" asp-controller="Tours" asp-action="Index" class="search-bar row g-3 align-items-end">
             <div class="col-lg-4">
                 <label for="busqueda" class="form-label">Buscar experiencia</label>
