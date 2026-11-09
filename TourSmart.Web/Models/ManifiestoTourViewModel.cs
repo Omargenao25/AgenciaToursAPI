@@ -1,5 +1,14 @@
 namespace TourSmart.Web.Models;
 
+public sealed class PasajeroAsistencia
+{
+    public int Id { get; set; }
+    public int Orden { get; set; }
+    public string NombreCompleto { get; set; } = "";
+    public DateTime? LlegadaUtc { get; set; }
+    public string? RegistradoPor { get; set; }
+}
+
 public sealed class ManifiestoReserva
 {
     public int ReservaId { get; set; }
