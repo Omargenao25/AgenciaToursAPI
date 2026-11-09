@@ -1,0 +1,116 @@
+@model RendimientoExcursionesViewModel
+@{
+    ViewData["Title"] = "Rendimiento de excursiones";
+    var desde = Model.DesdeUtc.ToString("yyyy-MM-dd");
+    var hasta = Model.HastaExclusivoUtc > Model.DesdeUtc
+        ? Model.HastaExclusivoUtc.AddDays(-1).ToString("yyyy-MM-dd")
+        : Model.DesdeUtc.ToString("yyyy-MM-dd");
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al dashboard</a>
+        <span class="eyebrow">TOURSMART RD · INTELIGENCIA OPERATIVA</span>
+        <h1>Rendimiento de <em>excursiones.</em></h1>
+        <p>Compara ocupación, asistencia e incidencias de las salidas cerradas.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+        <form method="get" asp-controller="ReportesWeb" asp-action="RendimientoExcursiones" class="row g-3 align-items-end mb-4">
+            <div class="col-sm-5 col-lg-3">
+                <label class="form-label" for="desde">Fecha del cierre desde (UTC)</label>
+                <input class="form-control" type="date" name="desde" id="desde" value="@desde" required />
+            </div>
+            <div class="col-sm-5 col-lg-3">
+                <label class="form-label" for="hasta">Fecha del cierre hasta (UTC)</label>
+                <input class="form-control" type="date" name="hasta" id="hasta" value="@hasta" required />
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-accent">Analizar ↗</button>
+            </div>
+            <div class="col-12 col-lg-auto">
+                <a class="btn btn-outline-secondary rounded-pill" asp-controller="ReportesWeb" asp-action="HistorialExcursiones" asp-route-desde="@desde" asp-route-hasta="@hasta">Ver historial detallado ↗</a>
+            </div>
+        </form>
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-4"><div class="metric-card metric-card-accent"><span>Ocupación de las salidas</span><strong>@Model.PorcentajeOcupacion.ToString("N1")%</strong><small>@Model.TotalConfirmados de @Model.CapacidadTotal plazas</small></div></div>
+            <div class="col-6 col-lg-4"><div class="metric-card"><span>Asistencia de confirmados</span><strong>@Model.PorcentajeAsistencia.ToString("N1")%</strong><small>@Model.TotalPresentes de @Model.TotalConfirmados personas</small></div></div>
+            <div class="col-6 col-lg-4"><div class="metric-card"><span>Excursiones cerradas</span><strong>@Model.TotalExcursiones</strong><small>Con cierre operativo registrado</small></div></div>
+            <div class="col-6 col-lg-4"><div class="metric-card"><span>Presentes</span><strong>@Model.TotalPresentes</strong><small>Check-in consolidado</small></div></div>
+            <div class="col-6 col-lg-4"><div class="metric-card"><span>Ausentes</span><strong>@Model.TotalAusentes</strong><small>No asistieron al momento de cerrar</small></div></div>
+            <div class="col-6 col-lg-4"><div class="metric-card"><span>Salidas con incidencias</span><strong>@Model.TotalConIncidencias</strong><small>Registraron observaciones</small></div></div>
+        </div>
+
+        <div class="alert alert-info mb-4">
+            <strong>Cómo se calculan:</strong> ocupación = plazas confirmadas / capacidad de las excursiones;
+            asistencia = presentes / confirmados. Los porcentajes globales son ponderados por plazas, no
+            el promedio simple de porcentajes individuales. Solo cuentan las salidas con cierre operativo.
+            El filtro corresponde a la fecha de cierre en UTC.
+        </div>
+
+        <section class="dashboard-table">
+            <div class="dashboard-table-title"><h3>Comparativa por excursión</h3><span>@Model.TotalExcursiones cierre(s)</span></div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr><th>Excursión</th><th>Capacidad</th><th>Confirmados</th><th>Ocupación</th><th>Presentes</th><th>Asistencia</th><th>Ausentes</th><th>Incidencias</th><th>Detalle</th></tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var tour in Model.Excursiones)
+                    {
+                        <tr>
+                            <td><strong>@tour.Tour</strong><small class="d-block text-secondary">Salida: @tour.FechaSalida.ToString("dd/MM/yyyy")</small></td>
+                            <td>@tour.Capacidad</td>
+                            <td>@tour.Confirmados</td>
+                            <td>
+                                <strong>@tour.PorcentajeOcupacion.ToString("N1")%</strong>
+                                <div class="progress mt-2" style="height:7px">
+                                    <div class="progress-bar" role="progressbar" style="width:@Math.Clamp(tour.PorcentajeOcupacion, 0m, 100m).ToString(System.Globalization.CultureInfo.InvariantCulture)%" aria-label="Ocupación de @tour.Tour" aria-valuenow="@tour.PorcentajeOcupacion.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td>@tour.Presentes</td>
+                            <td>
+                                <strong>@tour.PorcentajeAsistencia.ToString("N1")%</strong>
+                                <div class="progress mt-2" style="height:7px">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width:@Math.Clamp(tour.PorcentajeAsistencia, 0m, 100m).ToString(System.Globalization.CultureInfo.InvariantCulture)%" aria-label="Asistencia de @tour.Tour" aria-valuenow="@tour.PorcentajeAsistencia.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td>@tour.Ausentes</td>
+                            <td>@(tour.TieneIncidencias ? "Sí" : "No")</td>
+                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="ToursAdmin" asp-action="CierreOperativo" asp-route-id="@tour.TourId">Ver cierre</a></td>
+                        </tr>
+                    }
+                    @if (!Model.Excursiones.Any())
+                    {
+                        <tr><td colspan="9" class="text-secondary py-4">No existen cierres en el período. Prueba con otras fechas.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav class="d-flex justify-content-between align-items-center gap-3 mt-4" aria-label="Paginación de rendimiento">
+                <span>Página @Model.Pagina de @Model.TotalPaginas</span>
+                <div class="d-flex gap-2">
+                    @if (Model.Pagina > 1)
+                    {
+                        <a class="btn btn-outline-secondary rounded-pill" asp-controller="ReportesWeb" asp-action="RendimientoExcursiones" asp-route-desde="@desde" asp-route-hasta="@hasta" asp-route-pagina="@(Model.Pagina - 1)">← Anterior</a>
+                    }
+                    @if (Model.Pagina < Model.TotalPaginas)
+                    {
+                        <a class="btn btn-outline-secondary rounded-pill" asp-controller="ReportesWeb" asp-action="RendimientoExcursiones" asp-route-desde="@desde" asp-route-hasta="@hasta" asp-route-pagina="@(Model.Pagina + 1)">Siguiente →</a>
+                    }
+                </div>
+            </nav>
+        }
+        <p class="dashboard-footnote mt-3">Reporte interno de solo lectura. Los datos proceden de los cierres registrados; no se realizan cambios en reservas, pasajeros ni pagos.</p>
+    </div>
+</section>
