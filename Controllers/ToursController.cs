@@ -67,6 +67,7 @@ namespace AgenciaToursAPI.Controllers
                     FechaFin = t.FechaFin,
                     Estado = t.Estado,
                     CapacidadMaxima = t.CapacidadMaxima,
+                    CerradoOperativo = _context.CierresOperativosTour.Any(x => x.TourId == t.Id),
                     CuposReservados = t.Reservas.Where(r => r.Estado != EstadosReserva.Cancelada).Sum(r => r.CantidadPersonas)
                 })
                 .ToListAsync();
@@ -130,6 +131,7 @@ namespace AgenciaToursAPI.Controllers
                     FechaFin = t.FechaFin,
                     Estado = t.Estado,
                     CapacidadMaxima = t.CapacidadMaxima,
+                    CerradoOperativo = _context.CierresOperativosTour.Any(x => x.TourId == t.Id),
                     CuposReservados = t.Reservas.Where(r => r.Estado != EstadosReserva.Cancelada).Sum(r => r.CantidadPersonas)
                 })
                 .FirstOrDefaultAsync();
@@ -560,6 +562,7 @@ namespace AgenciaToursAPI.Controllers
                     FechaFin = t.FechaFin,
                     Estado = t.Estado,
                     CapacidadMaxima = t.CapacidadMaxima,
+                    CerradoOperativo = _context.CierresOperativosTour.Any(x => x.TourId == t.Id),
                     CuposReservados = t.Reservas.Where(r => r.Estado != EstadosReserva.Cancelada).Sum(r => r.CantidadPersonas)
                 })
                 .FirstOrDefaultAsync();
