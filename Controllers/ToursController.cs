@@ -325,6 +325,9 @@ namespace AgenciaToursAPI.Controllers
                 return NotFound("El tour no existe.");
             }
 
+            if (await _context.CierresOperativosTour.AnyAsync(x => x.TourId == id))
+                return Conflict("No se puede modificar un tour con cierre operativo registrado.");
+
             var fechaInicioSolicitada = dto.Fecha.Date.Add(dto.Hora);
 
             if (fechaInicioSolicitada <= DateTime.Now)
@@ -447,6 +450,9 @@ namespace AgenciaToursAPI.Controllers
             {
                 return NotFound("El tour no existe.");
             }
+
+            if (await _context.CierresOperativosTour.AnyAsync(x => x.TourId == id))
+                return Conflict("No se puede modificar un tour con cierre operativo registrado.");
 
             var tieneReservas = await _context.Reservas
                 .AnyAsync(r => r.TourId == id);
