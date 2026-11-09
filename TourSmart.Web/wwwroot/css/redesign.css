@@ -1,0 +1,190 @@
+/* TourSmart RD - Renovacion visual integral · v2
+   Capa de diseño: preserva rutas, controles y reglas del proyecto. */
+:root {
+  --ink:#18343a; --pine:#102f34; --forest:#21504a; --muted:#60757c;
+  --cream:#f5f7f5; --sand:#eaf0eb; --lime:#e2f288; --mint:#dbebdf;
+  --line:#dce6e1; --brand:#177866; --brand-deep:#105f52;
+  --surface:#ffffff; --ts-shadow:0 15px 44px rgba(15,57,51,.075);
+}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{color:var(--ink);background:var(--cream);font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;line-height:1.58}
+main{min-height:62vh}
+a{color:#176a59;transition:color .18s ease,background .18s ease,transform .18s ease}
+a:hover{color:#0d493f}
+:focus-visible{outline:3px solid #e0bb65!important;outline-offset:3px}
+.container{max-width:1220px}
+h1,h2,h3,h4{letter-spacing:-.045em}
+h1,h2{font-weight:800}
+h3{font-weight:750}
+p{line-height:1.75}
+.eyebrow{color:#317d70;font-size:.73rem;letter-spacing:.16em;font-weight:800}
+.site-header{position:sticky;top:0;z-index:1050;background:rgba(14,44,49,.98);box-shadow:0 10px 30px rgba(4,25,27,.12);border-bottom:1px solid rgba(255,255,255,.12)}
+.site-header .navbar{min-height:78px}
+.site-header .brand{font-size:1.65rem;letter-spacing:-.075em}
+.site-header .brand-mark{display:inline-grid;place-items:center;width:31px;height:31px;border-radius:10px;background:var(--lime);color:#123f36;margin-right:.55rem;font-size:1.12rem}
+.site-header .nav-link{font-size:.91rem;font-weight:650;border-radius:12px;padding:.68rem .85rem!important}
+.site-header .nav-link:hover,.site-header .nav-link.active{background:rgba(226,242,136,.13);color:var(--lime)!important}
+.nav-login{border-radius:12px;font-weight:780;min-height:42px;padding:.55rem 1.2rem}
+.nav-login:hover{background:var(--lime)}
+.site-header .navbar-toggler{border:1px solid #ffffff55;border-radius:12px;padding:.62rem .75rem}
+.header-actions{display:flex;gap:.75rem;align-items:center}
+.header-pill{border:1px solid #ffffff40;border-radius:999px;padding:.45rem .85rem;color:#dbebe1;font-size:.76rem;font-weight:700}
+.site-footer{background:#0d292d;position:relative;border-top:4px solid var(--lime)}
+.site-footer .container{padding-top:3.5rem!important;padding-bottom:3.5rem!important}
+.footer-brand{font-size:1.7rem!important}
+.footer-copy{color:#c1d1cd}
+.btn{font-weight:730;transition:transform .17s ease,box-shadow .17s ease,background .17s ease}
+.btn:hover:not(:disabled){transform:translateY(-1px)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn-accent{background:var(--lime);color:var(--pine);border:1px solid transparent;border-radius:13px;box-shadow:0 5px 0 rgba(12,50,45,.09);padding:.79rem 1.35rem}
+.btn-accent:hover{background:#d3e86a;color:var(--pine)}
+.btn-dark-pill{background:var(--pine);border:1px solid var(--pine);color:#fff;border-radius:13px;padding:.79rem 1.25rem}
+.btn-dark-pill:hover{background:#20534c;border-color:#20534c;color:#fff}
+.btn-outline-primary,.btn-outline-success,.btn-outline-info{color:var(--brand-deep);border-color:#a6c7bd}
+.btn-outline-primary:hover,.btn-outline-success:hover,.btn-outline-info:hover{background:var(--brand-deep);border-color:var(--brand-deep);color:#fff}
+.btn-outline-secondary{border-color:#c3d1ca;color:#3e5955}
+.rounded-pill.btn{border-radius:13px!important}
+.btn-sm{padding:.49rem .7rem;border-radius:10px;min-height:35px}
+.section-space{padding-top:4.7rem;padding-bottom:5.3rem}
+.section-heading{margin-bottom:2.1rem}
+.section-heading h2{font-size:clamp(2.2rem,4vw,3.25rem)}
+.section-heading p{max-width:650px}
+.inner-hero{background:radial-gradient(circle at 88% 25%,rgba(108,165,137,.28),transparent 32%),linear-gradient(135deg,#102e35 0%,#174741 100%);padding:3.9rem 0 4.5rem;position:relative;overflow:hidden}
+.inner-hero:after{content:"";position:absolute;width:280px;height:280px;right:-80px;bottom:-180px;border:60px solid rgba(216,240,173,.09);border-radius:50%;pointer-events:none}
+.inner-hero h1{font-size:clamp(2.7rem,5vw,4.8rem);max-width:900px;line-height:1.09}
+.inner-hero p{max-width:700px}
+.back-link{display:inline-flex;align-items:center;color:#e1ede6;margin-bottom:1.6rem;font-weight:650}
+.back-link:hover{color:var(--lime)}
+/* Inicio: apertura mas expresiva, tarjetas y pasos */
+.hero{background:radial-gradient(circle at 76% 32%,rgba(124,185,158,.17),transparent 38%),linear-gradient(145deg,#0d2b31,#184b44);color:#fff}
+.hero-content{min-height:620px;grid-template-columns:1.12fr .88fr;gap:4rem;padding-top:3rem;padding-bottom:3rem}
+.hero h1{font-size:clamp(3.35rem,5.9vw,6rem);line-height:1.06;margin:1.25rem 0 1.3rem;max-width:850px}
+.hero h1 em{color:var(--lime)}
+.hero-eyebrow{color:#c8e8d2}
+.hero-description{color:#d0e2d8;line-height:1.85}
+.hero-actions{gap:1.25rem;margin-top:2.2rem}
+.hero-secondary-link{border-bottom:1px solid #c2e2cf;padding-bottom:.28rem}
+.hero-visual{height:480px;border-radius:38px;background:linear-gradient(145deg,#b2ded3,#dfeac9 59%,#7ea997);box-shadow:20px 20px 0 rgba(188,231,174,.12);transform:rotate(-1.5deg)}
+.hero-visual .sun-orb{box-shadow:0 0 100px #fff2a1b0}
+.floating-tag{border-radius:14px;box-shadow:0 10px 25px #0b292a25}
+.hero-bottom{padding-top:1.1rem;padding-bottom:1.5rem;letter-spacing:.13em}
+.tour-card{border:1px solid var(--line);border-radius:22px;box-shadow:var(--ts-shadow);height:100%;transition:transform .22s ease,box-shadow .22s ease}
+.tour-card:hover{transform:translateY(-5px);box-shadow:0 23px 54px rgba(13,57,51,.13)}
+.tour-card-top{min-height:225px;background:linear-gradient(135deg,#9bc9c2,#458578)}
+.tour-card:nth-child(3n + 2) .tour-card-top{background:linear-gradient(135deg,#a7bdc7,#567d86)}
+.tour-card:nth-child(3n) .tour-card-top{background:linear-gradient(135deg,#d6d6ab,#7b9d78)}
+.tour-pill{background:rgba(255,255,255,.94);border-radius:10px;font-weight:770}
+.tour-destination{font-size:1.1rem}
+.tour-card-content{padding:1.6rem}
+.tour-meta{font-size:.72rem;color:#578279}
+.tour-title{min-height:0;font-size:1.45rem;line-height:1.24}
+.tour-subline{line-height:1.6}
+.tour-card-bottom{align-items:center}
+.tour-arrow{border-radius:13px;flex-shrink:0}
+.how-section{background:#e9f1eb}
+.step-card{min-height:230px;border:1px solid var(--line);border-radius:20px;box-shadow:var(--ts-shadow)}
+.step-card span{color:#1f8b71}
+.step-card strong{font-size:1.22rem}
+.catalog-section .search-bar{border-radius:22px;border-color:var(--line);box-shadow:var(--ts-shadow)}
+.search-bar{padding:1.8rem}
+.search-bar.row{margin-left:0;margin-right:0}
+.search-bar .form-label{font-size:.78rem}
+.search-bar .form-control,.search-bar .form-select{width:100%;min-height:45px;border-radius:11px;padding:.74rem .9rem;background-color:#fff;border:1px solid #d1e0d8}
+.catalog-count{border-top:1px solid var(--line);padding-top:1.1rem}
+.detail-poster{border-radius:24px;box-shadow:var(--ts-shadow)}
+.info-tile{border:1px solid var(--line);background:#fff;border-radius:17px}
+.booking-summary{border-radius:22px;top:6.5rem}
+.booking-summary h3{font-size:1.55rem}
+.summary-price{color:var(--pine)}
+/* Panel admin, tablas y formularios: la misma estructura en todas las vistas */
+.dashboard-hero{padding:3.2rem 0}
+.dashboard-head{align-items:center}
+.dashboard-head>div:last-child{display:flex;flex-wrap:wrap;gap:.55rem!important}
+.dashboard-head h2{font-size:clamp(2rem,3.6vw,3rem)}
+.dashboard-head p{margin-top:.6rem}
+.metric-card{border-radius:19px;box-shadow:var(--ts-shadow);min-height:164px;padding:1.45rem}
+.metric-card strong{font-size:2.65rem;color:var(--pine)}
+.metric-card span{font-size:.8rem}
+.metric-card-accent{background:#e3efcf}
+.dashboard-table,.reservation-filters,.panel-feature,.tour-admin-form,.geo-panel{border:1px solid var(--line);border-radius:21px;box-shadow:var(--ts-shadow);background:#fff}
+.dashboard-table{height:auto;min-height:100%;padding:1.5rem}
+.dashboard-table-title{padding-bottom:1rem;border-bottom:1px solid var(--line)}
+.dashboard-table-title h3{font-size:1.25rem}
+.table-responsive{max-width:100%;scrollbar-color:#b6ccc2 #f0f4f0;scrollbar-width:thin}
+.table{--bs-table-bg:transparent}
+.table thead th{background:#f1f6f2;color:#557168!important;border-bottom-color:#e3ece5!important;white-space:nowrap;font-weight:800}
+.table td{vertical-align:middle;border-bottom-color:#ebf0ed!important}
+.table tbody tr:hover{background:#f7faf7}
+.table tbody tr:last-child td{border-bottom:0}
+.table td .btn{margin-bottom:.2rem}
+.form-label{font-weight:730;color:#2d504a}
+.form-control,.form-select{border-radius:11px;border:1px solid #d3e0d9;background-color:#fff;min-height:44px;padding:.68rem .85rem;color:var(--ink)}
+textarea.form-control{min-height:110px}
+.form-control:focus,.form-select:focus,.form-check-input:focus{border-color:#358b76;box-shadow:0 0 0 .22rem #bce2d38c}
+.form-check-input:checked{background-color:var(--brand);border-color:var(--brand)}
+.input-group>.form-control{min-width:0}
+.reservation-filters{padding:1.6rem;margin-left:0;margin-right:0}
+.reservation-filters.row{margin-left:0;margin-right:0}
+.reservation-status{border-radius:9px;padding:.38rem .7rem}
+.alert{border-radius:14px;border-width:1px;padding:1rem 1.15rem}
+.service-alert,.empty-box{border-radius:18px}
+.capacity-track{height:10px;background:#e8efe9}
+.capacity-fill{background:linear-gradient(90deg,#2c9078,#92c4a2)}
+.geo-panel{min-height:0}
+.geo-table td .btn{margin-bottom:0}
+.auth-section{background:linear-gradient(140deg,#133e40,#2a7166 53%,#e7efea 53.1%,#f5f7f5 100%);padding:4.5rem 0}
+.auth-shell{border-radius:25px;box-shadow:0 26px 72px #072d2b30}
+.auth-intro{background:radial-gradient(circle at 80% 80%,#2f6e5a,#133a3d);padding:4rem 3rem}
+.auth-form-panel{padding:3.5rem 3.2rem}
+.auth-form-panel .form-control{min-height:48px}
+.auth-form-panel h2{font-size:clamp(2.1rem,3vw,2.7rem)}
+.auth-form-panel .btn-accent{min-height:49px}
+.panel-feature{padding:2.6rem}
+/* Elementos reutilizables para un lenguaje visual coherente */
+.ts-quicklinks{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.4rem}
+.ts-quicklinks a{display:inline-flex;align-items:center;gap:.45rem;padding:.74rem 1rem;border:1px solid #b9ccc4;border-radius:12px;background:#fff;font-size:.85rem;font-weight:760;color:#235d51}
+.ts-quicklinks a:hover{background:#dff1e7;transform:translateY(-2px)}
+.ts-banner{padding:1.4rem 1.6rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;background:linear-gradient(120deg,#143d3f,#2e7566);border-radius:18px;color:#fff;flex-wrap:wrap}
+.ts-banner h3{color:#fff;margin:0;font-size:1.32rem}
+.ts-banner p{color:#d5eae0;margin:.35rem 0 0}
+.ts-banner .btn{white-space:nowrap}
+.ts-notice{background:#f0f7ef;border:1px solid #cbded0;border-radius:13px;padding:1rem 1.15rem;color:#355a4e}
+.ts-skip{position:absolute;left:10px;top:-100px;z-index:2000;background:var(--lime);padding:12px 16px;border-radius:10px;color:var(--pine);font-weight:800}
+.ts-skip:focus{top:10px}
+@media(max-width:991px){
+  .site-header .navbar-collapse{margin-top:1rem;border-top:1px solid #ffffff25;padding-top:.85rem;padding-bottom:.5rem}
+  .site-header .nav-link{padding:.8rem 1rem!important}
+  .hero-content{grid-template-columns:1fr;gap:1.8rem}
+  .hero-visual{height:350px;max-width:590px;transform:none;margin:0 auto}
+  .booking-summary{position:static}
+  .section-space{padding:3.8rem 0}
+  .auth-shell{grid-template-columns:1fr}
+  .auth-intro{padding:2.5rem}.auth-form-panel{padding:2.5rem}
+  .auth-deco{margin-top:2rem}
+}
+@media(max-width:575px){
+  .container{padding-left:1rem;padding-right:1rem}
+  .site-header .navbar{min-height:66px}
+  .site-header .brand{font-size:1.4rem}
+  .hero h1{font-size:clamp(2.9rem,11vw,4rem)}
+  .hero-content{padding-top:2.7rem;padding-bottom:2.5rem}
+  .hero-visual{height:280px;border-radius:21px;box-shadow:none}
+  .hero-actions{align-items:stretch;gap:.85rem}
+  .hero-actions .btn{width:100%}
+  .hero-bottom{font-size:.56rem}
+  .section-space{padding:3rem 0}
+  .inner-hero{padding:2.8rem 0 3rem}
+  .inner-hero h1{font-size:2.65rem}
+  .search-bar{padding:1.2rem}
+  .dashboard-table{padding:1rem}
+  .dashboard-head>div:last-child .btn{flex:1 1 auto}
+  .metric-card{min-height:138px;padding:1rem}
+  .metric-card strong{font-size:2.2rem}
+  .auth-intro,.auth-form-panel{padding:1.7rem}
+  .panel-feature{padding:1.5rem}
+  .ts-banner{padding:1.2rem}
+  .ts-banner .btn{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
