@@ -26,5 +26,5 @@ public sealed class TourCard
     public bool CerradoOperativo { get; set; }
     public int CuposReservados { get; set; }
     public int CuposDisponibles { get; set; }
-    public bool Reservable => Estado == "Disponible" && CuposDisponibles > 0;
+    public bool Reservable => !CerradoOperativo && Estado == "Disponible" && CuposDisponibles > 0;
 }
