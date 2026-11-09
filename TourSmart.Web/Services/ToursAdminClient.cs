@@ -16,6 +16,32 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
         return await resp.Content.ReadFromJsonAsync<List<T>>(cancellationToken: ct) ?? new();
     }
 
+    public async Task<EstadoCierreOperativo> ObtenerCierreOperativoAsync(
+        string token, int tourId, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Get,
+            $"api/tours/{tourId}/cierre-operativo");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        return await resp.Content.ReadFromJsonAsync<EstadoCierreOperativo>(cancellationToken: ct)
+            ?? throw new HttpRequestException("No se recibió el estado del cierre operativo.");
+    }
+
+    public async Task<(HttpStatusCode Estado, string Mensaje)> RegistrarCierreOperativoAsync(
+        string token, int tourId, string? incidencias, bool confirmar, CancellationToken ct)
+    {
+        using var req = new HttpRequestMessage(HttpMethod.Post,
+            $"api/tours/{tourId}/cierre-operativo")
+        {
+            Content = JsonContent.Create(new { Confirmar = confirmar, Incidencias = incidencias })
+        };
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        using var resp = await http.SendAsync(req, ct);
+        return (resp.StatusCode,
+            resp.IsSuccessStatusCode ? "" : await resp.Content.ReadAsStringAsync(ct));
+    }
+
     public async Task<HttpStatusCode> MarcarAsistenciaAsync(
         string token, int tourId, int pasajeroId, bool presente, CancellationToken ct)
     {
