@@ -2,22 +2,22 @@
 @{
     var disponible = Model.Reservable;
     var lugares = Model.CuposDisponibles;
-    var icono = Model.Categoria.Contains("Aventura", StringComparison.OrdinalIgnoreCase) ? "⛰" : "☀";
+    var icono = Model.Categoria.Contains("Aventura", StringComparison.OrdinalIgnoreCase) ? "⛰" : "✦";
 }
-<article class="tour-card h-100">
-    <div class="tour-card-top">
+<article class="tour-card ts-v3-tour-card h-100">
+    <div class="tour-card-top ts-v3-tour-cover">
         <span class="place-icon" aria-hidden="true">@icono</span>
-        <span class="tour-pill">@(disponible ? $"{lugares} plazas libres" : "No disponible")</span>
+        <span class="tour-pill @(disponible ? "ts-v3-pill-available" : "ts-v3-pill-full")">@(disponible ? $"{lugares} plazas libres" : "No disponible")</span>
         <div class="tour-art-line"></div>
-        <span class="tour-destination">@Model.Destino, @Model.Pais</span>
+        <span class="tour-destination"><span aria-hidden="true">⌖</span> @Model.Destino, @Model.Pais</span>
     </div>
     <div class="tour-card-content">
         <div class="tour-meta">@Model.Categoria <span>•</span> @Model.Fecha.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("es-DO"))</div>
         <h3 class="tour-title">@Model.Nombre</h3>
-        <p class="tour-subline">Duración: @Model.DuracionDias día(s) y @Model.DuracionHoras hora(s)</p>
+        <p class="tour-subline"><span aria-hidden="true">◷</span> @Model.DuracionDias día(s) · @Model.DuracionHoras hora(s) <span class="ts-v3-dot">·</span> <span aria-hidden="true">◉</span> @Model.CapacidadMaxima plazas en total</p>
         <div class="tour-card-bottom">
-            <div><span class="price-hint">Desde</span><strong class="price">RD$@Model.Precio.ToString("N0", new System.Globalization.CultureInfo("es-DO"))</strong><span class="price-hint">por persona</span></div>
-            <a class="tour-arrow" asp-controller="Tours" asp-action="Detalle" asp-route-id="@Model.Id" aria-label="Ver detalles de @Model.Nombre">↗</a>
+            <div><span class="price-hint">Precio desde</span><strong class="price">RD$@Model.Precio.ToString("N0", new System.Globalization.CultureInfo("es-DO"))</strong><span class="price-hint">por persona</span></div>
+            <a class="tour-arrow" asp-controller="Tours" asp-action="Detalle" asp-route-id="@Model.Id" aria-label="Ver detalles de @Model.Nombre">→</a>
         </div>
     </div>
 </article>
