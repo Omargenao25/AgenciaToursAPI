@@ -31,8 +31,11 @@ public sealed class ReservasWebController(IReservasAdminClient reservasApi, ITou
         model.MetodosPago = catalogos.Metodos
             .Select(x => new SelectListItem(x.Nombre, x.Id.ToString()))
             .ToList();
-        model.Tours = tours
+        var toursDisponibles = tours
             .Where(x => x.Estado == "Disponible" && !x.CerradoOperativo && x.Fecha.Date.Add(x.Hora) > DateTime.Now && x.CuposDisponibles > 0)
+            .ToList();
+        model.CuposPorTour = toursDisponibles.ToDictionary(x => x.Id, x => x.CuposDisponibles);
+        model.Tours = toursDisponibles
             .OrderBy(x => x.Fecha)
             .Select(x => new SelectListItem(
                 $"{x.Nombre} · {x.Fecha:dd/MM/yyyy} · {x.CuposDisponibles} plazas · RD$ {x.Precio:N2}",
