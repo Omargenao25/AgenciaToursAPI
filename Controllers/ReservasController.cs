@@ -210,6 +210,8 @@ namespace AgenciaToursAPI.Controllers
                     .SingleOrDefaultAsync();
                 if (actual != null) toursBloqueados[tourId] = actual;
             }
+            if (await _context.CierresOperativosTour.AnyAsync(c => idsTour.Contains(c.TourId)))
+                return Conflict("No se pueden modificar reservas asociadas a tours con cierre operativo.");
             toursBloqueados.TryGetValue(reservaActual.TourId, out var tourOriginal);
 
             if (tourOriginal == null)
