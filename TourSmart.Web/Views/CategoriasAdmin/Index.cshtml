@@ -1,0 +1,138 @@
+@model TourSmart.Web.Controllers.CategoriasListado
+@{
+    ViewData["Title"] = "Gestionar categorías";
+    var editando = Model.Categoria.Id > 0;
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
+        <span class="eyebrow">CATÁLOGO · TOURSMART RD</span>
+        <h1>Gestiona tus <em>categorías.</em></h1>
+        <p>Crea y organiza los tipos de experiencias disponibles en la agencia.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Exito"] is string exito)
+        {
+            <div class="alert alert-success" role="status">@exito</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <a class="btn btn-outline-secondary" asp-controller="GeografiaAdmin" asp-action="Index">Países y destinos</a>
+            <a class="btn btn-outline-primary" asp-controller="ToursAdmin" asp-action="Crear">+ Crear tour</a>
+            <a class="btn btn-outline-secondary" asp-controller="ToursAdmin" asp-action="Index">Gestionar tours</a>
+        </div>
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-4">
+                <div class="geo-panel p-4">
+                    <span class="eyebrow">@(editando ? "EDITAR CATEGORÍA" : "NUEVA CATEGORÍA")</span>
+                    <h2 class="h3 mt-2 mb-3">@(editando ? "Actualizar categoría" : "Registrar categoría")</h2>
+                    <p class="text-secondary small">Ejemplos: Aventura, Ecoturismo, Playa, Cultural.</p>
+                    <form method="post" asp-controller="CategoriasAdmin" asp-action="Guardar">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Categoria.Id" />
+                        <label asp-for="Categoria.Nombre" class="form-label">Nombre de la categoría</label>
+                        <input asp-for="Categoria.Nombre" class="form-control mb-3" minlength="2" maxlength="50"
+                               required autocomplete="off" placeholder="Ej. Ecoturismo" />
+                        <button type="submit" class="btn btn-accent w-100">
+                            @(editando ? "Guardar cambios" : "+ Agregar categoría")
+                        </button>
+                        @if (editando)
+                        {
+                            <a class="btn btn-outline-secondary w-100 mt-2" asp-action="Index">Cancelar edición</a>
+                        }
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="geo-panel p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <span class="eyebrow">CATÁLOGO</span>
+                            <h2 class="h3 mt-2 mb-0">Categorías registradas</h2>
+                        </div>
+                        <span class="badge text-bg-light">@Model.Categorias.Count en total</span>
+                    </div>
+                    <label for="buscarCategorias" class="form-label">Buscar categoría</label>
+                    <input id="buscarCategorias" class="form-control mb-3" type="search"
+                           placeholder="Escribe el nombre..." autocomplete="off" />
+                    <div class="table-responsive">
+                        <table class="table align-middle" id="tablaCategorias">
+                            <thead><tr><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody>
+                            @foreach (var categoria in Model.Categorias)
+                            {
+                                var enUso = Model.CategoriasEnUso.Contains(categoria.Id);
+                                <tr class="fila-categoria" data-nombre="@categoria.Nombre">
+                                    <td><strong>@categoria.Nombre</strong></td>
+                                    <td>
+                                        @if (enUso)
+                                        {
+                                            <span class="badge text-bg-info">En uso</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-light">Sin tours</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <a asp-action="Index" asp-route-editarId="@categoria.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                                            @if (enUso)
+                                            {
+                                                <button class="btn btn-sm btn-outline-secondary" type="button" disabled title="Tiene tours asociados">No eliminable</button>
+                                            }
+                                            else
+                                            {
+                                                <form method="post" asp-action="Eliminar" asp-route-id="@categoria.Id"
+                                                      class="m-0" data-categoria="@categoria.Nombre">
+                                                    @Html.AntiForgeryToken()
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!Model.Categorias.Any())
+                            {
+                                <tr><td colspan="3" class="text-secondary py-4">Todavía no hay categorías. Agrega la primera desde el formulario.</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="sinCategorias" class="text-secondary d-none">No hay categorías con esa búsqueda.</p>
+                    <p class="text-secondary small mb-0">Las categorías utilizadas por tours no pueden eliminarse. Puedes cambiarles el nombre sin perder sus asociaciones.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts {
+<script>
+(() => {
+    const buscar = document.getElementById("buscarCategorias");
+    const filas = [...document.querySelectorAll(".fila-categoria")];
+    const sinResultados = document.getElementById("sinCategorias");
+    if (buscar) buscar.addEventListener("input", () => {
+        const termino = buscar.value.trim().toLocaleLowerCase();
+        let visibles = 0;
+        filas.forEach(fila => {
+            const coincide = (fila.dataset.nombre || "").toLocaleLowerCase().includes(termino);
+            fila.classList.toggle("d-none", !coincide);
+            if (coincide) visibles++;
+        });
+        sinResultados.classList.toggle("d-none", visibles > 0 || filas.length === 0);
+    });
+    document.querySelectorAll("form[data-categoria]").forEach(form => {
+        form.addEventListener("submit", e => {
+            if (!confirm("¿Eliminar la categoría '" + form.dataset.categoria + "'?")) e.preventDefault();
+        });
+    });
+})();
+</script>
+}
