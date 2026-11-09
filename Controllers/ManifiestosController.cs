@@ -47,14 +47,19 @@ public sealed class ManifiestosController(ApplicationDbContext db) : ControllerB
         var nombres = await db.PasajerosReserva.AsNoTracking()
             .Where(p => ids.Contains(p.ReservaId))
             .OrderBy(p => p.Orden)
-            .Select(p => new { p.ReservaId, p.NombreCompleto })
+            .Select(p => new { p.Id, p.ReservaId, p.Orden, p.NombreCompleto, p.LlegadaUtc, p.RegistradoPor })
             .ToListAsync(ct);
         var porReserva = nombres.GroupBy(p => p.ReservaId)
-            .ToDictionary(g => g.Key, g => g.Select(p => p.NombreCompleto).ToList());
+            .ToDictionary(g => g.Key, g => g.Select(p => new PasajeroAsistenciaDto {
+                Id = p.Id, Orden = p.Orden, NombreCompleto = p.NombreCompleto,
+                LlegadaUtc = p.LlegadaUtc, RegistradoPor = p.RegistradoPor
+            }).ToList());
 
         var filas = reservas.Select(r => new ManifiestoReservaDto {
             ReservaId = r.Id, Titular = r.Titular, Telefono = r.Telefono,
-            Pasajeros = porReserva.TryGetValue(r.Id, out var lista) ? lista : new List<string>(),
+            Asistentes = porReserva.TryGetValue(r.Id, out var lista) ? lista : new List<PasajeroAsistenciaDto>(),
+            Pasajeros = porReserva.TryGetValue(r.Id, out var pasajeros)
+                ? pasajeros.Select(p => p.NombreCompleto).ToList() : new List<string>(),
             CantidadPersonas = r.CantidadPersonas, Estado = r.Estado,
             Total = r.Total, NetoRecibido = r.Cobrado - r.Devuelto
         }).ToList();
@@ -67,6 +72,7 @@ public sealed class ManifiestosController(ApplicationDbContext db) : ControllerB
             TourId = tour.Id, Tour = tour.Nombre, Fecha = tour.Fecha,
             Hora = tour.Hora, Guia = tour.Guia, Transporte = tour.Transporte,
             CapacidadMaxima = tour.CapacidadMaxima,
+            Llegaron = confirmadas.Sum(r => r.Asistentes.Count(p => p.LlegadaUtc.HasValue)),
             CuposConfirmados = confirmadas.Sum(r => r.CantidadPersonas),
             CuposPendientes = pendientes.Sum(r => r.CantidadPersonas),
             Confirmadas = confirmadas,
