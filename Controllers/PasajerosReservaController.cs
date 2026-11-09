@@ -55,6 +55,8 @@ public sealed class PasajerosReservaController(ApplicationDbContext db) : Contro
         var tour = await db.Tours.AsNoTracking().Where(t => t.Id == reserva.TourId)
             .Select(t => new { t.Fecha, t.Hora }).SingleOrDefaultAsync(ct);
         if (tour is null) return NotFound();
+        if (await db.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId, ct))
+            return Conflict("El cierre operativo impide cambiar nombres de pasajeros.");
         if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
             return Conflict("No se puede modificar la lista después del inicio del tour.");
 
