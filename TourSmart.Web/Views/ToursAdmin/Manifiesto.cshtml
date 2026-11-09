@@ -18,6 +18,18 @@
             <div class="col-md-3"><div class="metric-card"><span>Plazas comprometidas</span><strong>@Model.CuposComprometidos</strong><small>Confirmadas + pendientes</small></div></div>
             <div class="col-md-3"><div class="metric-card"><span>Disponibles</span><strong>@Model.CuposDisponibles</strong><small>Capacidad máxima: @Model.CapacidadMaxima</small></div></div>
         </div>
+        @if (TempData["Exito"] is string exito)
+        {
+            <div class="alert alert-success" role="status">@exito</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <div class="row g-3 mb-4">
+            <div class="col-md-6"><div class="metric-card metric-card-accent"><span>Pasajeros presentes</span><strong>@Model.Llegaron</strong><small>Check-in sobre plazas confirmadas</small></div></div>
+            <div class="col-md-6"><div class="metric-card"><span>Pasajeros faltantes</span><strong>@Model.Faltan</strong><small>Plazas confirmadas aún sin llegada</small></div></div>
+        </div>
         <div class="alert alert-info mb-4">
             <strong>Lista operativa de titulares.</strong> Cada reserva identifica al titular y el número de plazas que contrató.
             Las reservas nuevas incluyen nombres individuales. Las reservas históricas anteriores a la Fase 5.0 pueden estar pendientes de completar.
@@ -45,12 +57,34 @@
                                 @if (item.Pasajeros.Count > 0)
                                 {
                                     <small class="d-block text-secondary">Pasajeros nominales:</small>
-                                    <ol class="small mb-0 ps-3">
-                                        @foreach (var nombre in item.Pasajeros)
+                                    <div class="mt-2">
+                                        @foreach (var pasajero in item.Asistentes)
                                         {
-                                            <li>@nombre</li>
+                                            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                                <strong class="small">@pasajero.Orden. @pasajero.NombreCompleto</strong>
+                                                @if (pasajero.LlegadaUtc.HasValue)
+                                                {
+                                                    <span class="badge bg-success">Presente</span>
+                                                    <small class="text-secondary">@pasajero.LlegadaUtc.Value.ToString("dd/MM HH:mm") UTC · @pasajero.RegistradoPor</small>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Pendiente</span>
+                                                }
+                                                @if (Model.Fecha.Date.Add(Model.Hora) > DateTime.Now)
+                                                {
+                                                    <form method="post" asp-controller="ToursAdmin" asp-action="CheckIn"
+                                                          asp-route-id="@Model.TourId" asp-route-pasajeroId="@pasajero.Id" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="presente" value="@(pasajero.LlegadaUtc.HasValue ? "false" : "true")" />
+                                                        <button class="btn btn-sm @(pasajero.LlegadaUtc.HasValue ? "btn-outline-warning" : "btn-outline-success")" type="submit">
+                                                            @(pasajero.LlegadaUtc.HasValue ? "Revertir" : "Marcar llegada")
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </div>
                                         }
-                                    </ol>
+                                    </div>
                                 }
                                 else
                                 {
@@ -114,6 +148,6 @@
                 </table>
             </div>
         </section>
-        <p class="dashboard-footnote">Información de uso interno. Protege los datos de contacto y verifica el estado de cada reserva antes de la salida. Este módulo es de solo lectura.</p>
+        <p class="dashboard-footnote">Información de uso interno. Protege los datos de contacto y verifica el estado de cada reserva antes de la salida. Las llegadas se registran individualmente por personal autorizado antes de la salida.</p>
     </div>
 </section>
