@@ -12,11 +12,52 @@
 <section class="section-space catalog-section">
     <div class="container">
         <form method="get" asp-controller="Tours" asp-action="Index" class="search-bar row g-3 align-items-end">
-            <div class="col-lg-7"><label for="busqueda" class="form-label">Buscar destino o experiencia</label><input class="form-control" type="search" id="busqueda" name="busqueda" value="@Model.Busqueda" placeholder="Ej. Punta Cana, aventura, México..." /></div>
-            <div class="col-lg-3"><label for="categoria" class="form-label">Categoría</label><input class="form-control" id="categoria" name="categoria" value="@Model.Categoria" placeholder="Todas las categorías" /></div>
-            <div class="col-lg-2"><button type="submit" class="btn btn-accent w-100">Buscar ↗</button></div>
+            <div class="col-lg-4">
+                <label for="busqueda" class="form-label">Buscar experiencia</label>
+                <input class="form-control" type="search" id="busqueda" name="busqueda" maxlength="100" value="@Model.Busqueda" placeholder="Ej. aventura, playa..." />
+            </div>
+            <div class="col-lg-3">
+                <label for="paisId" class="form-label">País</label>
+                <select class="form-select" id="paisId" name="paisId">
+                    <option value="">Todos los países</option>
+                    @foreach (var pais in Model.Paises)
+                    {
+                        <option value="@pais.Id" selected="@(Model.PaisId == pais.Id)">@pais.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <label for="destinoId" class="form-label">Destino</label>
+                <select class="form-select" id="destinoId" name="destinoId">
+                    <option value="">Todos los destinos</option>
+                    @foreach (var destino in Model.Destinos)
+                    {
+                        <option value="@destino.Id" data-pais="@destino.PaisId" selected="@(Model.DestinoId == destino.Id)">@destino.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-2">
+                <label for="categoria" class="form-label">Categoría</label>
+                <select class="form-select" id="categoria" name="categoria">
+                    <option value="">Todas</option>
+                    @foreach (var categoria in Model.Categorias)
+                    {
+                        <option value="@categoria" selected="@(string.Equals(Model.Categoria, categoria, StringComparison.OrdinalIgnoreCase))">@categoria</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-8">
+                <label class="d-inline-flex align-items-center gap-2">
+                    <input type="checkbox" class="form-check-input m-0" name="soloDisponibles" value="true" checked="@Model.SoloDisponibles" />
+                    Mostrar solo tours disponibles con plazas libres
+                </label>
+            </div>
+            <div class="col-lg-4 d-flex gap-2">
+                <button type="submit" class="btn btn-accent flex-grow-1">Aplicar filtros ↗</button>
+                <a class="btn btn-outline-secondary rounded-pill" asp-action="Index">Limpiar</a>
+            </div>
         </form>
-        <div class="catalog-count"><strong>@Model.TotalTours</strong> experiencias encontradas</div>
+        <div class="catalog-count" aria-live="polite"><strong>@Model.TotalTours</strong> experiencias encontradas</div>
         @if (!Model.ServicioDisponible)
         {
             <div class="service-alert" role="status">No se pudo conectar con AgenciaToursAPI. Comprueba que esté ejecutándose en http://localhost:5290.</div>
@@ -36,3 +77,23 @@
         }
     </div>
 </section>
+@section Scripts {
+<script>
+(() => {
+    const pais = document.getElementById("paisId");
+    const destino = document.getElementById("destinoId");
+    if (!pais || !destino) return;
+    function actualizarDestinos() {
+        const valor = pais.value;
+        for (const opcion of destino.options) {
+            if (!opcion.value) continue;
+            opcion.hidden = Boolean(valor) && opcion.dataset.pais !== valor;
+            opcion.disabled = opcion.hidden;
+        }
+        if (destino.selectedOptions.length && destino.selectedOptions[0].disabled) destino.value = "";
+    }
+    pais.addEventListener("change", actualizarDestinos);
+    actualizarDestinos();
+})();
+</script>
+}
