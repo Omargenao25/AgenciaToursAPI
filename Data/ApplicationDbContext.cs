@@ -29,6 +29,7 @@ namespace AgenciaToursAPI.Data
 
         public DbSet<Reserva> Reservas { get; set; }
         public DbSet<PasajeroReserva> PasajerosReserva { get; set; }
+        public DbSet<CierreOperativoTour> CierresOperativosTour { get; set; }
 
         public DbSet<PagoReserva> PagosReserva { get; set; }
         public DbSet<ReembolsoReserva> ReembolsosReserva { get; set; }
@@ -126,6 +127,19 @@ namespace AgenciaToursAPI.Data
                 .WithMany(m => m.Reservas)
                 .HasForeignKey(r => r.MetodoPagoId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<CierreOperativoTour>()
+                .HasOne(c => c.Tour)
+                .WithMany()
+                .HasForeignKey(c => c.TourId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<CierreOperativoTour>()
+                .HasIndex(c => c.TourId).IsUnique();
+
+            modelBuilder.Entity<CierreOperativoTour>()
+                .ToTable(t => t.HasCheckConstraint("CK_CierresOperativosTour_Contadores",
+                    "[PlazasConfirmadas] >= 0 AND [PasajerosPresentes] >= 0 AND [PasajerosAusentes] >= 0 AND [PlazasConfirmadas] = [PasajerosPresentes] + [PasajerosAusentes]"));
 
             modelBuilder.Entity<PasajeroReserva>()
                 .HasOne(p => p.Reserva)
