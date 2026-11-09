@@ -60,7 +60,9 @@ namespace AgenciaToursAPI.Controllers
             Destino destino)
         {
 
-            destino.Nombre = destino.Nombre.Trim();
+            destino.Nombre = destino.Nombre?.Trim() ?? string.Empty;
+            if (destino.Nombre.Length < 2)
+                return BadRequest("El nombre del destino debe contener al menos dos caracteres.");
 
 
             var paisExiste = await _context.Paises
@@ -83,7 +85,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (existe)
             {
-                return BadRequest("Ya existe este destino para el país seleccionado.");
+                return Conflict("Ya existe este destino para el país seleccionado.");
             }
 
 
@@ -139,7 +141,9 @@ namespace AgenciaToursAPI.Controllers
             }
 
 
-            destino.Nombre = destino.Nombre.Trim();
+            destino.Nombre = destino.Nombre?.Trim() ?? string.Empty;
+            if (destino.Nombre.Length < 2)
+                return BadRequest("El nombre del destino debe contener al menos dos caracteres.");
 
 
             var existe = await _context.Destinos
@@ -154,7 +158,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (existe)
             {
-                return BadRequest("Ya existe otro destino igual para ese país.");
+                return Conflict("Ya existe otro destino igual para ese país.");
             }
 
             if (destino.DuracionDias == 0 &&
@@ -172,10 +176,17 @@ namespace AgenciaToursAPI.Controllers
             if (tieneTours &&
                 destinoActual.PaisId != destino.PaisId)
             {
-                return BadRequest("No se puede cambiar el país de un destino que tiene tours asociados.");
+                return Conflict("No se puede cambiar el país de un destino que tiene tours asociados.");
             }
 
 
+
+            if (tieneTours &&
+                (destinoActual.DuracionDias != destino.DuracionDias ||
+                 destinoActual.DuracionHoras != destino.DuracionHoras))
+            {
+                return Conflict("No se puede cambiar la duración de un destino que ya tiene tours asociados; sus fechas de finalización dependen de la duración original.");
+            }
 
             destinoActual.Nombre = destino.Nombre;
             destinoActual.DuracionDias = destino.DuracionDias;
@@ -210,7 +221,7 @@ namespace AgenciaToursAPI.Controllers
 
             if (tieneTours)
             {
-                return BadRequest("No se puede eliminar el destino porque tiene tours asociados.");
+                return Conflict("No se puede eliminar el destino porque tiene tours asociados.");
             }
 
 
