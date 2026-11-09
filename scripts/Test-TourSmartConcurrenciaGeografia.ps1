@@ -15,6 +15,7 @@ param(
     [switch]$BaseAisladaConfirmada
 )
 $ErrorActionPreference = "Stop"
+$global:LASTEXITCODE = 0
 if (-not $BaseAisladaConfirmada) {
     Write-Host "[BLOQUEADO] Usa una base de pruebas AISLADA y respaldo. Para habilitar: -BaseAisladaConfirmada" -ForegroundColor Yellow
     exit 2
@@ -70,8 +71,8 @@ try {
     finally {
         if ($req1) { $req1.Dispose() }
         if ($req2) { $req2.Dispose() }
-        if ($enviar1 -and $enviar1.IsCompletedSuccessfully) { $enviar1.Result.Dispose() }
-        if ($enviar2 -and $enviar2.IsCompletedSuccessfully) { $enviar2.Result.Dispose() }
+        if ($enviar1 -and $enviar1.Status -eq [Threading.Tasks.TaskStatus]::RanToCompletion) { $enviar1.Result.Dispose() }
+        if ($enviar2 -and $enviar2.Status -eq [Threading.Tasks.TaskStatus]::RanToCompletion) { $enviar2.Result.Dispose() }
     }
 }
 catch {
