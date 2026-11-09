@@ -253,6 +253,8 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
                     b.Property<string>("NombreCompleto").IsRequired().HasMaxLength(120).HasColumnType("nvarchar(120)");
+                    b.Property<DateTime?>("LlegadaUtc").HasColumnType("datetime2");
+                    b.Property<string>("RegistradoPor").HasMaxLength(100).HasColumnType("nvarchar(100)");
                     b.Property<int>("Orden").HasColumnType("int");
                     b.Property<int>("ReservaId").HasColumnType("int");
                     b.HasKey("Id");
