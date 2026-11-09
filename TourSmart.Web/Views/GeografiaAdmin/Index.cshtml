@@ -1,120 +1,195 @@
 @model TourSmart.Web.Controllers.GeografiaListado
 @{
-    ViewData["Title"] = "Países y destinos";
-    var paises = Model.Paises.ToDictionary(p => p.Id, p => p.Nombre);
+    ViewData["Title"] = "Gestionar países y destinos";
+    var nombresPaises = Model.Paises.ToDictionary(p => p.Id, p => p.Nombre);
+    var editandoPais = Model.Pais.Id > 0;
+    var editandoDestino = Model.Destino.Id > 0;
 }
 <section class="inner-hero dashboard-hero">
     <div class="container">
         <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
-        <span class="eyebrow">CATÁLOGOS · TOURSMART RD</span>
+        <span class="eyebrow">GESTIÓN GEOGRÁFICA · TOURSMART RD</span>
         <h1>Países y <em>destinos.</em></h1>
-        <p>Organiza las ubicaciones que luego seleccionarás al crear excursiones.</p>
+        <p>Organiza las ubicaciones de tus excursiones. Primero registra un país y luego sus destinos.</p>
     </div>
 </section>
-<section class="section-space"><div class="container">
+<section class="section-space geo-section">
+<div class="container">
     @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
     @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
-    <div class="row g-4">
-        <div class="col-lg-5">
-            <section class="dashboard-table mb-4">
-                <h2 class="h4 mb-3">@(Model.Pais.Id > 0 ? "Editar país" : "Nuevo país")</h2>
+
+    <div class="geo-overview">
+        <div class="geo-stat"><span>Países registrados</span><strong>@Model.Paises.Count</strong></div>
+        <div class="geo-stat"><span>Destinos registrados</span><strong>@Model.Destinos.Count</strong></div>
+        <div class="geo-stat geo-stat-action"><span>Acceso rápido</span><a class="btn btn-dark-pill" asp-controller="ToursAdmin" asp-action="Crear">Crear un tour ↗</a></div>
+    </div>
+
+    <nav class="geo-tabs" aria-label="Secciones de gestión">
+        <a href="#paises" class="geo-tab">01 · Países</a>
+        <a href="#destinos" class="geo-tab">02 · Destinos</a>
+    </nav>
+
+    <section id="paises" class="geo-workspace" aria-labelledby="titulo-paises">
+        <div class="geo-section-heading">
+            <div><span class="eyebrow">PASO 01</span><h2 id="titulo-paises">Gestionar <em>países.</em></h2><p>Registra y administra los países disponibles para las excursiones.</p></div>
+        </div>
+        <div class="geo-columns">
+            <div class="geo-panel geo-form-panel" id="form-pais">
+                <h3>@(editandoPais ? "Editar país" : "Registrar país")</h3>
+                <p class="geo-help">El nombre debe identificar claramente al país.</p>
                 <form method="post" asp-controller="GeografiaAdmin" asp-action="GuardarPais">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Pais.Id" />
-                    <div class="mb-3">
-                        <label asp-for="Pais.Nombre" class="form-label">Nombre del país</label>
-                        <input asp-for="Pais.Nombre" class="form-control" maxlength="100" required placeholder="Ej. República Dominicana" />
+                    <label asp-for="Pais.Nombre" class="form-label">Nombre del país</label>
+                    <input asp-for="Pais.Nombre" class="form-control" minlength="2" maxlength="100" required placeholder="Ej. República Dominicana" autocomplete="off" />
+                    <span asp-validation-for="Pais.Nombre" class="text-danger small"></span>
+                    <div class="geo-form-actions">
+                        <button class="btn btn-accent" type="submit">@(editandoPais ? "Guardar cambios" : "+ Agregar país")</button>
+                        @if (editandoPais) { <a class="btn btn-outline-secondary" asp-action="Index" asp-fragment="paises">Cancelar edición</a> }
                     </div>
-                    <button type="submit" class="btn btn-accent">Guardar país</button>
-                    @if (Model.Pais.Id > 0) { <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancelar</a> }
                 </form>
-            </section>
-            <section class="dashboard-table">
-                <h2 class="h4 mb-3">@(Model.Destino.Id > 0 ? "Editar destino" : "Nuevo destino")</h2>
+            </div>
+            <div class="geo-panel geo-list-panel">
+                <div class="geo-panel-header"><h3>Lista de países</h3><span>@Model.Paises.Count registrados</span></div>
+                <label for="filtrarPaises" class="form-label">Buscar país</label>
+                <input id="filtrarPaises" class="form-control geo-search" type="search" placeholder="Buscar por nombre..." aria-controls="tablaPaises" />
+                <div class="table-responsive">
+                    <table id="tablaPaises" class="table align-middle geo-table">
+                        <thead><tr><th>País</th><th>Destinos</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                        @foreach (var pais in Model.Paises)
+                        {
+                            var vinculados = Model.Destinos.Count(d => d.PaisId == pais.Id);
+                            <tr data-search="@pais.Nombre">
+                                <td><strong>@pais.Nombre</strong><small class="geo-row-sub">ID #@pais.Id</small></td>
+                                <td><span class="geo-count">@vinculados</span></td>
+                                <td>
+                                    <div class="geo-actions">
+                                        <a class="btn btn-sm btn-outline-success" asp-action="Index" asp-route-paisId="@pais.Id" asp-fragment="form-pais">Editar</a>
+                                        @if (vinculados > 0)
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" disabled title="Tiene destinos asociados">En uso</button>
+                                        }
+                                        else
+                                        {
+                                            <form class="geo-delete" asp-controller="GeografiaAdmin" asp-action="EliminarPais" asp-route-id="@pais.Id" method="post" data-nombre="@pais.Nombre">
+                                                @Html.AntiForgeryToken()
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Paises.Any()) { <tr><td colspan="3" class="geo-empty">No hay países todavía. Registra el primero en el formulario.</td></tr> }
+                        </tbody>
+                    </table>
+                </div>
+                <p id="sinPaises" class="geo-empty d-none">No encontramos países con esa búsqueda.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="destinos" class="geo-workspace" aria-labelledby="titulo-destinos">
+        <div class="geo-section-heading">
+            <div><span class="eyebrow">PASO 02</span><h2 id="titulo-destinos">Gestionar <em>destinos.</em></h2><p>Asocia cada destino con su país y define la duración de la excursión.</p></div>
+        </div>
+        <div class="geo-columns">
+            <div class="geo-panel geo-form-panel" id="form-destino">
+                <h3>@(editandoDestino ? "Editar destino" : "Registrar destino")</h3>
+                <p class="geo-help">La duración se utilizará como referencia al crear nuevos tours.</p>
+                @if (Model.Paises.Count == 0) { <div class="alert alert-warning">Primero registra un país para poder agregar destinos.</div> }
                 <form method="post" asp-controller="GeografiaAdmin" asp-action="GuardarDestino">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Destino.Id" />
-                    <div class="mb-3">
-                        <label asp-for="Destino.Nombre" class="form-label">Nombre del destino</label>
-                        <input asp-for="Destino.Nombre" class="form-control" maxlength="100" required placeholder="Ej. Samaná" />
+                    <label asp-for="Destino.Nombre" class="form-label">Nombre del destino</label>
+                    <input asp-for="Destino.Nombre" class="form-control mb-3" minlength="2" maxlength="100" required placeholder="Ej. Samaná" autocomplete="off" />
+                    <label asp-for="Destino.PaisId" class="form-label">País al que pertenece</label>
+                    <select asp-for="Destino.PaisId" class="form-select mb-3" required>
+                        <option value="0">Seleccionar país</option>
+                        @foreach (var pais in Model.Paises)
+                        {
+                            <option value="@pais.Id">@pais.Nombre</option>
+                        }
+                    </select>
+                    <div class="row g-3">
+                        <div class="col-sm-6"><label asp-for="Destino.DuracionDias" class="form-label">Días</label><input asp-for="Destino.DuracionDias" class="form-control" type="number" min="0" max="365" required /></div>
+                        <div class="col-sm-6"><label asp-for="Destino.DuracionHoras" class="form-label">Horas</label><input asp-for="Destino.DuracionHoras" class="form-control" type="number" min="0" max="23" required /></div>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Destino.PaisId" class="form-label">País al que pertenece</label>
-                        <select asp-for="Destino.PaisId" class="form-select" required>
-                            <option value="0">Selecciona un país</option>
-                            @foreach (var pais in Model.Paises)
-                            {
-                                <option value="@pais.Id">@pais.Nombre</option>
-                            }
-                        </select>
+                    <p class="geo-help mt-3">Indica al menos 1 hora o 1 día.</p>
+                    <div class="geo-form-actions">
+                        <button class="btn btn-accent" type="submit" @(Model.Paises.Count == 0 ? "disabled" : "")>@(editandoDestino ? "Guardar cambios" : "+ Agregar destino")</button>
+                        @if (editandoDestino) { <a class="btn btn-outline-secondary" asp-action="Index" asp-fragment="destinos">Cancelar edición</a> }
                     </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-6"><label asp-for="Destino.DuracionDias" class="form-label">Duración (días)</label><input asp-for="Destino.DuracionDias" class="form-control" type="number" min="0" max="365" /></div>
-                        <div class="col-6"><label asp-for="Destino.DuracionHoras" class="form-label">Duración (horas)</label><input asp-for="Destino.DuracionHoras" class="form-control" type="number" min="0" max="23" /></div>
-                    </div>
-                    <p class="text-secondary small">La duración debe ser mayor que cero. Los tours nuevos tomarán la duración del destino.</p>
-                    <button type="submit" class="btn btn-accent">Guardar destino</button>
-                    @if (Model.Destino.Id > 0) { <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancelar</a> }
                 </form>
-            </section>
+            </div>
+            <div class="geo-panel geo-list-panel">
+                <div class="geo-panel-header"><h3>Lista de destinos</h3><span>@Model.Destinos.Count registrados</span></div>
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-7"><label for="filtrarDestinos" class="form-label">Buscar destino</label><input id="filtrarDestinos" class="form-control geo-search" type="search" placeholder="Nombre del destino..." /></div>
+                    <div class="col-sm-5"><label for="filtrarPais" class="form-label">Filtrar por país</label><select id="filtrarPais" class="form-select"><option value="">Todos los países</option>@foreach (var pais in Model.Paises) { <option value="@pais.Id">@pais.Nombre</option> }</select></div>
+                </div>
+                <div class="table-responsive">
+                    <table id="tablaDestinos" class="table align-middle geo-table">
+                        <thead><tr><th>Destino y país</th><th>Duración</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                        @foreach (var destino in Model.Destinos)
+                        {
+                            <tr data-search="@destino.Nombre" data-pais="@destino.PaisId">
+                                <td><strong>@destino.Nombre</strong><small class="geo-row-sub">@(nombresPaises.TryGetValue(destino.PaisId, out var nombrePais) ? nombrePais : "País desconocido")</small></td>
+                                <td><span class="geo-duration">@destino.DuracionDias d · @destino.DuracionHoras h</span></td>
+                                <td>
+                                    <div class="geo-actions">
+                                        <a class="btn btn-sm btn-outline-success" asp-action="Index" asp-route-destinoId="@destino.Id" asp-fragment="form-destino">Editar</a>
+                                        <form class="geo-delete" asp-controller="GeografiaAdmin" asp-action="EliminarDestino" asp-route-id="@destino.Id" method="post" data-nombre="@destino.Nombre">
+                                            @Html.AntiForgeryToken()
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Destinos.Any()) { <tr><td colspan="3" class="geo-empty">Aún no hay destinos. Registra el primero a la izquierda.</td></tr> }
+                        </tbody>
+                    </table>
+                </div>
+                <p id="sinDestinos" class="geo-empty d-none">No encontramos destinos con esos filtros.</p>
+            </div>
         </div>
-        <div class="col-lg-7">
-            <section class="dashboard-table mb-4">
-                <h2 class="h4 mb-3">Países registrados (@Model.Paises.Count)</h2>
-                <div class="table-responsive"><table class="table align-middle">
-                    <thead><tr><th>País</th><th>Destinos</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                    @foreach (var pais in Model.Paises)
-                    {
-                        <tr>
-                            <td><strong>@pais.Nombre</strong></td>
-                            <td>@Model.Destinos.Count(d => d.PaisId == pais.Id)</td>
-                            <td>
-                                <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-paisId="@pais.Id">Editar</a>
-                                <form class="d-inline eliminar-catalogo" asp-action="EliminarPais" asp-route-id="@pais.Id" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Paises.Any()) { <tr><td colspan="3">Todavía no hay países registrados.</td></tr> }
-                    </tbody>
-                </table></div>
-            </section>
-            <section class="dashboard-table">
-                <h2 class="h4 mb-3">Destinos registrados (@Model.Destinos.Count)</h2>
-                <div class="table-responsive"><table class="table align-middle">
-                    <thead><tr><th>Destino</th><th>País</th><th>Duración</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                    @foreach (var destino in Model.Destinos)
-                    {
-                        <tr>
-                            <td><strong>@destino.Nombre</strong></td>
-                            <td>@(paises.TryGetValue(destino.PaisId, out var nombrePais) ? nombrePais : "Desconocido")</td>
-                            <td>@destino.DuracionDias d · @destino.DuracionHoras h</td>
-                            <td>
-                                <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-destinoId="@destino.Id">Editar</a>
-                                <form class="d-inline eliminar-catalogo" asp-action="EliminarDestino" asp-route-id="@destino.Id" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Destinos.Any()) { <tr><td colspan="4">Todavía no hay destinos registrados.</td></tr> }
-                    </tbody>
-                </table></div>
-            </section>
-        </div>
-    </div>
-</div></section>
+    </section>
+</div>
+</section>
 @section Scripts {
 <script>
-document.querySelectorAll(".eliminar-catalogo").forEach(form => {
-    form.addEventListener("submit", event => {
-        if (!confirm("¿Eliminar este registro? Solo se permitirá si no tiene relaciones asociadas.")) event.preventDefault();
+(() => {
+    const norm = value => (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    function setup(tableId, searchId, emptyId, countryId) {
+        const table = document.getElementById(tableId);
+        const search = document.getElementById(searchId);
+        const empty = document.getElementById(emptyId);
+        const country = countryId ? document.getElementById(countryId) : null;
+        function filter() {
+            let visible = 0;
+            table.querySelectorAll("tbody tr[data-search]").forEach(row => {
+                const matches = norm(row.dataset.search).includes(norm(search.value))
+                    && (!country || !country.value || row.dataset.pais === country.value);
+                row.hidden = !matches;
+                if (matches) visible++;
+            });
+            empty.classList.toggle("d-none", visible > 0 || !table.querySelector("tbody tr[data-search]"));
+        }
+        search.addEventListener("input", filter);
+        if (country) country.addEventListener("change", filter);
+    }
+    setup("tablaPaises", "filtrarPaises", "sinPaises");
+    setup("tablaDestinos", "filtrarDestinos", "sinDestinos", "filtrarPais");
+    document.querySelectorAll(".geo-delete").forEach(form => {
+        form.addEventListener("submit", event => {
+            if (!confirm('¿Eliminar "' + form.dataset.nombre + '"? La operación se bloqueará si tiene tours o destinos asociados.')) {
+                event.preventDefault();
+            }
+        });
     });
-});
+})();
 </script>
 }
