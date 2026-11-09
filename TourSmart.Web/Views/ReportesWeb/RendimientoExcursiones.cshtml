@@ -79,7 +79,7 @@
                             <td>
                                 <strong>@tour.PorcentajeAsistencia.ToString("N1")%</strong>
                                 <div class="progress mt-2" style="height:7px">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width:@Math.Clamp(tour.PorcentajeAsistencia, 0m, 100m).ToString(System.Globalization.CultureInfo.InvariantCulture)%" aria-label="Asistencia de @tour.Tour" aria-valuenow="@tour.PorcentajeAsistencia.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar bg-success" role="progressbar" style="width:@(Math.Clamp(tour.PorcentajeAsistencia, 0m, 100m).ToString(System.Globalization.CultureInfo.InvariantCulture))%" aria-label="Asistencia de @tour.Tour" aria-valuenow="@tour.PorcentajeAsistencia.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </td>
                             <td>@tour.Ausentes</td>
