@@ -144,6 +144,75 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         return RedirectToAction(nameof(Manifiesto), new { id });
     }
 
+    [HttpGet("{id:int}/cierre-operativo")]
+    public async Task<IActionResult> CierreOperativo(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var token = Token();
+        if (string.IsNullOrWhiteSpace(token)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var manifiesto = await adminApi.ObtenerManifiestoAsync(token, id, ct);
+            var estado = await adminApi.ObtenerCierreOperativoAsync(token, id, ct);
+            Response.Headers.CacheControl = "private, no-store";
+            return View(new CierreOperativoViewModel {
+                Manifiesto = manifiesto, Estado = estado
+            });
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode == HttpStatusCode.NotFound
+                ? "El tour solicitado no existe."
+                : "No se pudo cargar el cierre operativo. Comprueba la conexión con la API.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La consulta tardó demasiado.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost("{id:int}/cierre-operativo")]
+    [Authorize(Roles = "Administrador")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CierreOperativo(
+        int id, CierreOperativoViewModel model, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var token = Token();
+        if (string.IsNullOrWhiteSpace(token)) return RedirectToAction("Acceder", "Cuenta");
+
+        if (!model.Confirmar || (model.Incidencias?.Length ?? 0) > 1000)
+        {
+            TempData["Error"] = "Debes confirmar la revisión del manifiesto y respetar el máximo de 1000 caracteres.";
+            return RedirectToAction(nameof(CierreOperativo), new { id });
+        }
+
+        try
+        {
+            var (status, mensaje) = await adminApi.RegistrarCierreOperativoAsync(
+                token, id, model.Incidencias, true, ct);
+            TempData[status == HttpStatusCode.Created ? "Exito" : "Error"] = status switch
+            {
+                HttpStatusCode.Created => "Cierre operativo registrado correctamente. La asistencia queda consolidada.",
+                HttpStatusCode.Conflict => "No se pudo cerrar: comprueba que no haya solicitudes pendientes, que todos los nombres estén completos, que exista al menos un pasajero presente y que el tour no esté cerrado.",
+                HttpStatusCode.BadRequest => "La API rechazó los datos del cierre.",
+                HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden =>
+                    "No tienes autorización para cerrar una excursión.",
+                _ => $"No se pudo completar el cierre (HTTP {(int)status}). {mensaje}"
+            };
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "No se pudo conectar con la API. Comprueba si la excursión ya fue cerrada antes de repetir.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La operación tardó demasiado. Consulta el estado antes de reintentar.";
+        }
+        return RedirectToAction(nameof(CierreOperativo), new { id });
+    }
+
     [HttpGet("{id:int}/hoja-salida")]
     public async Task<IActionResult> HojaSalida(int id, CancellationToken ct)
     {
