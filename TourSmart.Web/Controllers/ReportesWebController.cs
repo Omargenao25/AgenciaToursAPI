@@ -12,6 +12,51 @@ namespace TourSmart.Web.Controllers;
 [Route("panel/reportes")]
 public sealed class ReportesWebController(IReservasAdminClient api, IMemoryCache cache) : Controller
 {
+    [HttpGet("historial-excursiones")]
+    public async Task<IActionResult> HistorialExcursiones(
+        DateTime? desde, DateTime? hasta, int pagina = 1,
+        CancellationToken ct = default)
+    {
+        var hoy = DateTime.UtcNow.Date;
+        var inicio = (desde ?? hoy.AddDays(-90)).Date;
+        var fin = (hasta ?? hoy).Date;
+        if (inicio.Year < 2000 || fin < inicio || fin >= DateTime.MaxValue.Date ||
+            (fin - inicio).TotalDays > 366 || pagina < 1 || pagina > 100000)
+        {
+            ModelState.AddModelError("", "Selecciona un período válido de hasta 366 días y una página positiva.");
+            return View(new HistorialExcursionesViewModel {
+                DesdeUtc = inicio,
+                HastaExclusivoUtc = fin < DateTime.MaxValue.Date ? fin.AddDays(1) : fin
+            });
+        }
+
+        var sid = User.FindFirstValue("SessionId");
+        if (sid is null || !cache.TryGetValue("jwt:" + sid, out object? value) ||
+            value is not string jwt || string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+
+        try
+        {
+            var modelo = await api.HistorialExcursionesAsync(jwt, inicio, fin, pagina, ct);
+            Response.Headers.CacheControl = "private, no-store";
+            return View(modelo);
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized
+                ? "No tienes permisos para consultar el historial de excursiones."
+                : "No se pudo consultar el historial operativo. Comprueba que la API esté disponible.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado en responder.";
+        }
+
+        return View(new HistorialExcursionesViewModel {
+            DesdeUtc = inicio, HastaExclusivoUtc = fin.AddDays(1), Pagina = pagina
+        });
+    }
+
     [HttpGet("cuentas-por-cobrar")]
     public async Task<IActionResult> CuentasPorCobrar(CancellationToken ct)
     {
