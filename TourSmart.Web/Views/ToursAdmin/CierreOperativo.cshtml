@@ -1,0 +1,127 @@
+@model CierreOperativoViewModel
+@{
+    ViewData["Title"] = "Cierre operativo del tour";
+    var tour = Model.Manifiesto;
+    var cierre = Model.Estado.Cierre;
+    var faltanNombres = tour.Confirmadas.Sum(r => Math.Max(0, r.CantidadPersonas - r.Asistentes.Count));
+    var puedeCerrar = User.IsInRole("Administrador") && !Model.Estado.Cerrado &&
+        tour.CuposConfirmados > 0 && tour.Llegaron > 0 &&
+        tour.Pendientes.Count == 0 && faltanNombres == 0;
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="ToursAdmin" asp-action="Manifiesto"
+           asp-route-id="@tour.TourId">← Volver al manifiesto</a>
+        <span class="eyebrow">TOURSMART RD · OPERACIONES</span>
+        <h1>Cierre de <em>excursión.</em></h1>
+        <p>@tour.Tour · @tour.Fecha.ToString("dd/MM/yyyy") · @tour.Hora.ToString(@"hh\:mm")</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Exito"] is string ok)
+        {
+            <div class="alert alert-success" role="status">@ok</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4"><div class="metric-card"><span>Plazas confirmadas</span><strong>@tour.CuposConfirmados</strong><small>La capacidad comercial no se modifica</small></div></div>
+            <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Presentes</span><strong>@tour.Llegaron</strong><small>Llegadas registradas en check-in</small></div></div>
+            <div class="col-md-4"><div class="metric-card"><span>Ausentes / faltantes</span><strong>@tour.Faltan</strong><small>Antes del cierre son faltantes provisionales</small></div></div>
+        </div>
+
+        @if (Model.Estado.Cerrado && cierre is not null)
+        {
+            <div class="alert alert-success mb-4">
+                <strong>Excursión cerrada operativamente.</strong>
+                Registro definitivo creado el @cierre.FechaCierreUtc.ToString("dd/MM/yyyy HH:mm") UTC
+                por @cierre.CerradoPor. No pueden modificarse las llegadas ni abrirse nuevas reservas en este tour.
+            </div>
+            <section class="dashboard-table">
+                <div class="dashboard-table-title"><h3>Resumen registrado</h3><span>Solo lectura</span></div>
+                <div class="p-4">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4"><strong>Confirmados:</strong> @cierre.PlazasConfirmadas</div>
+                        <div class="col-md-4"><strong>Presentes:</strong> @cierre.PasajerosPresentes</div>
+                        <div class="col-md-4"><strong>Ausentes:</strong> @cierre.PasajerosAusentes</div>
+                    </div>
+                    <h4 class="h6">Incidencias registradas</h4>
+                    <p class="mb-0" style="white-space:pre-wrap">@(string.IsNullOrWhiteSpace(cierre.Incidencias) ? "Sin incidencias reportadas." : cierre.Incidencias)</p>
+                </div>
+            </section>
+        }
+        else
+        {
+            <div class="alert alert-info mb-4">
+                <strong>Antes de cerrar:</strong> verifica la lista de pasajeros y el check-in.
+                Este cierre registra los presentes y ausentes en ese momento; no registra pagos,
+                no cambia el estado comercial del tour ni confirma reservas pendientes.
+            </div>
+            @if (tour.Pendientes.Count > 0)
+            {
+                <div class="alert alert-warning">Hay @tour.Pendientes.Count solicitud(es) pendientes.
+                    Confírmalas o cancélalas conforme a las reglas de la agencia antes de cerrar.</div>
+            }
+            @if (faltanNombres > 0)
+            {
+                <div class="alert alert-warning">Faltan @faltanNombres nombres de pasajeros confirmados.
+                    Complétalos desde el manifiesto.</div>
+            }
+            @if (tour.Llegaron == 0)
+            {
+                <div class="alert alert-warning">Todavía no hay pasajeros marcados como presentes.</div>
+            }
+
+            @if (User.IsInRole("Administrador"))
+            {
+                <section class="dashboard-table">
+                    <div class="dashboard-table-title"><h3>Confirmación administrativa</h3><span>Una sola vez por tour</span></div>
+                    <div class="p-4">
+                        <form method="post" asp-controller="ToursAdmin" asp-action="CierreOperativo"
+                              asp-route-id="@tour.TourId" id="formCierre">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <label class="form-label" asp-for="Incidencias">Incidencias / observaciones de la salida</label>
+                                <textarea asp-for="Incidencias" class="form-control" rows="5"
+                                          maxlength="1000" placeholder="Retrasos, incidencias logísticas o anotaciones relevantes. No incluyas datos sensibles innecesarios."></textarea>
+                                <span asp-validation-for="Incidencias" class="text-danger small"></span>
+                                <small class="text-secondary">Máximo 1000 caracteres. Campo opcional.</small>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input asp-for="Confirmar" type="checkbox" class="form-check-input" required />
+                                <label class="form-check-label" asp-for="Confirmar">Confirmo que revisé el manifiesto y que deseo cerrar la salida con los contadores actuales.</label>
+                            </div>
+                            <button type="submit" class="btn btn-accent" disabled="@(!puedeCerrar)">Registrar cierre operativo ↗</button>
+                            @if (!puedeCerrar)
+                            {
+                                <p class="text-secondary small mt-2">Completa las condiciones indicadas arriba para habilitar el cierre.</p>
+                            }
+                        </form>
+                    </div>
+                </section>
+            }
+            else
+            {
+                <div class="alert alert-secondary">Solo el Administrador puede cerrar la salida. Como Operador puedes revisar el manifiesto y consultar el cierre.</div>
+            }
+        }
+        <p class="dashboard-footnote">El resumen registrado es una instantánea operativa. No se elimina ni se modifica desde esta pantalla.
+            Se recomienda guardar la hoja de salida del guía para consulta administrativa según la política de privacidad.</p>
+    </div>
+</section>
+@section Scripts {
+<script>
+const formularioCierre = document.getElementById("formCierre");
+if (formularioCierre) {
+    formularioCierre.addEventListener("submit", function (event) {
+        if (!window.confirm("¿Cerrar operativamente esta excursión? Se bloquearán los cambios de asistencia y las reservas nuevas. Esta acción no podrá deshacerse desde el panel.")) {
+            event.preventDefault();
+        }
+    });
+}
+</script>
+}
