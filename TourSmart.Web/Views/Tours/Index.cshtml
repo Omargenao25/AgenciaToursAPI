@@ -57,7 +57,7 @@
                 <a class="btn btn-outline-secondary rounded-pill" asp-action="Index">Limpiar</a>
             </div>
         </form>
-        <div class="catalog-count" aria-live="polite"><strong>@Model.TotalTours</strong> experiencias encontradas</div>
+        <div class="catalog-count d-flex flex-wrap justify-content-between align-items-center gap-2" aria-live="polite"><span><strong>@Model.TotalTours</strong> experiencias encontradas</span><span class="text-secondary small">Selecciona una experiencia para conocer sus detalles y disponibilidad.</span></div>
         @if (!Model.ServicioDisponible)
         {
             <div class="service-alert" role="status">No se pudo conectar con AgenciaToursAPI. Comprueba que esté ejecutándose en http://localhost:5290.</div>
