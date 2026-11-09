@@ -66,7 +66,7 @@ foreach ($destino in $destinos) {
     if ($destinoPorId.ContainsKey($id)) { ErrorDeDatos "Destino: ID repetido $id." }
     $destinoPorId[$id] = $destino
     if (!$paisPorId.ContainsKey($paisId)) {
-        ErrorDeDatos "Destino $id: país $paisId inexistente."
+        ErrorDeDatos "Destino ${id}: país $paisId inexistente."
     }
     $clave = "$paisId|$(ClaveNombre ([string]$destino.nombre))"
     if ($nombresDestinos.ContainsKey($clave)) {
@@ -75,7 +75,7 @@ foreach ($destino in $destinos) {
     $dias = [int]$destino.duracionDias
     $horas = [int]$destino.duracionHoras
     if ($dias -lt 0 -or $dias -gt 365 -or $horas -lt 0 -or $horas -gt 23 -or ($dias -eq 0 -and $horas -eq 0)) {
-        ErrorDeDatos "Destino $id: duración inválida ($dias días, $horas horas)."
+        ErrorDeDatos "Destino ${id}: duración inválida ($dias días, $horas horas)."
     }
 }
 foreach ($tour in $tours) {
@@ -83,26 +83,26 @@ foreach ($tour in $tours) {
     $paisId = [int]$tour.paisId
     $destinoId = [int]$tour.destinoId
     if (!$paisPorId.ContainsKey($paisId)) {
-        ErrorDeDatos "Tour $id: país $paisId inexistente."
+        ErrorDeDatos "Tour ${id}: país $paisId inexistente."
     }
     if (!$destinoPorId.ContainsKey($destinoId)) {
-        ErrorDeDatos "Tour $id: destino $destinoId inexistente."
+        ErrorDeDatos "Tour ${id}: destino $destinoId inexistente."
         continue
     }
     $destino = $destinoPorId[$destinoId]
     if ([int]$destino.paisId -ne $paisId) {
-        ErrorDeDatos "Tour $id: el destino $destinoId no pertenece al país $paisId."
+        ErrorDeDatos "Tour ${id}: el destino $destinoId no pertenece al país $paisId."
     }
     if ([int]$tour.duracionDias -ne [int]$destino.duracionDias -or
         [int]$tour.duracionHoras -ne [int]$destino.duracionHoras) {
-        ErrorDeDatos "Tour $id: duración distinta a la del destino $destinoId."
+        ErrorDeDatos "Tour ${id}: duración distinta a la del destino $destinoId."
     }
     if ($paisPorId.ContainsKey($paisId) -and
         (ClaveNombre ([string]$tour.pais)) -ne (ClaveNombre ([string]$paisPorId[$paisId].nombre))) {
-        ErrorDeDatos "Tour $id: nombre de país distinto al catálogo."
+        ErrorDeDatos "Tour ${id}: nombre de país distinto al catálogo."
     }
     if ((ClaveNombre ([string]$tour.destino)) -ne (ClaveNombre ([string]$destino.nombre))) {
-        ErrorDeDatos "Tour $id: nombre de destino distinto al catálogo."
+        ErrorDeDatos "Tour ${id}: nombre de destino distinto al catálogo."
     }
 }
 Write-Host "Auditoría de geografía: $($paises.Count) países, $($destinos.Count) destinos, $($tours.Count) tours."
