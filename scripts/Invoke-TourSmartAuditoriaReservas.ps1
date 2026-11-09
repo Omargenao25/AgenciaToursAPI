@@ -41,12 +41,19 @@ $codigo = 1
 try {
     $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($contrasenaSegura)
     $contrasena = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
-    $body = @{ correo = $correo.Trim(); contraseña = $contrasena } | ConvertTo-Json -Compress
+    # Windows PowerShell 5.1 may parse UTF-8 without BOM as ANSI.
+    # Construct the JSON key using an ASCII-only script so the API still
+    # receives the expected Unicode property name.
+    $campoClave = "contrase" + [char]0x00F1 + "a"
+    $datosLogin = @{ correo = $correo.Trim() }
+    $datosLogin[$campoClave] = $contrasena
+    $body = $datosLogin | ConvertTo-Json -Compress
     $bytes = [Text.Encoding]::UTF8.GetBytes($body)
     $respuesta = Invoke-RestMethod -Method Post -Uri "$($ApiBase.TrimEnd('/'))/api/Auth/login" -Body $bytes -ContentType "application/json; charset=utf-8" -TimeoutSec 20
     $body = $null
     $bytes = $null
     $contrasena = $null
+    $datosLogin = $null
 
     if ($respuesta.rol -ne "Administrador") {
         Write-Host "[BLOQUEADO] La auditoria requiere un usuario Administrador de pruebas." -ForegroundColor Yellow
@@ -69,6 +76,7 @@ catch {
 }
 finally {
     $contrasena = $null
+    $datosLogin = $null
     $body = $null
     $bytes = $null
     if ($bstr -ne [IntPtr]::Zero) {
