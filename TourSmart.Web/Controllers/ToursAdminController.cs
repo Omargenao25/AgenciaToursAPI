@@ -144,6 +144,39 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         return RedirectToAction(nameof(Manifiesto), new { id });
     }
 
+    [HttpGet("{id:int}/hoja-salida")]
+    public async Task<IActionResult> HojaSalida(int id, CancellationToken ct)
+    {
+        if (id <= 0) return NotFound();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var model = await adminApi.ObtenerManifiestoAsync(jwt, id, ct);
+            Response.Headers.CacheControl = "private, no-store";
+            Response.Headers["X-Content-Type-Options"] = "nosniff";
+            Response.Headers["Referrer-Policy"] = "no-referrer";
+            Response.Headers["X-Robots-Tag"] = "noindex, nofollow, noarchive";
+            return View(model);
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode switch
+            {
+                HttpStatusCode.NotFound => "El tour no existe.",
+                HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden =>
+                    "No tienes autorización para consultar la hoja de salida.",
+                _ => "No se pudo cargar la hoja de salida desde la API."
+            };
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado. Vuelve a intentarlo.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpGet("{id:int}/manifiesto")]
     public async Task<IActionResult> Manifiesto(int id, CancellationToken ct)
     {
