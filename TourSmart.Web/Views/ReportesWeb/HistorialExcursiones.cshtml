@@ -1,0 +1,120 @@
+@model HistorialExcursionesViewModel
+@{
+    ViewData["Title"] = "Historial de excursiones";
+    var desde = Model.DesdeUtc.ToString("yyyy-MM-dd");
+    var hasta = Model.HastaExclusivoUtc > Model.DesdeUtc
+        ? Model.HastaExclusivoUtc.AddDays(-1).ToString("yyyy-MM-dd")
+        : Model.DesdeUtc.ToString("yyyy-MM-dd");
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al dashboard</a>
+        <span class="eyebrow">TOURSMART RD · REPORTES OPERATIVOS</span>
+        <h1>Historial de <em>excursiones.</em></h1>
+        <p>Consulta las salidas cerradas y el resumen de asistencia registrado por la agencia.</p>
+    </div>
+</section>
+<section class="section-space">
+    <div class="container">
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-warning" role="alert">@error</div>
+        }
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+        <form method="get" asp-controller="ReportesWeb" asp-action="HistorialExcursiones" class="row g-3 align-items-end mb-4">
+            <div class="col-sm-5 col-lg-3">
+                <label for="desde" class="form-label">Cierre desde (UTC)</label>
+                <input id="desde" name="desde" type="date" value="@desde" class="form-control" required />
+            </div>
+            <div class="col-sm-5 col-lg-3">
+                <label for="hasta" class="form-label">Cierre hasta (UTC)</label>
+                <input id="hasta" name="hasta" type="date" value="@hasta" class="form-control" required />
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-accent" type="submit">Consultar ↗</button>
+            </div>
+        </form>
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg"><div class="metric-card metric-card-accent"><span>Excursiones cerradas</span><strong>@Model.TotalCierres</strong><small>En el período</small></div></div>
+            <div class="col-6 col-lg"><div class="metric-card"><span>Plazas confirmadas</span><strong>@Model.TotalPlazasConfirmadas</strong><small>Al momento del cierre</small></div></div>
+            <div class="col-6 col-lg"><div class="metric-card"><span>Presentes</span><strong>@Model.TotalPresentes</strong><small>Asistencia final</small></div></div>
+            <div class="col-6 col-lg"><div class="metric-card"><span>Ausentes</span><strong>@Model.TotalAusentes</strong><small>No se presentaron</small></div></div>
+            <div class="col-12 col-lg"><div class="metric-card"><span>Con incidencias</span><strong>@Model.TotalConIncidencias</strong><small>Cierres con observaciones</small></div></div>
+        </div>
+
+        <div class="alert alert-info mb-4">
+            Los filtros usan la <strong>fecha de registro del cierre en UTC</strong>, no la fecha programada de la excursión.
+            Los indicadores abarcan todos los cierres del período, aunque la tabla muestre solo una página.
+            Esta pantalla es exclusivamente de consulta.
+        </div>
+
+        <div class="dashboard-table">
+            <div class="dashboard-table-title">
+                <h3>Cierres operativos registrados</h3>
+                <span>@Model.TotalCierres excursión(es)</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tour y salida</th><th>Guía / transporte</th><th>Fecha de cierre (UTC)</th>
+                            <th>Responsable</th><th>Confirmados</th><th>Presentes</th><th>Ausentes</th><th>Incidencias</th><th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Cierres)
+                    {
+                        <tr>
+                            <td><strong>@item.Tour</strong><small class="d-block text-secondary">@item.FechaSalida.ToString("dd/MM/yyyy") · @item.HoraSalida.ToString(@"hh\:mm")</small></td>
+                            <td>@item.Guia <small class="d-block text-secondary">@item.Transporte</small></td>
+                            <td>@item.FechaCierreUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@item.CerradoPor</td>
+                            <td>@item.PlazasConfirmadas</td>
+                            <td>@item.PasajerosPresentes</td>
+                            <td>@item.PasajerosAusentes</td>
+                            <td>
+                                @if (item.TieneIncidencias)
+                                {
+                                    <span class="badge bg-warning text-dark">Registradas</span>
+                                    <details class="mt-2"><summary class="small">Ver observación</summary><p class="small mt-2" style="white-space:pre-wrap">@item.Incidencias</p></details>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary">Sin incidencias</span>
+                                }
+                            </td>
+                            <td><a class="btn btn-sm btn-outline-primary" asp-controller="ToursAdmin" asp-action="CierreOperativo" asp-route-id="@item.TourId">Ver cierre</a></td>
+                        </tr>
+                    }
+                    @if (!Model.Cierres.Any())
+                    {
+                        <tr><td colspan="9" class="py-4 text-secondary">No se encontraron cierres operativos para las fechas seleccionadas.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @if (Model.TotalPaginas > 1)
+        {
+            <nav class="d-flex align-items-center justify-content-between mt-4 gap-3" aria-label="Páginas del historial">
+                <span>Página @Model.Pagina de @Model.TotalPaginas</span>
+                <div class="d-flex gap-2">
+                    @if (Model.Pagina > 1)
+                    {
+                        <a class="btn btn-outline-secondary rounded-pill" asp-controller="ReportesWeb" asp-action="HistorialExcursiones" asp-route-desde="@desde" asp-route-hasta="@hasta" asp-route-pagina="@(Model.Pagina - 1)">← Anterior</a>
+                    }
+                    @if (Model.Pagina < Model.TotalPaginas)
+                    {
+                        <a class="btn btn-outline-secondary rounded-pill" asp-controller="ReportesWeb" asp-action="HistorialExcursiones" asp-route-desde="@desde" asp-route-hasta="@hasta" asp-route-pagina="@(Model.Pagina + 1)">Siguiente →</a>
+                    }
+                </div>
+            </nav>
+        }
+        <p class="dashboard-footnote mt-3">
+            Registros históricos protegidos. Los datos de asistencia se conservaron al cerrar cada excursión;
+            consultar esta página no modifica pasajeros, reservas ni pagos.
+        </p>
+    </div>
+</section>
