@@ -21,4 +21,5 @@ public sealed class CrearReservaViewModel
     public IReadOnlyList<SelectListItem> Clientes { get; set; } = Array.Empty<SelectListItem>();
     public IReadOnlyList<SelectListItem> Tours { get; set; } = Array.Empty<SelectListItem>();
     public IReadOnlyList<SelectListItem> MetodosPago { get; set; } = Array.Empty<SelectListItem>();
+    public Dictionary<int, int> CuposPorTour { get; set; } = new();
 }
