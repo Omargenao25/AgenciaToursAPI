@@ -40,11 +40,13 @@
                         </select>
                         <span asp-validation-for="TourId" class="small text-danger"></span>
                         <small class="text-secondary">Solo se muestran tours futuros con plazas disponibles.</small>
+                        <div id="cuposTourAviso" class="mt-2 small" aria-live="polite">Selecciona un tour para ver su disponibilidad.</div>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="CantidadPersonas" class="form-label">Cantidad de personas</label>
                         <input asp-for="CantidadPersonas" type="number" min="1" max="100" class="form-control" />
                         <span asp-validation-for="CantidadPersonas" class="small text-danger"></span>
+                        <small id="limitePasajerosAviso" class="d-block mt-2 text-secondary" aria-live="polite">El límite es de 100 personas por reserva y depende de las plazas del tour.</small>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -73,9 +75,24 @@
 @section Scripts {
 <script>
 (function () {
+  const cupos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CuposPorTour));
+  const tour = document.getElementById("TourId");
   const cantidad = document.getElementById("CantidadPersonas");
   const lista = document.getElementById("listaPasajeros");
-  if (!cantidad || !lista) return;
+  const aviso = document.getElementById("cuposTourAviso");
+  const limiteAviso = document.getElementById("limitePasajerosAviso");
+  if (!cantidad || !lista || !tour || !aviso || !limiteAviso) return;
+  const revisarCupos = () => {
+    const disponibles = cupos[tour.value];
+    const maximo = Number.isInteger(disponibles) ? Math.min(100, disponibles) : 100;
+    cantidad.max = String(maximo);
+    const total = Number(cantidad.value);
+    const excedido = Number.isInteger(disponibles) && total > maximo;
+    cantidad.setCustomValidity(excedido ? "Solo quedan " + disponibles + " plazas disponibles para este tour." : "");
+    aviso.textContent = Number.isInteger(disponibles) ? "Disponibilidad actual: " + disponibles + " plazas." : "Selecciona un tour para ver su disponibilidad.";
+    aviso.className = "mt-2 small " + (excedido ? "text-danger fw-semibold" : "text-secondary");
+    limiteAviso.textContent = Number.isInteger(disponibles) ? "Puedes reservar hasta " + maximo + " personas en este tour." : "El límite por reserva es de 100 personas.";
+  };
   const actualizarNombres = () => {
     const n = Math.min(100, Math.max(1, Number(cantidad.value) || 1));
     const valores = Array.from(lista.querySelectorAll('input[name^="Pasajeros["]')).map(x => x.value);
@@ -100,12 +117,15 @@
       lista.append(grupo);
     }
   };
-  cantidad.addEventListener("change", actualizarNombres);
-  cantidad.addEventListener("input", actualizarNombres);
+  cantidad.addEventListener("change", () => { actualizarNombres(); revisarCupos(); });
+  cantidad.addEventListener("input", () => { actualizarNombres(); revisarCupos(); });
+  tour.addEventListener("change", revisarCupos);
   actualizarNombres();
+  revisarCupos();
 })();
 
 document.getElementById("crearReservaForm").addEventListener("submit", function () {
+    if (!this.checkValidity()) return;
     const boton = document.getElementById("guardarReserva");
     boton.disabled = true;
     boton.textContent = "Guardando...";
