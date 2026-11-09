@@ -5,6 +5,8 @@ namespace TourSmart.Web.Services;
 
 public interface IReservasAdminClient
 {
+    Task<RendimientoExcursionesViewModel> RendimientoExcursionesAsync(
+        string jwt, DateTime desde, DateTime hasta, int pagina, CancellationToken ct);
     Task<HistorialExcursionesViewModel> HistorialExcursionesAsync(
         string jwt, DateTime desde, DateTime hasta, int pagina, CancellationToken ct);
     Task<CuentasPorCobrarViewModel> CuentasPorCobrarAsync(string jwt, CancellationToken ct);
