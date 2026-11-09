@@ -28,7 +28,7 @@
      <td>@tour.CuposReservados / @tour.CapacidadMaxima<small class="d-block text-secondary">@tour.CuposDisponibles libres</small></td>
      <td><span class="reservation-status @(tour.CerradoOperativo ? "is-cancelled" : tour.Estado == "Disponible" ? "is-confirmed" : "is-pending")">@(tour.CerradoOperativo ? "Salida cerrada" : tour.Estado)</span></td>
      <td>
-      @if(tour.Estado == "Disponible") { <a class="btn btn-sm btn-outline-success" asp-controller="ToursAdmin" asp-action="Editar" asp-route-id="@tour.Id">Editar</a> }
+      @if(tour.Estado == "Disponible" && !tour.CerradoOperativo) { <a class="btn btn-sm btn-outline-success" asp-controller="ToursAdmin" asp-action="Editar" asp-route-id="@tour.Id">Editar</a> }
       else { <span class="text-secondary small">Finalizado / iniciado</span> }
       <a class="btn btn-sm btn-outline-info" asp-controller="ToursAdmin" asp-action="Manifiesto" asp-route-id="@tour.Id">Pasajeros</a>
       <a class="btn btn-sm btn-outline-primary" asp-controller="ToursAdmin" asp-action="Adelanto" asp-route-id="@tour.Id">Adelanto</a>
