@@ -4,6 +4,15 @@ namespace AgenciaToursAPI.DTOs;
 /// Lista operativa de titulares de reservas. NO es un registro individual
 /// de acompañantes: solo existe la cantidad de personas por reserva.
 /// </summary>
+public sealed class PasajeroAsistenciaDto
+{
+    public int Id { get; set; }
+    public int Orden { get; set; }
+    public string NombreCompleto { get; set; } = "";
+    public DateTime? LlegadaUtc { get; set; }
+    public string? RegistradoPor { get; set; }
+}
+
 public sealed class ManifiestoReservaDto
 {
     public int ReservaId { get; set; }
