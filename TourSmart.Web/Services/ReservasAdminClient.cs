@@ -7,6 +7,18 @@ namespace TourSmart.Web.Services;
 
 public sealed class ReservasAdminClient(HttpClient client) : IReservasAdminClient
 {
+    public async Task<RendimientoExcursionesViewModel> RendimientoExcursionesAsync(
+        string jwt, DateTime desde, DateTime hasta, int pagina, CancellationToken ct)
+    {
+        var url = $"api/reportes/rendimiento-excursiones?desde={desde:yyyy-MM-dd}&hasta={hasta:yyyy-MM-dd}&pagina={pagina}";
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await client.SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<RendimientoExcursionesViewModel>(cancellationToken: ct)
+            ?? throw new HttpRequestException("La API no devolvió los indicadores de rendimiento.");
+    }
+
     public async Task<HistorialExcursionesViewModel> HistorialExcursionesAsync(
         string jwt, DateTime desde, DateTime hasta, int pagina, CancellationToken ct)
     {
