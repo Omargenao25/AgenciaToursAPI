@@ -12,7 +12,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "TourSmart.Session";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTPS obligatorio en producción
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always; // Nunca transmitir cookies en HTTP en producción
         options.LoginPath = "/cuenta/acceder";
         options.AccessDeniedPath = "/cuenta/denegado";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
@@ -54,6 +56,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
     });
 builder.Services.AddAuthorization();
+// Ninguna llamada al backend debe transmitir JWT o datos de clientes por HTTP en producción.
+var apiBaseUrl = builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/";
+if (!builder.Environment.IsDevelopment() &&
+    (!Uri.TryCreate(apiBaseUrl, UriKind.Absolute, out var apiUri) ||
+     apiUri.Scheme != Uri.UriSchemeHttps))
+    throw new InvalidOperationException(
+        "Api:BaseUrl debe usar HTTPS en producción para proteger las sesiones y reservas.");
+
 builder.Services.AddHttpClient<IToursApiClient, ToursApiClient>(client =>
 {
     var baseUrl = builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/";
@@ -105,6 +115,16 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    // Las páginas autenticadas no deben conservarse en cachés compartidas.
+    if (context.User.Identity?.IsAuthenticated == true)
+        context.Response.Headers.CacheControl = "private, no-store";
+    await next();
+});
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
