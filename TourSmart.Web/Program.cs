@@ -120,15 +120,19 @@ app.Use(async (context, next) =>
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
     context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
     context.Response.Headers["X-Frame-Options"] = "DENY";
-    // Las páginas autenticadas no deben conservarse en cachés compartidas.
-    if (context.User.Identity?.IsAuthenticated == true)
-        context.Response.Headers.CacheControl = "private, no-store";
+
     await next();
 });
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+        context.Response.Headers.CacheControl = "private, no-store";
+    await next();
+});
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
