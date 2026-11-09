@@ -396,7 +396,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
             if (actual is not null)
             {
                 model.CuposReservados = actual.CuposReservados;
-                if (actual.Estado != "Disponible")
+                if (actual.Estado != "Disponible" || actual.CerradoOperativo)
                     ModelState.AddModelError("", "No se puede editar un tour que ya comenzó.");
                 if (model.CapacidadMaxima < actual.CuposReservados)
                     ModelState.AddModelError(nameof(model.CapacidadMaxima), "La capacidad es inferior a los cupos ocupados.");
