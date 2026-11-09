@@ -61,6 +61,9 @@ public sealed class CierresOperativosController(ApplicationDbContext db) : Contr
         if (await db.CierresOperativosTour.AnyAsync(c => c.TourId == tourId, ct))
             return Conflict("La excursión ya tiene un cierre operativo. No se puede duplicar.");
 
+        if (await db.Reservas.AnyAsync(r => r.TourId == tourId && r.Estado == "Pendiente", ct))
+            return Conflict("Existen solicitudes pendientes. Confirma o cancela las solicitudes antes de cerrar la salida.");
+
         var confirmadas = await db.Reservas.AsNoTracking()
             .Where(r => r.TourId == tourId && r.Estado == "Confirmada")
             .Select(r => new
