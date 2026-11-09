@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Data;
 
 namespace AgenciaToursAPI.Controllers;
 
@@ -22,6 +23,16 @@ public sealed class CheckInPasajerosController(ApplicationDbContext db) : Contro
         int tourId, int pasajeroId, CambiarAsistenciaDto dto, CancellationToken ct)
     {
         if (tourId <= 0 || pasajeroId <= 0) return NotFound();
+
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        // Se adquiere el mismo bloqueo por tour utilizado en el cierre operativo:
+        // ningún check-in puede intercalarse con el recuento final.
+        var existe = await db.Tours
+            .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {tourId}")
+            .AsNoTracking().AnyAsync(ct);
+        if (!existe) return NotFound();
+        if (await db.CierresOperativosTour.AnyAsync(x => x.TourId == tourId, ct))
+            return Conflict("La excursión ya fue cerrada operativamente. No se puede cambiar el check-in.");
 
         // El ID del pasajero no basta: verificar pertenencia al tour y reserva confirmada.
         var info = await db.PasajerosReserva.AsNoTracking()
@@ -68,7 +79,11 @@ public sealed class CheckInPasajerosController(ApplicationDbContext db) : Contro
                     .SetProperty(p => p.LlegadaUtc, (DateTime?)null)
                     .SetProperty(p => p.RegistradoPor, (string?)null), ct);
 
-        if (filas == 1) return NoContent();
+        if (filas == 1)
+        {
+            await tx.CommitAsync(ct);
+            return NoContent();
+        }
 
         // Idempotente para estados ya alcanzados, sin duplicar registros.
         var actual = await db.PasajerosReserva.AsNoTracking()
@@ -82,7 +97,11 @@ public sealed class CheckInPasajerosController(ApplicationDbContext db) : Contro
         if (actual.Estado != "Confirmada" ||
             DateTime.Now >= actual.Fecha.Date.Add(actual.Hora))
             return Conflict("La reserva cambió de estado o la salida comenzó.");
-        if ((actual.LlegadaUtc is not null) == dto.Presente) return NoContent();
+        if ((actual.LlegadaUtc is not null) == dto.Presente)
+        {
+            await tx.CommitAsync(ct);
+            return NoContent();
+        }
         return Conflict("El estado cambió durante la operación. Actualiza el manifiesto.");
     }
 }
