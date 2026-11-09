@@ -316,6 +316,8 @@ namespace AgenciaToursAPI.Controllers
                 .SingleOrDefaultAsync();
 
             if (tour == null) return NotFound("El tour asociado no existe.");
+            if (await _context.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId))
+                return Conflict("El tour tiene un cierre operativo y sus reservas están bloqueadas.");
             if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
                 return Conflict("No es posible confirmar una reserva de un tour que ya comenzó.");
 
@@ -367,6 +369,8 @@ namespace AgenciaToursAPI.Controllers
                 .SingleOrDefaultAsync();
 
             if (tour == null) return NotFound("El tour asociado no existe.");
+            if (await _context.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId))
+                return Conflict("El tour tiene un cierre operativo y sus reservas están bloqueadas.");
             if (reserva.Estado == EstadosReserva.Cancelada) return NoContent();
             if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
                 return Conflict("No se puede cancelar una reserva después del inicio del tour.");
