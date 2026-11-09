@@ -41,19 +41,25 @@
             {
                 <div class="alert alert-warning" role="alert">@error</div>
             }
-            <div class="dashboard-head mb-4">
-                <div><span class="eyebrow">RESUMEN DEL NEGOCIO</span><h2>Tu agencia, <em>en un vistazo.</em></h2>
-                <p>Información obtenida de la API de TourSmart RD.</p></div>
-                <div class="d-flex gap-2 flex-wrap">@if (User.IsInRole("Administrador")) { <a class="btn btn-accent" asp-controller="ReportesWeb" asp-action="Finanzas">Reporte financiero ↗</a> <a class="btn btn-outline-primary rounded-pill" asp-controller="ReportesWeb" asp-action="HistorialExcursiones">Historial de excursiones ↗</a> <a class="btn btn-outline-success rounded-pill" asp-controller="ReportesWeb" asp-action="RendimientoExcursiones">Rendimiento de excursiones ↗</a> <a class="btn btn-outline-primary rounded-pill" asp-controller="ReportesWeb" asp-action="CuentasPorCobrar">Cuentas por cobrar ↗</a> <a class="btn btn-outline-warning rounded-pill" asp-controller="ReportesWeb" asp-action="CuentasPorCobrar" asp-fragment="alertas">Centro de alertas ↗</a> }<a class="btn btn-dark-pill" asp-controller="ReservasWeb" asp-action="Index">Gestionar reservas ↗</a><a class="btn btn-dark-pill" asp-controller="ToursAdmin" asp-action="Index">Gestionar tours ↗</a><a class="btn btn-dark-pill" asp-controller="GeografiaAdmin" asp-action="Index">Países y destinos ↗</a><a class="btn btn-dark-pill" asp-controller="ClientesAdmin" asp-action="Index">Gestionar clientes ↗</a><a class="btn btn-outline-secondary rounded-pill" asp-controller="Tours" asp-action="Index">Ver catálogo</a></div>
+            <div class="dashboard-head ts-v3-dashboard-head mb-4">
+                <div>
+                    <span class="eyebrow">CENTRO DE OPERACIONES</span>
+                    <h2>Tu agencia, <em>bajo control.</em></h2>
+                    <p>Indicadores de reservas, próximas salidas y plazas disponibles.</p>
+                </div>
+                <div class="ts-v3-primary-actions">
+                    <a class="btn btn-accent" asp-controller="ReservasWeb" asp-action="Crear">+ Nueva reserva</a>
+                    <a class="btn btn-dark-pill" asp-controller="ToursAdmin" asp-action="Crear">+ Nuevo tour</a>
+                </div>
             </div>
-            <div class="ts-quicklinks mb-4" aria-label="Accesos rápidos de administración">
-                <a asp-controller="ReservasWeb" asp-action="Index">◉ Reservas</a>
-                <a asp-controller="ToursAdmin" asp-action="Index">✦ Tours</a>
+            <div class="ts-quicklinks ts-v3-admin-nav mb-4" aria-label="Accesos rápidos de administración">
+                <a asp-controller="ReservasWeb" asp-action="Index">◉ Gestionar reservas</a>
+                <a asp-controller="ToursAdmin" asp-action="Index">✦ Gestionar tours</a>
                 <a asp-controller="GeografiaAdmin" asp-action="Index">⌖ Países y destinos</a>
-                <a asp-controller="ClientesAdmin" asp-action="Index">♧ Clientes</a>
+                <a asp-controller="ClientesAdmin" asp-action="Index">♧ Gestionar clientes</a>
                 @if (User.IsInRole("Administrador")) { <a asp-controller="ReportesWeb" asp-action="Finanzas">▥ Finanzas</a> }
             </div>
-            <div class="row g-3 mb-5">
+            <div class="row g-3 mb-5 ts-v3-metrics">
                 <div class="col-6 col-xl"><div class="metric-card"><span>Tours futuros</span><strong>@Model.ToursFuturos</strong><small>Excursiones por iniciar</small></div></div>
                 <div class="col-6 col-xl"><div class="metric-card"><span>Pendientes</span><strong>@Model.Pendientes</strong><small>Esperando confirmación</small></div></div>
                 <div class="col-6 col-xl"><div class="metric-card"><span>Confirmadas</span><strong>@Model.Confirmadas</strong><small>Reservas confirmadas</small></div></div>
