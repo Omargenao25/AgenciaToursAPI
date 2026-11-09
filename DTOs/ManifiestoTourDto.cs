@@ -36,6 +36,8 @@ public sealed class ManifiestoTourDto
     public string Guia { get; set; } = "";
     public string Transporte { get; set; } = "";
     public int CapacidadMaxima { get; set; }
+    public int Llegaron { get; set; }
+    public int Faltan => Math.Max(0, CuposConfirmados - Llegaron);
     public int CuposConfirmados { get; set; }
     public int CuposPendientes { get; set; }
     public int CuposComprometidos => CuposConfirmados + CuposPendientes;
