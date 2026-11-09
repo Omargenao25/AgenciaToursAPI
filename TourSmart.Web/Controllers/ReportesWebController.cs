@@ -12,6 +12,53 @@ namespace TourSmart.Web.Controllers;
 [Route("panel/reportes")]
 public sealed class ReportesWebController(IReservasAdminClient api, IMemoryCache cache) : Controller
 {
+    [HttpGet("rendimiento-excursiones")]
+    public async Task<IActionResult> RendimientoExcursiones(
+        DateTime? desde, DateTime? hasta, int pagina = 1, CancellationToken ct = default)
+    {
+        var hoy = DateTime.UtcNow.Date;
+        var inicio = (desde ?? hoy.AddDays(-90)).Date;
+        var fin = (hasta ?? hoy).Date;
+        if (inicio.Year < 2000 || fin < inicio || fin >= DateTime.MaxValue.Date ||
+            (fin - inicio).TotalDays > 366 || pagina < 1 || pagina > 100000)
+        {
+            ModelState.AddModelError("", "Selecciona un período UTC válido de hasta 366 días y una página positiva.");
+            return View(new RendimientoExcursionesViewModel
+            {
+                DesdeUtc = inicio,
+                HastaExclusivoUtc = fin < DateTime.MaxValue.Date ? fin.AddDays(1) : fin,
+                Pagina = pagina
+            });
+        }
+
+        var sid = User.FindFirstValue("SessionId");
+        if (sid is null || !cache.TryGetValue("jwt:" + sid, out object? value) ||
+            value is not string jwt || string.IsNullOrWhiteSpace(jwt))
+            return RedirectToAction("Acceder", "Cuenta");
+
+        try
+        {
+            var modelo = await api.RendimientoExcursionesAsync(jwt, inicio, fin, pagina, ct);
+            Response.Headers.CacheControl = "private, no-store";
+            return View(modelo);
+        }
+        catch (HttpRequestException ex)
+        {
+            TempData["Error"] = ex.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized
+                ? "No tienes permisos para consultar los indicadores de excursiones."
+                : "No se pudo consultar el reporte. Comprueba que la API esté disponible.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La consulta tardó demasiado.";
+        }
+
+        return View(new RendimientoExcursionesViewModel
+        {
+            DesdeUtc = inicio, HastaExclusivoUtc = fin.AddDays(1), Pagina = pagina
+        });
+    }
+
     [HttpGet("historial-excursiones")]
     public async Task<IActionResult> HistorialExcursiones(
         DateTime? desde, DateTime? hasta, int pagina = 1,
