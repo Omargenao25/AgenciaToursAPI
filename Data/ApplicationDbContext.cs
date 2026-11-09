@@ -42,6 +42,20 @@ namespace AgenciaToursAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Unicidad a nivel SQL para evitar registros duplicados por solicitudes concurrentes.
+            modelBuilder.Entity<Pais>()
+                .HasIndex(p => p.Nombre)
+                .IsUnique();
+
+            modelBuilder.Entity<Destino>()
+                .HasIndex(d => new { d.PaisId, d.Nombre })
+                .IsUnique();
+
+            modelBuilder.Entity<Destino>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_Destinos_DuracionPositiva",
+                    "[DuracionDias] BETWEEN 0 AND 365 AND [DuracionHoras] BETWEEN 0 AND 23 AND ([DuracionDias] > 0 OR [DuracionHoras] > 0)"));
+
             modelBuilder.Entity<Destino>()
                 .HasOne(d => d.Pais)
                 .WithMany(p => p.Destinos)
