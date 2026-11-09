@@ -29,6 +29,15 @@ builder.Services.AddScoped<
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("La clave JWT no está configurada.");
 
+// Evitar arrancar producción con una clave débil o un valor de ejemplo.
+// Desarrollo conserva la configuración de User Secrets que ya usa TourSmart.
+if (!builder.Environment.IsDevelopment() &&
+    (Encoding.UTF8.GetByteCount(jwtKey) < 32 ||
+     jwtKey.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) ||
+     jwtKey.Contains("example", StringComparison.OrdinalIgnoreCase)))
+    throw new InvalidOperationException(
+        "Configura una clave JWT de al menos 32 bytes y sin valores de ejemplo antes del despliegue.");
+
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]
     ?? throw new InvalidOperationException("El emisor JWT no está configurado.");
 
@@ -216,6 +225,32 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler(handler =>
+    {
+        handler.Run(async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json; charset=utf-8";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                mensaje = "Ha ocurrido un error interno. Intenta nuevamente."
+            });
+        });
+    });
+    app.UseHsts();
+}
+
+// Endurecimiento de respuestas; no cambia la semántica de los endpoints.
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+    await next();
+});
 
 app.UseHttpsRedirection();
 
