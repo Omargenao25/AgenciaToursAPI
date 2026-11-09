@@ -283,6 +283,8 @@ public sealed class MiCuentaController(
             .FromSqlInterpolated($"SELECT * FROM dbo.Tours WITH (UPDLOCK, HOLDLOCK) WHERE Id = {reserva.TourId}")
             .SingleOrDefaultAsync();
         if (tour is null) return NotFound("El tour asociado ya no existe.");
+        if (await db.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId))
+            return Conflict("La salida ya fue cerrada operativamente.");
         if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
             return Conflict("No se puede cancelar después del inicio del tour.");
 
