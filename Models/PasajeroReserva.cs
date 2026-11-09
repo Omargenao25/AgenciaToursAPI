@@ -10,4 +10,7 @@ public sealed class PasajeroReserva
     public int Orden { get; set; }
     [Required, MaxLength(120)]
     public string NombreCompleto { get; set; } = "";
+    public DateTime? LlegadaUtc { get; set; }
+    [MaxLength(100)]
+    public string? RegistradoPor { get; set; }
 }
