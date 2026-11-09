@@ -110,6 +110,40 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         return View(model);
     }
 
+    [HttpPost("{id:int}/manifiesto/check-in/{pasajeroId:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CheckIn(
+        int id, int pasajeroId, bool presente, CancellationToken ct)
+    {
+        if (id <= 0 || pasajeroId <= 0) return NotFound();
+        var jwt = Token();
+        if (string.IsNullOrWhiteSpace(jwt)) return RedirectToAction("Acceder", "Cuenta");
+        try
+        {
+            var status = await adminApi.MarcarAsistenciaAsync(jwt, id, pasajeroId, presente, ct);
+            TempData[status == HttpStatusCode.NoContent ? "Exito" : "Error"] = status switch
+            {
+                HttpStatusCode.NoContent => presente
+                    ? "Pasajero marcado como presente." : "Se revirtió el check-in del pasajero.",
+                HttpStatusCode.Conflict =>
+                    "No se pudo registrar: comprueba que la reserva esté confirmada y el tour aún no haya comenzado.",
+                HttpStatusCode.NotFound => "El pasajero no pertenece a este tour.",
+                HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized =>
+                    "Tu cuenta no tiene permisos para esta acción.",
+                _ => $"No se pudo actualizar asistencia (HTTP {(int)status})."
+            };
+        }
+        catch (HttpRequestException)
+        {
+            TempData["Error"] = "No fue posible comunicarse con la API. Actualiza el manifiesto antes de reintentar.";
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            TempData["Error"] = "La API tardó demasiado. Comprueba el estado antes de reintentar.";
+        }
+        return RedirectToAction(nameof(Manifiesto), new { id });
+    }
+
     [HttpGet("{id:int}/manifiesto")]
     public async Task<IActionResult> Manifiesto(int id, CancellationToken ct)
     {
