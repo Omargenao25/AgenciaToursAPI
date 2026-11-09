@@ -64,6 +64,9 @@ public sealed class PasajerosReservaController(ApplicationDbContext db) : Contro
 
         var anteriores = await db.PasajerosReserva
             .Where(p => p.ReservaId == reservaId).ToListAsync(ct);
+        if (anteriores.Any(p => p.LlegadaUtc.HasValue))
+            return Conflict("No se pueden cambiar nombres después de registrar asistencia. Revertir primero el check-in.");
+
         db.PasajerosReserva.RemoveRange(anteriores);
         // Una única SaveChanges efectúa el reemplazo en orden y evita colisiones
         // con el índice (ReservaId, Orden) durante un intento fallido.
