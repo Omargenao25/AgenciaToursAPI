@@ -32,19 +32,26 @@ function ComprobarNombre($registro, [string]$tipo) {
         ErrorDeDatos "$tipo ID $($registro.id): nombre vacío, muy corto o con espacios sobrantes."
     }
 }
+# Invoke-RestMethod puede entregar un arreglo JSON como UN objeto Object[] en
+# Windows PowerShell 5.1. Desplegamos explícitamente cada colección para que
+# foreach siempre recorra registros y nunca intente convertir Object[] a int.
+function ObtenerRegistros([string]$url) {
+    $respuesta = Invoke-RestMethod -Method Get -Uri $url -TimeoutSec 15
+    if ($null -eq $respuesta) { return }
+    foreach ($registro in $respuesta) {
+        if ($null -ne $registro) { Write-Output $registro }
+    }
+}
 $base = $ApiBase.TrimEnd('/')
 try {
-    $paises = @(Invoke-RestMethod -Method Get -Uri "$base/api/Paises" -TimeoutSec 15)
-    $destinos = @(Invoke-RestMethod -Method Get -Uri "$base/api/Destinos" -TimeoutSec 15)
-    $tours = @(Invoke-RestMethod -Method Get -Uri "$base/api/Tours" -TimeoutSec 15)
+    $paises = @(ObtenerRegistros "$base/api/Paises")
+    $destinos = @(ObtenerRegistros "$base/api/Destinos")
+    $tours = @(ObtenerRegistros "$base/api/Tours")
 }
 catch {
     Write-Host "[ERROR] No se pudo consultar la API en $base. $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
-$paises = @($paises | Where-Object { $null -ne $_ })
-$destinos = @($destinos | Where-Object { $null -ne $_ })
-$tours = @($tours | Where-Object { $null -ne $_ })
 $paisPorId = @{}
 $destinoPorId = @{}
 $nombresPaises = @{}
