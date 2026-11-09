@@ -23,6 +23,7 @@ public sealed class TourCard
     public int DuracionHoras { get; set; }
     public string Estado { get; set; } = "";
     public int CapacidadMaxima { get; set; }
+    public bool CerradoOperativo { get; set; }
     public int CuposReservados { get; set; }
     public int CuposDisponibles { get; set; }
     public bool Reservable => Estado == "Disponible" && CuposDisponibles > 0;
