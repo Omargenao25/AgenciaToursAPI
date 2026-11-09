@@ -32,6 +32,8 @@ public sealed class ManifiestoTourViewModel
     public string Guia { get; set; } = "";
     public string Transporte { get; set; } = "";
     public int CapacidadMaxima { get; set; }
+    public int Llegaron { get; set; }
+    public int Faltan { get; set; }
     public int CuposConfirmados { get; set; }
     public int CuposPendientes { get; set; }
     public int CuposComprometidos { get; set; }
