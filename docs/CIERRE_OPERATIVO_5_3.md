@@ -18,6 +18,7 @@ Consolidar el resultado de la lista de asistencia sin confundirlo con la finaliz
 - El cierre es único por tour mediante índice SQL `UNIQUE(TourId)`. No se expone editar, eliminar ni revertir desde la web.
 - La transacción `Serializable` y el bloqueo SQL del tour serializan el cierre frente a los cambios de check-in. La API de check-in adquiere ese mismo bloqueo y rechaza modificaciones cuando existe cierre.
 - La API impide **reservas nuevas**, edición de nombres y modificación administrativa de las reservas vinculadas a un tour ya cerrado, así como cancelaciones de cliente en el tour cerrado. **No modifica** los pagos, reembolsos ni las reservas durante el cierre.
+- El catálogo expone `CerradoOperativo`: la web distingue **Salida cerrada**, evita ofrecer nuevas reservas y oculta la opción de editar un tour cerrado. La API también bloquea edición y eliminación del tour cerrado.
 - El cierre de operaciones **no cambia** la propiedad `Tour.Estado`: sigue derivándose de la fecha programada. No significa que la excursión haya finalizado su itinerario completo; solo consolida el control de salida.
 - El Operador puede consultar la página y el resultado, pero no autorizar el cierre. Los Clientes y usuarios anónimos no acceden.
 - Ninguna operación se envía por correo electrónico y no se genera un PDF automáticamente.
