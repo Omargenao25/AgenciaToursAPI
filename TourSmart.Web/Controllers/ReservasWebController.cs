@@ -32,7 +32,7 @@ public sealed class ReservasWebController(IReservasAdminClient reservasApi, ITou
             .Select(x => new SelectListItem(x.Nombre, x.Id.ToString()))
             .ToList();
         model.Tours = tours
-            .Where(x => x.Estado == "Disponible" && x.Fecha.Date.Add(x.Hora) > DateTime.Now && x.CuposDisponibles > 0)
+            .Where(x => x.Estado == "Disponible" && !x.CerradoOperativo && x.Fecha.Date.Add(x.Hora) > DateTime.Now && x.CuposDisponibles > 0)
             .OrderBy(x => x.Fecha)
             .Select(x => new SelectListItem(
                 $"{x.Nombre} · {x.Fecha:dd/MM/yyyy} · {x.CuposDisponibles} plazas · RD$ {x.Precio:N2}",
