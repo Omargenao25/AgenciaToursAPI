@@ -118,7 +118,14 @@
                     </div>
                     <p class="geo-help mt-3">Indica al menos 1 hora o 1 día.</p>
                     <div class="geo-form-actions">
-                        <button class="btn btn-accent" type="submit" @(Model.Paises.Count == 0 ? "disabled" : "")>@(editandoDestino ? "Guardar cambios" : "+ Agregar destino")</button>
+                        @if (Model.Paises.Count == 0)
+                        {
+                            <button class="btn btn-accent" type="submit" disabled>+ Agregar destino</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-accent" type="submit">@(editandoDestino ? "Guardar cambios" : "+ Agregar destino")</button>
+                        }
                         @if (editandoDestino) { <a class="btn btn-outline-secondary" asp-action="Index" asp-fragment="destinos">Cancelar edición</a> }
                     </div>
                 </form>
