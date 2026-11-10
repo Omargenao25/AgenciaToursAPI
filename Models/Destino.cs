@@ -7,6 +7,9 @@ namespace AgenciaToursAPI.Models
     {
         public int Id { get; set; }
 
+        [MaxLength(500)]
+        public string? ImagenUrl { get; set; }
+
         [Required(ErrorMessage = "El nombre del destino es obligatorio.")]
         [MaxLength(100,ErrorMessage = "El nombre del destino no puede superar los 100 caracteres.")]
         public string Nombre { get; set; } = string.Empty;
