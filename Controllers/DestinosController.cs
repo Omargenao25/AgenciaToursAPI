@@ -62,6 +62,7 @@ namespace AgenciaToursAPI.Controllers
         {
 
             destino.Nombre = destino.Nombre?.Trim() ?? string.Empty;
+            destino.ImagenUrl = string.IsNullOrWhiteSpace(destino.ImagenUrl) ? null : destino.ImagenUrl.Trim();
             if (destino.Nombre.Length < 2)
                 return BadRequest("El nombre del destino debe contener al menos dos caracteres.");
 
@@ -154,6 +155,7 @@ try
 
 
             destino.Nombre = destino.Nombre?.Trim() ?? string.Empty;
+            destino.ImagenUrl = string.IsNullOrWhiteSpace(destino.ImagenUrl) ? null : destino.ImagenUrl.Trim();
             if (destino.Nombre.Length < 2)
                 return BadRequest("El nombre del destino debe contener al menos dos caracteres.");
 
@@ -201,6 +203,7 @@ try
             }
 
             destinoActual.Nombre = destino.Nombre;
+            destinoActual.ImagenUrl = destino.ImagenUrl;
             destinoActual.DuracionDias = destino.DuracionDias;
             destinoActual.DuracionHoras = destino.DuracionHoras;
             destinoActual.PaisId = destino.PaisId;
