@@ -27,6 +27,22 @@
     <div class="col-md-6"><label asp-for="GuiaId" class="form-label">Guía turístico</label><select asp-for="GuiaId" asp-items="Model.Guias" class="form-select"><option value="0">Selecciona un guía</option></select><span asp-validation-for="GuiaId" class="text-danger small"></span></div>
     <div class="col-12"><label asp-for="TransporteId" class="form-label">Transporte</label><select asp-for="TransporteId" asp-items="Model.Transportes" class="form-select"><option value="0">Selecciona un transporte</option></select><span asp-validation-for="TransporteId" class="text-danger small"></span></div>
    </div>
+   <div class="eyebrow mt-5 mb-3">IMAGEN DE LA EXPERIENCIA</div>
+   <div class="row g-3 align-items-start">
+    <div class="col-lg-7">
+      <label asp-for="ImagenUrl" class="form-label">URL de la foto principal (opcional)</label>
+      <input asp-for="ImagenUrl" type="url" maxlength="500" class="form-control" id="imagenTourUrl"
+             placeholder="https://ejemplo.com/foto-del-tour.jpg" autocomplete="url" />
+      <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
+      <p class="text-secondary small mt-2">Pega una URL HTTPS pública de una imagen que tengas permiso de utilizar. Si la dejas vacía, se mostrará la imagen del destino o la ilustración de TourSmart.</p>
+    </div>
+    <div class="col-lg-5">
+      <div id="vistaPreviaTour" class="ts-photo-preview" aria-label="Vista previa de la imagen">
+        <span id="sinImagenTour">Vista previa de la excursión</span>
+        <img id="fotoPreviaTour" alt="Vista previa de foto de excursión" class="d-none" loading="lazy" />
+      </div>
+    </div>
+   </div>
    <div class="eyebrow mt-5 mb-3">FECHA, PRECIO Y CAPACIDAD</div>
    <div class="row g-3">
     <div class="col-md-6"><label asp-for="Fecha" class="form-label">Fecha de salida</label><input asp-for="Fecha" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" /><span asp-validation-for="Fecha" class="text-danger small"></span></div>
