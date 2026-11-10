@@ -135,6 +135,10 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<int>("DuracionHoras")
                         .HasColumnType("int");
 
+                    b.Property<string>("ImagenUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -464,6 +468,10 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<int>("HorasLimiteAdelanto")
                         .HasColumnType("int")
                         .HasDefaultValue(24);
+
+                    b.Property<string>("ImagenUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("GuiaId")
                         .HasColumnType("int");
