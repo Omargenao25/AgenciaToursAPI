@@ -15,7 +15,14 @@
     <div class="container">
         <div class="row g-5">
             <div class="col-lg-8">
-                <div class="detail-poster"><div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div><span>@Model.Destino</span></div>
+                <div class="detail-poster ts-detail-photo">
+                    <div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div>
+                    @if (!string.IsNullOrWhiteSpace(Model.ImagenMostrarUrl))
+                    {
+                        <img class="ts-photo-img" src="@Model.ImagenMostrarUrl" alt="Fotografía de @Model.Destino, @Model.Pais" fetchpriority="high" referrerpolicy="no-referrer" onerror="this.style.display='none'" />
+                    }
+                    <span>@Model.Destino</span>
+                </div>
                 <h2 class="detail-title mt-5">La aventura comienza <em>aquí.</em></h2>
                 <p class="detail-copy">Esta experiencia forma parte del catálogo de TourSmart RD. La información de fecha, categoría, precio y capacidad se obtiene directamente de nuestra API.</p>
                 <div class="row g-3 mt-3">
