@@ -8,6 +8,9 @@ namespace AgenciaToursAPI.Models
     {
         public int Id { get; set; }
 
+        [MaxLength(500)]
+        public string? ImagenUrl { get; set; }
+
         [Required(ErrorMessage = "El nombre del tour es obligatorio.")]
         [MaxLength(150)]
         public string Nombre { get; set; } = string.Empty;
