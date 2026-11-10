@@ -32,6 +32,8 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    ImagenUrl = t.ImagenUrl,
+                    ImagenDestinoUrl = t.Destino != null ? t.Destino.ImagenUrl : null,
                     PaisId = t.PaisId,
                     DestinoId = t.DestinoId,
                     CategoriaId = t.CategoriaId,
@@ -96,6 +98,8 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    ImagenUrl = t.ImagenUrl,
+                    ImagenDestinoUrl = t.Destino != null ? t.Destino.ImagenUrl : null,
                     PaisId = t.PaisId,
                     DestinoId = t.DestinoId,
                     CategoriaId = t.CategoriaId,
@@ -278,6 +282,7 @@ namespace AgenciaToursAPI.Controllers
             var tour = new Tour
             {
                 Nombre = dto.Nombre.Trim(),
+                ImagenUrl = string.IsNullOrWhiteSpace(dto.ImagenUrl) ? null : dto.ImagenUrl.Trim(),
                 PaisId = dto.PaisId,
                 DestinoId = dto.DestinoId,
                 CategoriaId = dto.CategoriaId,
@@ -424,6 +429,7 @@ namespace AgenciaToursAPI.Controllers
             }
 
             tour.Nombre = dto.Nombre.Trim();
+            tour.ImagenUrl = string.IsNullOrWhiteSpace(dto.ImagenUrl) ? null : dto.ImagenUrl.Trim();
             tour.PaisId = dto.PaisId;
             tour.DestinoId = dto.DestinoId;
             tour.CategoriaId = dto.CategoriaId;
@@ -527,6 +533,8 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    ImagenUrl = t.ImagenUrl,
+                    ImagenDestinoUrl = t.Destino != null ? t.Destino.ImagenUrl : null,
                     PaisId = t.PaisId,
                     DestinoId = t.DestinoId,
                     CategoriaId = t.CategoriaId,
