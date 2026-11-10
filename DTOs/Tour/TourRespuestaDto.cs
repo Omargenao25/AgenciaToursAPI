@@ -5,6 +5,8 @@
         public int Id { get; set; }
 
         public string Nombre { get; set; } = string.Empty;
+        public string? ImagenUrl { get; set; }
+        public string? ImagenDestinoUrl { get; set; }
         public int PaisId { get; set; }
         public int DestinoId { get; set; }
         public int CategoriaId { get; set; }
