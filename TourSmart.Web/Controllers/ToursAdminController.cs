@@ -371,6 +371,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
                 DestinoId = tour.DestinoId, CategoriaId = tour.CategoriaId,
                 GuiaId = tour.GuiaId, TransporteId = tour.TransporteId,
                 Fecha = tour.Fecha, Hora = tour.Hora, Precio = tour.Precio,
+                ImagenUrl = tour.ImagenUrl,
                 CapacidadMaxima = tour.CapacidadMaxima, CuposReservados = tour.CuposReservados
             };
             await CargarCatalogos(model, token, ct);
