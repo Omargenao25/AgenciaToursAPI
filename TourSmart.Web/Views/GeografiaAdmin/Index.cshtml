@@ -104,6 +104,11 @@
                     <input type="hidden" asp-for="Destino.Id" />
                     <label asp-for="Destino.Nombre" class="form-label">Nombre del destino</label>
                     <input asp-for="Destino.Nombre" class="form-control mb-3" minlength="2" maxlength="100" required placeholder="Ej. Samaná" autocomplete="off" />
+                    <label asp-for="Destino.ImagenUrl" class="form-label">Foto del destino (URL HTTPS opcional)</label>
+                    <input asp-for="Destino.ImagenUrl" class="form-control mb-2" type="url" maxlength="500"
+                           placeholder="https://ejemplo.com/foto-del-destino.jpg" />
+                    <span asp-validation-for="Destino.ImagenUrl" class="text-danger small"></span>
+                    <p class="geo-help">Esta foto se mostrará en las excursiones que no tengan una propia.</p>
                     <label asp-for="Destino.PaisId" class="form-label">País al que pertenece</label>
                     <select asp-for="Destino.PaisId" class="form-select mb-3" required>
                         <option value="0">Seleccionar país</option>
