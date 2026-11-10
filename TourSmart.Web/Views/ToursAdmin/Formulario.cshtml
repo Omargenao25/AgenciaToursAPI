@@ -59,6 +59,28 @@
 </div></section>
 @section Scripts {
 <script>
+const fotoCampo = document.getElementById("imagenTourUrl");
+const fotoPrevia = document.getElementById("fotoPreviaTour");
+const fotoVacia = document.getElementById("sinImagenTour");
+if (fotoCampo && fotoPrevia && fotoVacia) {
+    function actualizarFoto() {
+        const url = fotoCampo.value.trim();
+        let valido = false;
+        try {
+            const parsed = new URL(url);
+            valido = parsed.protocol === "https:" && Boolean(parsed.hostname);
+        } catch { /* URL vacia o incorrecta */ }
+        fotoPrevia.classList.add("d-none");
+        fotoPrevia.removeAttribute("src");
+        fotoVacia.textContent = valido ? "Cargando vista previa..." : "Agrega una URL HTTPS para previsualizar";
+        if (!valido) return;
+        fotoPrevia.onload = () => { fotoPrevia.classList.remove("d-none"); fotoVacia.textContent = ""; };
+        fotoPrevia.onerror = () => { fotoPrevia.classList.add("d-none"); fotoVacia.textContent = "No se pudo cargar esta imagen"; };
+        fotoPrevia.src = url;
+    }
+    fotoCampo.addEventListener("change", actualizarFoto);
+    actualizarFoto();
+}
 const destinosPorPais = @Html.Raw(ViewBag.DestinosPorPais ?? "[]");
 const pais = document.getElementById("paisSelect");
 const destino = document.getElementById("destinoSelect");
