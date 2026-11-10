@@ -352,3 +352,16 @@ a:hover {color:var(--ts-primary-dark)}
   .ts-v3-hero .hero-visual {box-shadow:none}
   .geo-actions .btn {min-width:70px}
 }
+
+/* Fotos de tours: portada real, degradado legible y respaldo decorativo */
+.ts-photo-cover,.ts-detail-photo {position:relative;isolation:isolate}
+.ts-photo-img {position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;z-index:1}
+.ts-photo-cover:after,.ts-detail-photo:after {content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(8,31,38,.06) 20%,rgba(8,31,38,.72) 100%)}
+.ts-photo-cover .place-icon,.ts-photo-cover .tour-art-line {display:none}
+.ts-photo-cover .tour-pill {position:absolute;z-index:3}
+.ts-photo-cover .tour-destination,.ts-detail-photo>span {z-index:3}
+.ts-detail-photo .ts-photo-img{border-radius:inherit}
+.ts-detail-photo>span {position:absolute}
+.ts-photo-preview {height:190px;border:2px dashed #C8D7E1;border-radius:16px;position:relative;background:linear-gradient(135deg,#E8F3F5,#F2F8FA);display:grid;place-items:center;overflow:hidden;color:#516575;text-align:center;padding:1rem;font-size:.88rem}
+.ts-photo-preview img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ts-detail-photo:has(.ts-photo-img) .sun-orb,.ts-detail-photo:has(.ts-photo-img) .landscape-back,.ts-detail-photo:has(.ts-photo-img) .landscape-front{display:none}
