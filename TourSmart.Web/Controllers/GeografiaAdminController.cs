@@ -19,6 +19,9 @@ public sealed class PaisFormulario
 public sealed class DestinoFormulario
 {
     public int Id { get; set; }
+    [StringLength(500)]
+    [RegularExpression(@"^https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?$", ErrorMessage = "Usa una URL HTTPS valida.")]
+    public string? ImagenUrl { get; set; }
     [Required, StringLength(100, MinimumLength = 2)]
     public string Nombre { get; set; } = "";
     [Range(1, int.MaxValue, ErrorMessage = "Selecciona un país.")]
@@ -115,6 +118,7 @@ public sealed class GeografiaAdminController(IHttpClientFactory httpClientFactor
         var token = Token();
         if (string.IsNullOrWhiteSpace(token)) return RedirectToAction("Acceder", "Cuenta");
         model.Nombre = model.Nombre?.Trim() ?? "";
+        model.ImagenUrl = string.IsNullOrWhiteSpace(model.ImagenUrl) ? null : model.ImagenUrl.Trim();
         if (!TryValidateModel(model) || model.Id < 0 || (model.DuracionDias == 0 && model.DuracionHoras == 0))
         {
             TempData["Error"] = "Indica nombre, país y una duración mayor que cero.";
