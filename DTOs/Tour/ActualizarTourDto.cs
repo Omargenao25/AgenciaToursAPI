@@ -4,6 +4,10 @@ namespace AgenciaToursAPI.DTOs
 {
     public class ActualizarTourDto
     {
+        [StringLength(500)]
+        [RegularExpression(@"^https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?$", ErrorMessage = "La imagen debe usar una URL HTTPS valida.")]
+        public string? ImagenUrl { get; set; }
+
         [Required(ErrorMessage = "El nombre del tour es obligatorio.")]
         [StringLength(150, MinimumLength = 3, ErrorMessage = "El nombre debe tener entre 3 y 150 caracteres.")]
         public string Nombre { get; set; } = string.Empty;
