@@ -71,7 +71,7 @@ if (fotoCampo && fotoPrevia && fotoVacia) {
         const url = fotoCampo.value.trim();
         let valido = false;
         try {
-            const parsed = new URL(url);
+            const parsed = new URL(url, window.location.origin);
             valido = (parsed.protocol === "https:" && Boolean(parsed.hostname)) || /^\/uploads\/tours\/[a-f0-9]{32}\.(jpg|png|webp)$/.test(url);
         } catch { /* URL vacia o incorrecta */ }
         fotoPrevia.classList.add("d-none");
