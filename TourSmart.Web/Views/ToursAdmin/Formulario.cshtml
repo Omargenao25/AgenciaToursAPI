@@ -31,10 +31,13 @@
    <div class="row g-3 align-items-start">
     <div class="col-lg-7">
       <label asp-for="ImagenUrl" class="form-label">URL de la foto principal (opcional)</label>
-      <input asp-for="ImagenUrl" type="url" maxlength="500" class="form-control" id="imagenTourUrl"
+      <input asp-for="ImagenUrl" type="text" maxlength="500" class="form-control" id="imagenTourUrl" data-foto-url
              placeholder="https://ejemplo.com/foto-del-tour.jpg" autocomplete="url" />
       <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
-      <p class="text-secondary small mt-2">Pega una URL HTTPS pública de una imagen que tengas permiso de utilizar. Si la dejas vacía, se mostrará la imagen del destino o la ilustración de TourSmart.</p>
+      <label for="archivoTour" class="form-label mt-3">O subir foto desde Windows</label>
+      <input id="archivoTour" data-foto-archivo class="form-control" type="file" accept="image/jpeg,image/png,image/webp" />
+      <small data-foto-estado class="d-block mt-2 text-secondary" aria-live="polite">JPG, PNG o WebP · máximo 5 MB. Guarda el tour después de subir.</small>
+      <p class="text-secondary small mt-2">También puedes pegar una URL HTTPS pública. Sin foto, se utiliza la imagen del destino o el diseño predeterminado.</p>
     </div>
     <div class="col-lg-5">
       <div id="vistaPreviaTour" class="ts-photo-preview" aria-label="Vista previa de la imagen">
@@ -58,6 +61,7 @@
  </div>
 </div></section>
 @section Scripts {
+<script src="~/js/toursmart-fotos.js" asp-append-version="true"></script>
 <script>
 const fotoCampo = document.getElementById("imagenTourUrl");
 const fotoPrevia = document.getElementById("fotoPreviaTour");
@@ -68,11 +72,11 @@ if (fotoCampo && fotoPrevia && fotoVacia) {
         let valido = false;
         try {
             const parsed = new URL(url);
-            valido = parsed.protocol === "https:" && Boolean(parsed.hostname);
+            valido = (parsed.protocol === "https:" && Boolean(parsed.hostname)) || /^\/uploads\/tours\/[a-f0-9]{32}\.(jpg|png|webp)$/.test(url);
         } catch { /* URL vacia o incorrecta */ }
         fotoPrevia.classList.add("d-none");
         fotoPrevia.removeAttribute("src");
-        fotoVacia.textContent = valido ? "Cargando vista previa..." : "Agrega una URL HTTPS para previsualizar";
+        fotoVacia.textContent = valido ? "Cargando vista previa..." : "Agrega una URL HTTPS o sube una foto";
         if (!valido) return;
         fotoPrevia.onload = () => { fotoPrevia.classList.remove("d-none"); fotoVacia.textContent = ""; };
         fotoPrevia.onerror = () => { fotoPrevia.classList.add("d-none"); fotoVacia.textContent = "No se pudo cargar esta imagen"; };
