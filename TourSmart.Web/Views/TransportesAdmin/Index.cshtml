@@ -1,0 +1,116 @@
+@model TourSmart.Web.Controllers.TransportesListado
+@{
+    ViewData["Title"] = "Gestionar transportes";
+    var editando = Model.Transporte.Id > 0;
+}
+<section class="inner-hero dashboard-hero"><div class="container">
+    <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
+    <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+    <h1>Flota y <em>transportes.</em></h1>
+    <p>Registra los medios de transporte disponibles y asígnalos a tus excursiones.</p>
+</div></section>
+<section class="section-space"><div class="container">
+    @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
+    @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+    <div class="d-flex gap-2 flex-wrap mb-4">
+        <a class="btn btn-outline-primary" asp-controller="ToursAdmin" asp-action="Crear">+ Crear tour</a>
+        <a class="btn btn-outline-secondary" asp-controller="ToursAdmin" asp-action="Index">Gestionar tours</a>
+    </div>
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+            <div class="geo-panel p-4">
+                <span class="eyebrow">@(editando ? "EDITAR TRANSPORTE" : "NUEVO TRANSPORTE")</span>
+                <h2 class="h3 mt-2 mb-3">@(editando ? "Actualizar transporte" : "Registrar transporte")</h2>
+                <form method="post" asp-controller="TransportesAdmin" asp-action="Guardar">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Transporte.Id" />
+                    <label asp-for="Transporte.Tipo" class="form-label">Tipo de transporte</label>
+                    <input asp-for="Transporte.Tipo" class="form-control mb-3" required minlength="2" maxlength="50"
+                           placeholder="Ej. Autobús turístico" />
+                    <label asp-for="Transporte.Descripcion" class="form-label">Descripción</label>
+                    <textarea asp-for="Transporte.Descripcion" class="form-control mb-3" rows="4" maxlength="150"
+                              placeholder="Ej. Autobús climatizado de 45 asientos"></textarea>
+                    <button class="btn btn-accent w-100" type="submit">
+                        @(editando ? "Guardar cambios" : "+ Registrar transporte")
+                    </button>
+                    @if (editando)
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Cancelar edición</a>
+                    }
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="geo-panel p-4">
+                <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center mb-3">
+                    <div><span class="eyebrow">CATÁLOGO</span><h2 class="h3 mt-2">Transportes registrados</h2></div>
+                    <span class="badge text-bg-light">@Model.Transportes.Count en total</span>
+                </div>
+                <label class="form-label" for="buscarTransporte">Buscar transporte</label>
+                <input class="form-control mb-3" type="search" id="buscarTransporte" placeholder="Tipo o descripción..." />
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th>Transporte</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in Model.Transportes)
+                        {
+                            var enUso = Model.EnUso.Contains(item.Id);
+                            <tr class="fila-transporte" data-search="@(item.Tipo + " " + item.Descripcion)">
+                                <td><strong>@item.Tipo</strong><small class="d-block text-secondary">@item.Descripcion</small></td>
+                                <td><span class="badge @(enUso ? "text-bg-info" : "text-bg-light")">@(enUso ? "Asignado" : "Disponible")</span></td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-editarId="@item.Id">Editar</a>
+                                        @if (enUso)
+                                        {
+                                            <button type="button" disabled class="btn btn-sm btn-outline-secondary" title="Tiene tours asociados">En uso</button>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-action="Eliminar" asp-route-id="@item.Id"
+                                                  data-tipo="@item.Tipo" class="m-0">
+                                                @Html.AntiForgeryToken()
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Transportes.Any())
+                        {
+                            <tr><td colspan="3" class="text-secondary py-4">Todavía no hay transportes. Registra el primero.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <p id="sinTransportes" class="text-secondary d-none">No hay resultados para esta búsqueda.</p>
+                <p class="text-secondary small">Los transportes asignados a tours pueden editarse, pero no eliminarse.</p>
+            </div>
+        </div>
+    </div>
+</div></section>
+@section Scripts {
+<script>
+(() => {
+ const buscar = document.getElementById("buscarTransporte");
+ const filas = Array.from(document.querySelectorAll(".fila-transporte"));
+ const vacio = document.getElementById("sinTransportes");
+ buscar?.addEventListener("input", () => {
+   const term = buscar.value.trim().toLocaleLowerCase();
+   let total = 0;
+   filas.forEach(fila => {
+      const coincide = (fila.dataset.search || "").toLocaleLowerCase().includes(term);
+      fila.classList.toggle("d-none", !coincide);
+      if (coincide) total++;
+   });
+   vacio?.classList.toggle("d-none", total !== 0 || filas.length === 0);
+ });
+ document.querySelectorAll("form[data-tipo]").forEach(form => {
+   form.addEventListener("submit", e => {
+     if (!confirm("¿Eliminar el transporte '" + form.dataset.tipo + "'?")) e.preventDefault();
+   });
+ });
+})();
+</script>
+}
