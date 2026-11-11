@@ -36,7 +36,7 @@ public sealed class TransportesAdminController(IHttpClientFactory factory, IMemo
         return id is not null && cache.TryGetValue("jwt:" + id, out object? v) ? v as string : null;
     }
     private HttpClient Api() => factory.CreateClient("TourSmart.Sesion");
-    private static HttpRequestMessage Request(HttpMethod method, string url, string token)
+    private static HttpRequestMessage CrearPeticion(HttpMethod method, string url, string token)
     {
         var req = new HttpRequestMessage(method, url);
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -56,12 +56,12 @@ public sealed class TransportesAdminController(IHttpClientFactory factory, IMemo
         var model = new TransportesListado();
         try
         {
-            using var req = Request(HttpMethod.Get, "api/Transportes", token);
+            using var req = CrearPeticion(HttpMethod.Get, "api/Transportes", token);
             using var response = await Api().SendAsync(req, ct);
             response.EnsureSuccessStatusCode();
             model.Transportes = await response.Content.ReadFromJsonAsync<List<TransporteFormulario>>(cancellationToken: ct) ?? new();
             model.Transportes = model.Transportes.OrderBy(t => t.Tipo).ThenBy(t => t.Descripcion).ToList();
-            using var toursReq = Request(HttpMethod.Get, "api/Tours", token);
+            using var toursReq = CrearPeticion(HttpMethod.Get, "api/Tours", token);
             using var toursResp = await Api().SendAsync(toursReq, ct);
             toursResp.EnsureSuccessStatusCode();
             var tours = await toursResp.Content.ReadFromJsonAsync<List<TourReferencia>>(cancellationToken: ct) ?? new();
@@ -92,7 +92,7 @@ public sealed class TransportesAdminController(IHttpClientFactory factory, IMemo
         }
         try
         {
-            using var req = Request(model.Id == 0 ? HttpMethod.Post : HttpMethod.Put,
+            using var req = CrearPeticion(model.Id == 0 ? HttpMethod.Post : HttpMethod.Put,
                 model.Id == 0 ? "api/Transportes" : $"api/Transportes/{model.Id}", token);
             req.Content = JsonContent.Create(new { model.Id, model.Tipo, model.Descripcion });
             using var resp = await Api().SendAsync(req, ct);
@@ -122,7 +122,7 @@ public sealed class TransportesAdminController(IHttpClientFactory factory, IMemo
         if (string.IsNullOrWhiteSpace(token)) return RedirectToAction("Acceder", "Cuenta");
         try
         {
-            using var req = Request(HttpMethod.Delete, $"api/Transportes/{id}", token);
+            using var req = CrearPeticion(HttpMethod.Delete, $"api/Transportes/{id}", token);
             using var resp = await Api().SendAsync(req, ct);
             TempData[resp.IsSuccessStatusCode ? "Exito" : "Error"] = resp.StatusCode switch
             {
