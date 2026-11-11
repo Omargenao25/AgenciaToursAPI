@@ -10,7 +10,7 @@ public sealed class TourFormularioViewModel
     [StringLength(150, MinimumLength = 3)]
     public string Nombre { get; set; } = "";
     [StringLength(500)]
-    [RegularExpression(@"^https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?$", ErrorMessage = "Usa una URL HTTPS valida para la imagen.")]
+    [RegularExpression(@"^(?:https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?|/uploads/tours/[a-f0-9]{32}\.(?:jpg|png|webp))$", ErrorMessage = "Usa HTTPS o selecciona una foto desde tu equipo.")]
     public string? ImagenUrl { get; set; }
     [Range(1, int.MaxValue, ErrorMessage = "Selecciona un país.")]
     public int PaisId { get; set; }
