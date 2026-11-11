@@ -8,7 +8,7 @@ namespace AgenciaToursAPI.Models
         public int Id { get; set; }
 
         [MaxLength(500)]
-        [RegularExpression(@"^https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?$", ErrorMessage = "La foto debe usar HTTPS.")]
+        [RegularExpression(@"^(?:https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?|/uploads/tours/[a-f0-9]{32}\.(?:jpg|png|webp))$", ErrorMessage = "Usa HTTPS o una foto subida desde tu equipo.")]
         public string? ImagenUrl { get; set; }
 
         [Required(ErrorMessage = "El nombre del destino es obligatorio.")]
