@@ -105,10 +105,13 @@
                     <label asp-for="Destino.Nombre" class="form-label">Nombre del destino</label>
                     <input asp-for="Destino.Nombre" class="form-control mb-3" minlength="2" maxlength="100" required placeholder="Ej. Samaná" autocomplete="off" />
                     <label asp-for="Destino.ImagenUrl" class="form-label">Foto del destino (URL HTTPS opcional)</label>
-                    <input asp-for="Destino.ImagenUrl" class="form-control mb-2" type="url" maxlength="500"
+                    <input asp-for="Destino.ImagenUrl" class="form-control mb-2" type="text" data-foto-url maxlength="500"
                            placeholder="https://ejemplo.com/foto-del-destino.jpg" />
                     <span asp-validation-for="Destino.ImagenUrl" class="text-danger small"></span>
-                    <p class="geo-help">Esta foto se mostrará en las excursiones que no tengan una propia.</p>
+                    <label class="form-label mt-2" for="archivoDestino">O selecciona una foto desde Windows</label>
+                    <input id="archivoDestino" data-foto-archivo type="file" class="form-control" accept="image/jpeg,image/png,image/webp" />
+                    <small data-foto-estado class="d-block mt-2 text-secondary" aria-live="polite">JPG, PNG o WebP · máximo 5 MB. Guarda el destino tras subir.</small>
+                    <p class="geo-help">La foto se utilizará en excursiones de este destino que no tengan imagen propia.</p>
                     <label asp-for="Destino.PaisId" class="form-label">País al que pertenece</label>
                     <select asp-for="Destino.PaisId" class="form-select mb-3" required>
                         <option value="0">Seleccionar país</option>
@@ -172,6 +175,7 @@
 </div>
 </section>
 @section Scripts {
+<script src="~/js/toursmart-fotos.js" asp-append-version="true"></script>
 <script>
 (() => {
     const norm = value => (value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
