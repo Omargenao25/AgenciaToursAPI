@@ -5,7 +5,7 @@ namespace AgenciaToursAPI.DTOs
     public class ActualizarTourDto
     {
         [StringLength(500)]
-        [RegularExpression(@"^https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?$", ErrorMessage = "La imagen debe usar una URL HTTPS valida.")]
+        [RegularExpression(@"^(?:https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?|/uploads/tours/[a-f0-9]{32}\.(?:jpg|png|webp))$", ErrorMessage = "Usa HTTPS o una imagen subida desde tu equipo.")]
         public string? ImagenUrl { get; set; }
 
         [Required(ErrorMessage = "El nombre del tour es obligatorio.")]
