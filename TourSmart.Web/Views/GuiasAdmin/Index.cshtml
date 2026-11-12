@@ -19,7 +19,7 @@
     <div class="row g-4 align-items-start">
         <div class="col-lg-4">
             <div class="geo-panel p-4">
-                <span class="eyebrow">@(editando ? "EDITAR TRANSPORTE" : "NUEVO TRANSPORTE")</span>
+                <span class="eyebrow">@(editando ? "EDITAR GUÍA" : "NUEVO GUÍA")</span>
                 <h2 class="h3 mt-2 mb-3">@(editando ? "Actualizar guía" : "Registrar guía")</h2>
                 <form method="post" asp-controller="GuiasAdmin" asp-action="Guardar">
                     @Html.AntiForgeryToken()
@@ -28,7 +28,7 @@
                     <input asp-for="Guia.Nombre" class="form-control mb-3" required minlength="2" maxlength="100"
                            placeholder="Ej. Ana Rodríguez" />
                     <label asp-for="Guia.Telefono" class="form-label">Teléfono</label>
-                    <textarea asp-for="Guia.Telefono" class="form-control mb-3" rows="1" maxlength="20"
+                    <textarea asp-for="Guia.Telefono" class="form-control mb-3" rows="1" maxlength="20" required minlength="7"
                               placeholder="Ej. 809-555-0101"></textarea>
                     <button class="btn btn-accent w-100" type="submit">
                         @(editando ? "Guardar cambios" : "+ Registrar guía")
@@ -43,19 +43,19 @@
         <div class="col-lg-8">
             <div class="geo-panel p-4">
                 <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center mb-3">
-                    <div><span class="eyebrow">CATÁLOGO</span><h2 class="h3 mt-2">Guias registrados</h2></div>
+                    <div><span class="eyebrow">CATÁLOGO</span><h2 class="h3 mt-2">Guías registrados</h2></div>
                     <span class="badge text-bg-light">@Model.Guias.Count en total</span>
                 </div>
                 <label class="form-label" for="buscarGuia">Buscar guía</label>
                 <input class="form-control mb-3" type="search" id="buscarGuia" placeholder="Nombre o teléfono..." />
                 <div class="table-responsive">
                     <table class="table align-middle">
-                        <thead><tr><th>Guia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>Guía</th><th>Estado</th><th>Acciones</th></tr></thead>
                         <tbody>
                         @foreach (var item in Model.Guias)
                         {
                             var enUso = Model.EnUso.Contains(item.Id);
-                            <tr class="fila-guía" data-search="@(item.Nombre + " " + item.Telefono)">
+                            <tr class="fila-guia" data-search="@(item.Nombre + " " + item.Telefono)">
                                 <td><strong>@item.Nombre</strong><small class="d-block text-secondary">@item.Telefono</small></td>
                                 <td><span class="badge @(enUso ? "text-bg-info" : "text-bg-light")">@(enUso ? "Asignado" : "Disponible")</span></td>
                                 <td>
@@ -94,7 +94,7 @@
 <script>
 (() => {
  const buscar = document.getElementById("buscarGuia");
- const filas = Array.from(document.querySelectorAll(".fila-guía"));
+ const filas = Array.from(document.querySelectorAll(".fila-guia"));
  const vacio = document.getElementById("sinGuias");
  buscar?.addEventListener("input", () => {
    const term = buscar.value.trim().toLocaleLowerCase();
