@@ -42,7 +42,7 @@
     <div class="col-lg-5">
       <div id="vistaPreviaTour" class="ts-photo-preview" aria-label="Vista previa de la imagen">
         <span id="sinImagenTour">Vista previa de la excursión</span>
-        <img id="fotoPreviaTour" alt="Vista previa de foto de excursión" class="d-none" loading="lazy" />
+        <img id="fotoPreviaTour" alt="Vista previa de foto de excursión" class="d-none" loading="eager" decoding="async" />
       </div>
     </div>
    </div>
@@ -67,24 +67,72 @@ const fotoCampo = document.getElementById("imagenTourUrl");
 const fotoPrevia = document.getElementById("fotoPreviaTour");
 const fotoVacia = document.getElementById("sinImagenTour");
 if (fotoCampo && fotoPrevia && fotoVacia) {
+    let solicitud = 0;
+    let temporizador = null;
+
+    function mostrarEstado(texto, error = false) {
+        fotoVacia.textContent = texto;
+        fotoVacia.classList.toggle("text-danger", error);
+    }
+
     function actualizarFoto() {
         const url = fotoCampo.value.trim();
-        let valido = false;
-        try {
-            const parsed = new URL(url, window.location.origin);
-            valido = (parsed.protocol === "https:" && Boolean(parsed.hostname)) || /^\/uploads\/tours\/[a-f0-9]{32}\.(jpg|png|webp)$/.test(url);
-        } catch { /* URL vacia o incorrecta */ }
+        const actual = ++solicitud;
+        if (temporizador !== null) {
+            clearTimeout(temporizador);
+            temporizador = null;
+        }
         fotoPrevia.classList.add("d-none");
         fotoPrevia.removeAttribute("src");
-        fotoVacia.textContent = valido ? "Cargando vista previa..." : "Agrega una URL HTTPS o sube una foto";
-        if (!valido) return;
-        fotoPrevia.onload = () => { fotoPrevia.classList.remove("d-none"); fotoVacia.textContent = ""; };
-        fotoPrevia.onerror = () => { fotoPrevia.classList.add("d-none"); fotoVacia.textContent = "No se pudo cargar esta imagen"; };
-        fotoPrevia.src = url;
+
+        if (!url) {
+            mostrarEstado("Pega una URL HTTPS o selecciona una foto desde Windows.");
+            return;
+        }
+
+        const esLocal = /^\\/uploads\\/tours\\/[a-f0-9]{32}\\.(?:jpg|png|webp)$/.test(url);
+        let esHttps = false;
+        try {
+            const parsed = new URL(url);
+            esHttps = parsed.protocol === "https:" && !!parsed.hostname && !parsed.username && !parsed.password;
+        } catch { /* No es URL externa valida */ }
+
+        if (!esLocal && !esHttps) {
+            mostrarEstado("Introduce una URL HTTPS válida o sube una fotografía.", true);
+            return;
+        }
+
+        mostrarEstado("Cargando vista previa...");
+        const prueba = new Image();
+        prueba.onload = () => {
+            if (actual !== solicitud) return;
+            if (temporizador !== null) clearTimeout(temporizador);
+            temporizador = null;
+            fotoPrevia.src = url;
+            fotoPrevia.classList.remove("d-none");
+            mostrarEstado("");
+        };
+        prueba.onerror = () => {
+            if (actual !== solicitud) return;
+            if (temporizador !== null) clearTimeout(temporizador);
+            temporizador = null;
+            mostrarEstado("No pudimos abrir la fotografía. Revisa el enlace o vuelve a subir el archivo.", true);
+        };
+        // Evitar que una respuesta lenta o bloqueada deje el mensaje de carga indefinidamente.
+        temporizador = setTimeout(() => {
+            if (actual !== solicitud) return;
+            prueba.onload = null;
+            prueba.onerror = null;
+            mostrarEstado("La imagen tardó demasiado en cargar. Prueba con otra foto o vuelve a subirla.", true);
+        }, 12000);
+        prueba.src = url;
     }
+
     fotoCampo.addEventListener("change", actualizarFoto);
+    fotoCampo.addEventListener("blur", actualizarFoto);
     actualizarFoto();
 }
+
 const destinosPorPais = @Html.Raw(ViewBag.DestinosPorPais ?? "[]");
 const pais = document.getElementById("paisSelect");
 const destino = document.getElementById("destinoSelect");
