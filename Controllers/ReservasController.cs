@@ -2,6 +2,7 @@ using AgenciaToursAPI.Security;
 using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
+using AgenciaToursAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,10 +16,12 @@ namespace AgenciaToursAPI.Controllers
     public class ReservasController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly NotificacionesReservaService _notificaciones;
 
-        public ReservasController(ApplicationDbContext context)
+        public ReservasController(ApplicationDbContext context, NotificacionesReservaService notificaciones)
         {
             _context = context;
+            _notificaciones = notificaciones;
         }
 
         
@@ -159,6 +162,7 @@ namespace AgenciaToursAPI.Controllers
             _context.PasajerosReserva.AddRange(pasajeros);
             await _context.SaveChangesAsync();
             await transaccion.CommitAsync();
+            await _notificaciones.AvisarAsync(reserva.Id, "Creada");
 
             var respuesta = await ObtenerReservaRespuesta(reserva.Id);
 
@@ -346,6 +350,7 @@ namespace AgenciaToursAPI.Controllers
             reserva.FechaCambioEstado = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             await transaccion.CommitAsync();
+            await _notificaciones.AvisarAsync(reserva.Id, "Confirmada");
             return NoContent();
         }
 
@@ -382,6 +387,7 @@ namespace AgenciaToursAPI.Controllers
             reserva.FechaCambioEstado = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             await transaccion.CommitAsync();
+            await _notificaciones.AvisarAsync(reserva.Id, "Cancelada");
             return NoContent();
         }
 
