@@ -1,0 +1,91 @@
+@{
+    ViewData["Title"] = "Imagen de portada";
+    string? imagenActual = ViewBag.ImagenActual as string;
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
+        <span class="eyebrow">IDENTIDAD VISUAL · TOURSMART RD</span>
+        <h1>Imagen de <em>portada.</em></h1>
+        <p>Personaliza la ilustración que representa a la agencia en la pantalla principal.</p>
+    </div>
+</section>
+<section class="section-space"><div class="container">
+    @if (TempData["Exito"] is string ok) { <div class="alert alert-success" role="status">@ok</div> }
+    @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-5">
+            <div class="geo-panel p-4">
+                <span class="eyebrow">PERSONALIZA TU AGENCIA</span>
+                <h2 class="h3 mt-2">Sube tu nueva imagen</h2>
+                <p class="text-secondary">Recomendamos una ilustración horizontal que represente aventura, viajes y exploración en general, sin destacar un destino concreto.</p>
+                <form method="post" asp-controller="PortadaAdmin" asp-action="Guardar" enctype="multipart/form-data" id="formPortada">
+                    @Html.AntiForgeryToken()
+                    <label class="form-label" for="imagenPortada">Seleccionar imagen desde Windows</label>
+                    <input class="form-control mb-2" id="imagenPortada" name="imagen" type="file"
+                           accept="image/jpeg,image/png,image/webp" required />
+                    <small class="d-block text-secondary mb-3">JPG, PNG o WebP · máximo 5 MB. Sugerencia: 1600 × 1200 píxeles o más.</small>
+                    <div id="mensajePortada" class="small mb-3" role="status" aria-live="polite"></div>
+                    <button class="btn btn-accent w-100" type="submit" id="guardarPortada">Guardar imagen de inicio</button>
+                </form>
+                <p class="small text-secondary mt-3 mb-0">La foto se guarda en este servidor y se muestra sólo dentro del bloque visual a la derecha del inicio. El título y los botones no cambian.</p>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="geo-panel p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h2 class="h4 mb-0">Vista previa de la portada</h2>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Abrir página de inicio</a>
+                </div>
+                <div class="ts-cover-admin-preview" id="previewPortada">
+                    <img id="previewPortadaImagen" src="@(imagenActual ?? "")" alt="Ilustración de portada de TourSmart RD"
+                         class="@(string.IsNullOrWhiteSpace(imagenActual) ? "d-none" : "")" />
+                    <div class="ts-cover-admin-empty @(string.IsNullOrWhiteSpace(imagenActual) ? "" : "d-none")" id="previewPortadaTexto">
+                        <span>✦</span>
+                        <strong>Tu próxima aventura comienza aquí</strong>
+                        <small>Selecciona una ilustración para ver cómo quedará.</small>
+                    </div>
+                    <span class="ts-cover-admin-tag">✦ Rutas que inspiran</span>
+                </div>
+                <p class="small text-secondary mt-3 mb-0">Esta imagen representa a la agencia en general; las imágenes de tours y destinos siguen administrándose por separado.</p>
+            </div>
+        </div>
+    </div>
+</div></section>
+@section Scripts {
+<script>
+(() => {
+    const input = document.getElementById("imagenPortada");
+    const img = document.getElementById("previewPortadaImagen");
+    const vacio = document.getElementById("previewPortadaTexto");
+    const estado = document.getElementById("mensajePortada");
+    const form = document.getElementById("formPortada");
+    let temporal = null;
+    input?.addEventListener("change", () => {
+        if (temporal) URL.revokeObjectURL(temporal);
+        temporal = null;
+        const file = input.files?.[0];
+        if (!file) return;
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5*1024*1024 || !file.size) {
+            estado.textContent = "Selecciona una foto JPG, PNG o WebP de hasta 5 MB.";
+            estado.className = "small mb-3 text-danger";
+            input.value = "";
+            return;
+        }
+        temporal = URL.createObjectURL(file);
+        img.src = temporal;
+        img.classList.remove("d-none");
+        vacio.classList.add("d-none");
+        estado.textContent = "Vista previa lista. Pulsa Guardar para publicarla.";
+        estado.className = "small mb-3 text-success";
+    });
+    form?.addEventListener("submit", () => {
+        const boton = document.getElementById("guardarPortada");
+        if (boton && form.checkValidity()) {
+            boton.disabled = true;
+            boton.textContent = "Guardando portada...";
+        }
+    });
+})();
+</script>
+}
