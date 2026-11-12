@@ -2,6 +2,7 @@ using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
 using AgenciaToursAPI.Security;
+using AgenciaToursAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,8 @@ namespace AgenciaToursAPI.Controllers;
 [Route("api/MiCuenta")]
 public sealed class MiCuentaController(
     ApplicationDbContext db,
-    IPasswordHasher<Usuario> passwordHasher) : ControllerBase
+    IPasswordHasher<Usuario> passwordHasher,
+    NotificacionesReservaService notificaciones) : ControllerBase
 {
     private async Task<int?> ClienteAutenticado()
     {
@@ -292,6 +294,7 @@ public sealed class MiCuentaController(
         reserva.FechaCambioEstado = DateTime.UtcNow;
         await db.SaveChangesAsync();
         await transaccion.CommitAsync();
+        await notificaciones.AvisarAsync(reserva.Id, "Cancelada");
 
         // Al excluir las reservas canceladas del cálculo de ocupación, libera sus plazas.
         // Conservar el registro permite auditar la operación.
@@ -359,6 +362,7 @@ public sealed class MiCuentaController(
         db.PasajerosReserva.AddRange(pasajeros);
         await db.SaveChangesAsync();
         await transaccion.CommitAsync();
+        await notificaciones.AvisarAsync(reserva.Id, "Creada");
         return StatusCode(StatusCodes.Status201Created, new { reserva.Id, reserva.Estado });
     }
 }
