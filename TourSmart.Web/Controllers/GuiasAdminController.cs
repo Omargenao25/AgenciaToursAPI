@@ -12,7 +12,7 @@ namespace TourSmart.Web.Controllers;
 public sealed class GuiaFormulario
 {
     public int Id { get; set; }
-    [Required(ErrorMessage = "Indica el nombre de guía.")]
+    [Required(ErrorMessage = "Indica el nombre del guía.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres.")]
     public string Nombre { get; set; } = "";
     [Required(ErrorMessage = "Indica el teléfono del guía.")]
@@ -28,7 +28,7 @@ public sealed class GuiasListado
 }
 
 [Authorize(Roles = "Administrador,Operador")]
-[Route("panel/guías")]
+[Route("panel/guias")]
 public sealed class GuiasAdminController(IHttpClientFactory factory, IMemoryCache cache) : Controller
 {
     private string? Token()
