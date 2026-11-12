@@ -1,6 +1,8 @@
 @model CatalogoViewModel
+@inject IWebHostEnvironment Ambiente
 @{
     ViewData["Title"] = "Descubre tu próxima aventura";
+    var fotoPortada = TourSmart.Web.Services.PortadaImagen.Obtener(Ambiente);
 }
 <section class="hero ts-v3-hero">
     <div class="container hero-content">
@@ -14,7 +16,11 @@
             </div>
             <div class="hero-proof"><div class="avatar-group"><span>☼</span><span>✈</span><span>✦</span></div><p><strong>Viaja con más confianza.</strong><br />Países, destinos, plazas y reservas en un solo lugar.</p></div>
         </div>
-        <div class="hero-visual ts-v3-visual" aria-hidden="true">
+        <div class="hero-visual ts-v3-visual @(fotoPortada is null ? "" : "ts-hero-con-foto")" aria-hidden="true">
+            @if (fotoPortada is not null)
+            {
+                <img class="ts-hero-main-image" src="@fotoPortada" alt="" loading="eager" fetchpriority="high" onerror="this.style.display='none';this.parentElement.classList.remove('ts-hero-con-foto')" />
+            }
             <div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div><div class="ts-v3-visual-orbit"></div>
             <div class="floating-tag floating-tag-one">✦ Rutas que inspiran</div>
             <div class="floating-tag floating-tag-two">↗ Tu próxima escapada</div>
