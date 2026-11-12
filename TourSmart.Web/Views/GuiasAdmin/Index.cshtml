@@ -1,0 +1,116 @@
+@model TourSmart.Web.Controllers.GuiasListado
+@{
+    ViewData["Title"] = "Gestionar guías";
+    var editando = Model.Guia.Id > 0;
+}
+<section class="inner-hero dashboard-hero"><div class="container">
+    <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
+    <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+    <h1>Equipo de <em>guías.</em></h1>
+    <p>Registra a los guías turísticos que acompañan tus excursiones.</p>
+</div></section>
+<section class="section-space"><div class="container">
+    @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
+    @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+    <div class="d-flex gap-2 flex-wrap mb-4">
+        <a class="btn btn-outline-primary" asp-controller="ToursAdmin" asp-action="Crear">+ Crear tour</a>
+        <a class="btn btn-outline-secondary" asp-controller="ToursAdmin" asp-action="Index">Gestionar tours</a>
+    </div>
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-4">
+            <div class="geo-panel p-4">
+                <span class="eyebrow">@(editando ? "EDITAR TRANSPORTE" : "NUEVO TRANSPORTE")</span>
+                <h2 class="h3 mt-2 mb-3">@(editando ? "Actualizar guía" : "Registrar guía")</h2>
+                <form method="post" asp-controller="GuiasAdmin" asp-action="Guardar">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Guia.Id" />
+                    <label asp-for="Guia.Nombre" class="form-label">Nombre de guía</label>
+                    <input asp-for="Guia.Nombre" class="form-control mb-3" required minlength="2" maxlength="100"
+                           placeholder="Ej. Ana Rodríguez" />
+                    <label asp-for="Guia.Telefono" class="form-label">Teléfono</label>
+                    <textarea asp-for="Guia.Telefono" class="form-control mb-3" rows="1" maxlength="20"
+                              placeholder="Ej. 809-555-0101"></textarea>
+                    <button class="btn btn-accent w-100" type="submit">
+                        @(editando ? "Guardar cambios" : "+ Registrar guía")
+                    </button>
+                    @if (editando)
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Cancelar edición</a>
+                    }
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="geo-panel p-4">
+                <div class="d-flex flex-wrap justify-content-between gap-2 align-items-center mb-3">
+                    <div><span class="eyebrow">CATÁLOGO</span><h2 class="h3 mt-2">Guias registrados</h2></div>
+                    <span class="badge text-bg-light">@Model.Guias.Count en total</span>
+                </div>
+                <label class="form-label" for="buscarGuia">Buscar guía</label>
+                <input class="form-control mb-3" type="search" id="buscarGuia" placeholder="Nombre o teléfono..." />
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th>Guia</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in Model.Guias)
+                        {
+                            var enUso = Model.EnUso.Contains(item.Id);
+                            <tr class="fila-guía" data-search="@(item.Nombre + " " + item.Telefono)">
+                                <td><strong>@item.Nombre</strong><small class="d-block text-secondary">@item.Telefono</small></td>
+                                <td><span class="badge @(enUso ? "text-bg-info" : "text-bg-light")">@(enUso ? "Asignado" : "Disponible")</span></td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <a class="btn btn-sm btn-outline-primary" asp-action="Index" asp-route-editarId="@item.Id">Editar</a>
+                                        @if (enUso)
+                                        {
+                                            <button type="button" disabled class="btn btn-sm btn-outline-secondary" title="Tiene tours asociados">En uso</button>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-action="Eliminar" asp-route-id="@item.Id"
+                                                  data-nombre="@item.Nombre" class="m-0">
+                                                @Html.AntiForgeryToken()
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">Eliminar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Guias.Any())
+                        {
+                            <tr><td colspan="3" class="text-secondary py-4">Todavía no hay guías. Registra el primero.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <p id="sinGuias" class="text-secondary d-none">No hay resultados para esta búsqueda.</p>
+                <p class="text-secondary small">Los guías asignados a tours pueden editarse, pero no eliminarse.</p>
+            </div>
+        </div>
+    </div>
+</div></section>
+@section Scripts {
+<script>
+(() => {
+ const buscar = document.getElementById("buscarGuia");
+ const filas = Array.from(document.querySelectorAll(".fila-guía"));
+ const vacio = document.getElementById("sinGuias");
+ buscar?.addEventListener("input", () => {
+   const term = buscar.value.trim().toLocaleLowerCase();
+   let total = 0;
+   filas.forEach(fila => {
+      const coincide = (fila.dataset.search || "").toLocaleLowerCase().includes(term);
+      fila.classList.toggle("d-none", !coincide);
+      if (coincide) total++;
+   });
+   vacio?.classList.toggle("d-none", total !== 0 || filas.length === 0);
+ });
+ document.querySelectorAll("form[data-nombre]").forEach(form => {
+   form.addEventListener("submit", e => {
+     if (!confirm("¿Eliminar el guía '" + form.dataset.nombre + "'?")) e.preventDefault();
+   });
+ });
+})();
+</script>
+}
