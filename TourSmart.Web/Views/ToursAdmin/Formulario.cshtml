@@ -90,7 +90,99 @@ if (fotoCampo && fotoPrevia && fotoVacia) {
             return;
         }
 
-        const esLocal = /^\\/uploads\\/tours\\/[a-f0-9]{32}\\.(?:jpg|png|webp)$/.test(url);
+        const esLocal = new RegExp(String.raw`^/uploads/tours/[a-f0-9]{32}\.(?:jpg|png|webp)@model TourFormularioViewModel
+@{ var editando = Model.Id > 0; ViewData["Title"] = editando ? "Editar tour" : "Crear tour"; var horaTexto = Model.Hora.ToString(@"hh\:mm"); }
+<section class="inner-hero dashboard-hero">
+ <div class="container">
+  <a class="back-link" asp-controller="ToursAdmin" asp-action="Index">← Volver a mis tours</a>
+  <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+  <h1>@(editando ? "Editar" : "Crear") <em>experiencia.</em></h1>
+  <p>@(editando ? "Actualiza la excursión respetando las reservas existentes." : "Agrega una nueva aventura al catálogo de la agencia.")</p>
+ </div>
+</section>
+<section class="section-space"><div class="container">
+ <div class="tour-admin-form">
+  <form method="post" asp-controller="ToursAdmin" asp-action="Guardar">
+   @Html.AntiForgeryToken()
+   <input type="hidden" asp-for="Id" />
+   <div asp-validation-summary="ModelOnly" class="text-danger mb-4" role="alert"></div>
+   @if(Model.TieneReservas)
+   {
+    <div class="service-alert mb-4"><strong>Este tour ya tiene @Model.CuposReservados plazas ocupadas.</strong><p class="mb-0 mt-2">No puedes cambiar país, destino, guía, transporte, fecha ni hora. La capacidad no puede ser menor que los cupos ocupados.</p></div>
+   }
+   <div class="eyebrow mb-3">INFORMACIÓN GENERAL</div>
+   <div class="row g-3">
+    <div class="col-12"><label asp-for="Nombre" class="form-label">Nombre del tour</label><input asp-for="Nombre" class="form-control" placeholder="Ej. Escapada a Samaná" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="PaisId" class="form-label">País</label><select asp-for="PaisId" asp-items="Model.Paises" class="form-select" id="paisSelect"><option value="0">Selecciona un país</option></select><span asp-validation-for="PaisId" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="DestinoId" class="form-label">Destino</label><select asp-for="DestinoId" asp-items="Model.Destinos" class="form-select" id="destinoSelect"><option value="0">Selecciona un destino</option></select><span asp-validation-for="DestinoId" class="text-danger small"></span></div>
+    <div class="col-md-6"><div class="d-flex flex-wrap justify-content-between align-items-center gap-2"><label asp-for="CategoriaId" class="form-label mb-0">Categoría</label><a class="small fw-semibold" asp-controller="CategoriasAdmin" asp-action="Index">+ Gestionar categorías</a></div><select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-select mt-2"><option value="0">Selecciona una categoría</option></select><span asp-validation-for="CategoriaId" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="GuiaId" class="form-label">Guía turístico</label><select asp-for="GuiaId" asp-items="Model.Guias" class="form-select"><option value="0">Selecciona un guía</option></select><span asp-validation-for="GuiaId" class="text-danger small"></span></div>
+    <div class="col-12"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><label asp-for="TransporteId" class="form-label mb-0">Transporte</label><a class="small fw-semibold" asp-controller="TransportesAdmin" asp-action="Index">+ Gestionar transportes</a></div><select asp-for="TransporteId" asp-items="Model.Transportes" class="form-select"><option value="0">Selecciona un transporte</option></select><span asp-validation-for="TransporteId" class="text-danger small"></span></div>
+   </div>
+   <div class="eyebrow mt-5 mb-3">IMAGEN DE LA EXPERIENCIA</div>
+   <div class="row g-3 align-items-start">
+    <div class="col-lg-7">
+      <label asp-for="ImagenUrl" class="form-label">URL de la foto principal (opcional)</label>
+      <input asp-for="ImagenUrl" type="text" maxlength="500" class="form-control" id="imagenTourUrl" data-foto-url
+             placeholder="https://ejemplo.com/foto-del-tour.jpg" autocomplete="url" />
+      <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
+      <label for="archivoTour" class="form-label mt-3">O subir foto desde Windows</label>
+      <input id="archivoTour" data-foto-archivo class="form-control" type="file" accept="image/jpeg,image/png,image/webp" />
+      <small data-foto-estado class="d-block mt-2 text-secondary" aria-live="polite">JPG, PNG o WebP · máximo 5 MB. Guarda el tour después de subir.</small>
+      <p class="text-secondary small mt-2">También puedes pegar una URL HTTPS pública. Sin foto, se utiliza la imagen del destino o el diseño predeterminado.</p>
+    </div>
+    <div class="col-lg-5">
+      <div id="vistaPreviaTour" class="ts-photo-preview" aria-label="Vista previa de la imagen">
+        <span id="sinImagenTour">Vista previa de la excursión</span>
+        <img id="fotoPreviaTour" alt="Vista previa de foto de excursión" class="d-none" loading="eager" decoding="async" />
+      </div>
+    </div>
+   </div>
+   <div class="eyebrow mt-5 mb-3">FECHA, PRECIO Y CAPACIDAD</div>
+   <div class="row g-3">
+    <div class="col-md-6"><label asp-for="Fecha" class="form-label">Fecha de salida</label><input asp-for="Fecha" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control" /><span asp-validation-for="Fecha" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="Hora" class="form-label">Hora de salida</label><input asp-for="Hora" type="time" value="@horaTexto" class="form-control" /><span asp-validation-for="Hora" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="Precio" class="form-label">Precio por persona (RD$)</label><input asp-for="Precio" type="number" step="0.01" min="0.01" max="10000000" class="form-control" /><span asp-validation-for="Precio" class="text-danger small"></span></div>
+    <div class="col-md-6"><label asp-for="CapacidadMaxima" class="form-label">Capacidad máxima</label><input asp-for="CapacidadMaxima" type="number" min="1" max="100000" class="form-control" /><span asp-validation-for="CapacidadMaxima" class="text-danger small"></span></div>
+   </div>
+   <div class="d-flex flex-wrap gap-3 mt-5">
+    <button class="btn btn-accent" type="submit">@(editando ? "Guardar cambios" : "Crear tour") ↗</button>
+    <a class="btn btn-outline-secondary rounded-pill px-4" asp-controller="ToursAdmin" asp-action="Index">Cancelar</a>
+   </div>
+  </form>
+ </div>
+</div></section>
+@section Scripts {
+<script src="~/js/toursmart-fotos.js" asp-append-version="true"></script>
+<script>
+const fotoCampo = document.getElementById("imagenTourUrl");
+const fotoPrevia = document.getElementById("fotoPreviaTour");
+const fotoVacia = document.getElementById("sinImagenTour");
+if (fotoCampo && fotoPrevia && fotoVacia) {
+    let solicitud = 0;
+    let temporizador = null;
+
+    function mostrarEstado(texto, error = false) {
+        fotoVacia.textContent = texto;
+        fotoVacia.classList.toggle("text-danger", error);
+    }
+
+    function actualizarFoto() {
+        const url = fotoCampo.value.trim();
+        const actual = ++solicitud;
+        if (temporizador !== null) {
+            clearTimeout(temporizador);
+            temporizador = null;
+        }
+        fotoPrevia.classList.add("d-none");
+        fotoPrevia.removeAttribute("src");
+
+        if (!url) {
+            mostrarEstado("Pega una URL HTTPS o selecciona una foto desde Windows.");
+            return;
+        }
+
+).test(url);
         let esHttps = false;
         try {
             const parsed = new URL(url);
