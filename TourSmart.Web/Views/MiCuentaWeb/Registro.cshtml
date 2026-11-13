@@ -13,7 +13,7 @@
  <div class="row g-3">
   <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" maxlength="80" autocomplete="given-name" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
   <div class="col-md-6"><label asp-for="Apellido" class="form-label">Apellido</label><input asp-for="Apellido" class="form-control" maxlength="80" autocomplete="family-name" /><span asp-validation-for="Apellido" class="text-danger small"></span></div>
-  <div class="col-md-6"><label asp-for="Correo" class="form-label">Correo</label><input asp-for="Correo" type="email" class="form-control" autocomplete="email" maxlength="150" /><span asp-validation-for="Correo" class="text-danger small"></span></div>
+  <div class="col-md-6"><label asp-for="Correo" class="form-label">Correo electrónico</label><input asp-for="Correo" type="email" class="form-control" autocomplete="email" maxlength="150" required /><span asp-validation-for="Correo" class="text-danger small"></span><small class="text-secondary">Usa un correo real al que puedas acceder (Gmail, Outlook, Yahoo o empresarial). Podrías necesitar verificarlo mediante un enlace.</small></div>
   <div class="col-md-6"><label asp-for="Telefono" class="form-label">Teléfono</label><input asp-for="Telefono" class="form-control" autocomplete="tel" maxlength="20" /><span asp-validation-for="Telefono" class="text-danger small"></span></div>
   <div class="col-md-6"><label asp-for="TipoDocumento" class="form-label">Documento de identidad</label>
    <select asp-for="TipoDocumento" class="form-select" id="tipoDocumento">
@@ -24,6 +24,7 @@
   <div class="col-md-6"><label asp-for="Contrasena" class="form-label">Contraseña (mínimo 8 caracteres)</label><input asp-for="Contrasena" type="password" autocomplete="new-password" class="form-control" /><span asp-validation-for="Contrasena" class="text-danger small"></span></div>
   <div class="col-md-6"><label asp-for="ConfirmarContrasena" class="form-label">Repetir contraseña</label><input asp-for="ConfirmarContrasena" type="password" autocomplete="new-password" class="form-control" /><span asp-validation-for="ConfirmarContrasena" class="text-danger small"></span></div>
  </div>
+ <p class="booking-note mt-4"><a asp-controller="MiCuentaWeb" asp-action="ReenviarVerificacion">¿Ya te registraste y no recibiste el enlace de verificación?</a></p>
  <p class="booking-note mt-4">Si ya tienes una ficha registrada en la agencia con este correo o documento, solicita su vinculación. No crees otra cuenta con una identidad ajena.</p>
  <div class="d-flex flex-wrap gap-3 mt-4"><button class="btn btn-accent" type="submit" id="botonRegistro">Crear cuenta ↗</button><a asp-controller="Cuenta" asp-action="Acceder" class="btn btn-outline-secondary rounded-pill px-4">Ya tengo cuenta</a></div>
 </form>
