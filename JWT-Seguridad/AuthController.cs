@@ -81,6 +81,9 @@ namespace AgenciaToursAPI.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            if (usuario.Rol == Roles.Cliente && !usuario.CorreoConfirmado)
+                return Unauthorized(new { mensaje = "Debes confirmar tu dirección de correo antes de iniciar sesión." });
+
             var minutosExpiracion =
                 _configuration.GetValue<int>(
                     "Jwt:ExpireMinutes"
