@@ -71,6 +71,14 @@ public sealed class NotificacionesReservaService(
                 Body = body,
                 IsBodyHtml = false
             };
+            // HTML como vista adicional, conservando texto plano para clientes
+            // que no muestran HTML. Nunca interpolar valores sin codificar.
+            var html = PlantillaCorreoReserva.Crear(
+                info.Nombre, info.Tour, info.Id, evento,
+                info.Fecha, info.Hora, info.CantidadPersonas, info.Total, info.Estado);
+            mensaje.AlternateViews.Add(
+                AlternateView.CreateAlternateViewFromString(
+                    html, System.Text.Encoding.UTF8, "text/html"));
             mensaje.To.Add(new MailAddress(info.Correo));
 
             using var smtp = new SmtpClient(
