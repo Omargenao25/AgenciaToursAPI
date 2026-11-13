@@ -18,7 +18,8 @@ namespace AgenciaToursAPI.Controllers;
 public sealed class MiCuentaController(
     ApplicationDbContext db,
     IPasswordHasher<Usuario> passwordHasher,
-    NotificacionesReservaService notificaciones) : ControllerBase
+    NotificacionesReservaService notificaciones,
+    VerificacionCorreoService verificacion) : ControllerBase
 {
     private async Task<int?> ClienteAutenticado()
     {
@@ -170,12 +171,14 @@ public sealed class MiCuentaController(
             {
                 Nombre = cliente.Nombre + " " + cliente.Apellido,
                 Correo = correo, Rol = Roles.Cliente,
-                ClienteId = cliente.Id
+                ClienteId = cliente.Id,
+                CorreoConfirmado = !verificacion.Habilitado
             };
             usuario.PasswordHash = passwordHasher.HashPassword(usuario, dto.Contrasena);
             db.Usuarios.Add(usuario);
             await db.SaveChangesAsync();
             await tx.CommitAsync();
+            if (verificacion.Habilitado) await verificacion.EnviarSiProcedeAsync(usuario.Id);
             return StatusCode(StatusCodes.Status201Created);
         }
         catch (DbUpdateException)
