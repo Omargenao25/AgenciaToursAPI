@@ -37,12 +37,26 @@ namespace AgenciaToursAPI.Data
         public DbSet<Usuario> Usuarios { get; set; }
 
         public DbSet<RecuperacionContrasena> RecuperacionesContrasena { get; set; }
+        public DbSet<VerificacionCorreo> VerificacionesCorreo { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Unicidad a nivel SQL para evitar registros duplicados por solicitudes concurrentes.
+            modelBuilder.Entity<Usuario>()
+                .Property(u => u.CorreoConfirmado)
+                .HasDefaultValue(true);
+
+            modelBuilder.Entity<VerificacionCorreo>()
+                .HasIndex(v => v.TokenHash).IsUnique();
+            modelBuilder.Entity<VerificacionCorreo>()
+                .HasIndex(v => new { v.UsuarioId, v.CreadoUtc });
+            modelBuilder.Entity<VerificacionCorreo>()
+                .HasOne(v => v.Usuario).WithMany()
+                .HasForeignKey(v => v.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Pais>()
                 .HasIndex(p => p.Nombre)
                 .IsUnique();
