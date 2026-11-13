@@ -1,0 +1,28 @@
+@model TourSmart.Web.Models.ReenviarVerificacionViewModel
+@{
+    ViewData["Title"] = "Reenviar confirmación";
+}
+<section class="inner-hero dashboard-hero"><div class="container">
+    <span class="eyebrow">SEGURIDAD · TOURSMART RD</span>
+    <h1>Verifica tu <em>correo.</em></h1>
+    <p>Te ayudamos a completar la activación de tu cuenta de viajero.</p>
+</div></section>
+<section class="section-space"><div class="container">
+    <div class="tour-admin-form" style="max-width:640px;margin:auto">
+        <h2 class="h3 mb-3">Solicitar nuevo enlace</h2>
+        @if (TempData["Info"] is string mensaje)
+        {
+            <div class="alert alert-info" role="status">@mensaje</div>
+        }
+        <form method="post" asp-action="ReenviarVerificacion" asp-controller="MiCuentaWeb">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" role="alert" class="text-danger mb-3"></div>
+            <label asp-for="Correo" class="form-label">Correo usado en tu registro</label>
+            <input asp-for="Correo" type="email" autocomplete="email" class="form-control mb-2" maxlength="150" required />
+            <span asp-validation-for="Correo" class="text-danger small d-block mb-3"></span>
+            <button class="btn btn-accent" type="submit">Enviar otro enlace</button>
+        </form>
+        <p class="text-secondary mt-4">El enlace dura 30 minutos. Comprueba la bandeja de entrada y Spam.</p>
+        <a asp-controller="Cuenta" asp-action="Acceder">Volver a iniciar sesión</a>
+    </div>
+</div></section>
