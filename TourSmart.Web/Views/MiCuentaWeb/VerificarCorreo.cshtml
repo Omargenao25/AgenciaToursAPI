@@ -1,0 +1,29 @@
+@model TourSmart.Web.Models.VerificarCorreoViewModel
+@{
+    ViewData["Title"] = "Confirmar mi correo";
+}
+<section class="inner-hero dashboard-hero"><div class="container">
+    <span class="eyebrow">SEGURIDAD · TOURSMART RD</span>
+    <h1>Confirma tu <em>correo.</em></h1>
+    <p>Verifica tu dirección antes de utilizar tu cuenta de viajero.</p>
+</div></section>
+<section class="section-space"><div class="container">
+    <div class="tour-admin-form" style="max-width:640px;margin:auto">
+        <h2 class="h3 mb-3">Activa tu cuenta</h2>
+        @if (string.IsNullOrEmpty(Model.Token) || Model.Token.Length != 64)
+        {
+            <div class="alert alert-warning">El enlace de verificación no es válido.</div>
+        }
+        else
+        {
+            <p>Para confirmar que tienes acceso a tu correo, pulsa el siguiente botón.</p>
+            <form method="post" asp-action="VerificarCorreo" asp-controller="MiCuentaWeb">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Token" />
+                <div asp-validation-summary="ModelOnly" role="alert" class="text-danger mb-3"></div>
+                <button type="submit" class="btn btn-accent">Confirmar mi correo</button>
+            </form>
+        }
+        <p class="text-secondary mt-4">¿El enlace venció? <a asp-action="ReenviarVerificacion">Solicita uno nuevo</a>.</p>
+    </div>
+</div></section>
