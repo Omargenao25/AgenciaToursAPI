@@ -12,6 +12,8 @@ namespace AgenciaToursAPI.Models
         [MaxLength(32)]
         public string VersionSesion { get; set; } = Guid.NewGuid().ToString("N");
 
+        public bool CorreoConfirmado { get; set; } = true;
+
         public int? ClienteId { get; set; }
         public Cliente? Cliente { get; set; }
 
