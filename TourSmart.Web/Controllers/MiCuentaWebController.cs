@@ -46,7 +46,7 @@ public sealed class MiCuentaWebController(
             var status = await cuentaApi.RegistrarAsync(model, ct);
             if (status == HttpStatusCode.Created)
             {
-                TempData["RegistroExitoso"] = "Cuenta creada correctamente. Ya puedes iniciar sesión.";
+                TempData["RegistroExitoso"] = "Cuenta creada. Si la verificación por correo está activada, abre el enlace enviado a tu bandeja antes de iniciar sesión.";
                 return RedirectToAction("Acceder", "Cuenta");
             }
             ModelState.AddModelError("", status switch
@@ -60,6 +60,75 @@ public sealed class MiCuentaWebController(
         catch (TaskCanceledException) when (!ct.IsCancellationRequested)
         {
             ModelState.AddModelError("", "El registro tardó demasiado. Revisa si ya existe tu cuenta antes de intentar de nuevo.");
+        }
+        return View(model);
+    }
+
+    [HttpGet("verificar-correo")]
+    [AllowAnonymous]
+    public IActionResult VerificarCorreo(string? token)
+    {
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers["Referrer-Policy"] = "no-referrer";
+        return View(new TourSmart.Web.Models.VerificarCorreoViewModel { Token = token ?? "" });
+    }
+
+    [HttpPost("verificar-correo")]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerificarCorreo(TourSmart.Web.Models.VerificarCorreoViewModel model, CancellationToken ct)
+    {
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers["Referrer-Policy"] = "no-referrer";
+        if (!ModelState.IsValid) return View(model);
+        try
+        {
+            var status = await cuentaApi.ConfirmarCorreoAsync(model.Token, ct);
+            if (status == HttpStatusCode.NoContent)
+            {
+                TempData["RegistroExitoso"] = "Tu correo ha sido verificado. ¡Ya puedes iniciar sesión!";
+                return RedirectToAction("Acceder", "Cuenta");
+            }
+            ModelState.AddModelError("", "El enlace expiró, es incorrecto o ya fue utilizado. Puedes solicitar otro.");
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "La API no está disponible. Intenta más tarde.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La verificación tardó demasiado. Intenta nuevamente.");
+        }
+        return View(model);
+    }
+
+    [HttpGet("reenviar-verificacion")]
+    [AllowAnonymous]
+    public IActionResult ReenviarVerificacion() => View(new TourSmart.Web.Models.ReenviarVerificacionViewModel());
+
+    [HttpPost("reenviar-verificacion")]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReenviarVerificacion(TourSmart.Web.Models.ReenviarVerificacionViewModel model, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(model);
+        try
+        {
+            var status = await cuentaApi.ReenviarConfirmacionAsync(model.Correo.Trim(), ct);
+            if (status == HttpStatusCode.OK)
+            {
+                TempData["Info"] = "Si tu cuenta está pendiente de verificar, recibirás un enlace. Revisa también Spam.";
+                return RedirectToAction(nameof(ReenviarVerificacion));
+            }
+            ModelState.AddModelError("", "No pudimos procesar la solicitud. Intenta más tarde.");
+        }
+        catch (HttpRequestException)
+        {
+            ModelState.AddModelError("", "La API no está disponible en este momento.");
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            ModelState.AddModelError("", "La solicitud tardó demasiado. Intenta más tarde.");
         }
         return View(model);
     }
