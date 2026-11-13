@@ -573,6 +573,7 @@ namespace AgenciaToursAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("CorreoConfirmado")
+                        .ValueGeneratedNever()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
