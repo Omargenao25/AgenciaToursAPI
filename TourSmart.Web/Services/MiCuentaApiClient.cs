@@ -18,6 +18,18 @@ public sealed class MiCuentaApiClient(HttpClient client) : IMiCuentaApiClient
         return response.StatusCode;
     }
 
+    public async Task<HttpStatusCode> ConfirmarCorreoAsync(string token, CancellationToken ct)
+    {
+        using var response = await client.PostAsJsonAsync("api/verificacion-correo/confirmar", new { Token = token }, ct);
+        return response.StatusCode;
+    }
+
+    public async Task<HttpStatusCode> ReenviarConfirmacionAsync(string correo, CancellationToken ct)
+    {
+        using var response = await client.PostAsJsonAsync("api/verificacion-correo/reenviar", new { Correo = correo }, ct);
+        return response.StatusCode;
+    }
+
     private static HttpRequestMessage Autorizar(HttpMethod method, string route, string jwt)
     {
         var request = new HttpRequestMessage(method, route);
