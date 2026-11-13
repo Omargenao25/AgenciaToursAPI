@@ -121,6 +121,25 @@ namespace AgenciaToursAPI.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.VerificacionCorreo", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("ConsumidoUtc").HasColumnType("datetime2");
+                    b.Property<DateTime>("CreadoUtc").HasColumnType("datetime2");
+                    b.Property<DateTime>("ExpiraUtc").HasColumnType("datetime2");
+                    b.Property<string>("TokenHash").IsRequired().HasMaxLength(64).HasColumnType("nvarchar(64)");
+                    b.Property<int>("UsuarioId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("TokenHash").IsUnique();
+                    b.HasIndex("UsuarioId", "CreadoUtc");
+                    b.ToTable("VerificacionesCorreo");
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.Destino", b =>
                 {
                     b.Property<int>("Id")
@@ -553,6 +572,10 @@ namespace AgenciaToursAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("CorreoConfirmado")
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<int?>("ClienteId")
                         .HasColumnType("int");
 
@@ -734,6 +757,16 @@ namespace AgenciaToursAPI.Migrations
                     b.Navigation("Pais");
 
                     b.Navigation("Transporte");
+                });
+
+            modelBuilder.Entity("AgenciaToursAPI.Models.VerificacionCorreo", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.Usuario", b =>
