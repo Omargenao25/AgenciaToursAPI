@@ -1,0 +1,57 @@
+@model TourSmart.Web.Models.RevisionComprobanteViewModel
+@{
+    ViewData["Title"] = "Revisión de adelantos";
+}
+<section class="inner-hero dashboard-hero"><div class="container">
+    <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
+    <span class="eyebrow">OPERACIONES · TOURSMART RD</span>
+    <h1>Revisión de <em>adelantos.</em></h1>
+    <p>Confirma únicamente transferencias que hayan llegado a la cuenta de la agencia.</p>
+</div></section>
+<section class="section-space"><div class="container">
+    @if (TempData["Exito"] is string ok) { <div class="alert alert-success" role="status">@ok</div> }
+    @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+    <div class="alert alert-warning">
+        <strong>Verificación obligatoria:</strong> descargar un comprobante no demuestra que el dinero haya llegado.
+        Comprueba en el banco importe, referencia, titular, fecha y ausencia de duplicidad antes de aprobar.
+        No hagas clic en Aprobar usando solamente una captura.
+    </div>
+    <div class="dashboard-table">
+        <div class="dashboard-table-title"><h2>Comprobantes pendientes</h2><span>@Model.Pendientes.Count por revisar</span></div>
+        <div class="table-responsive"><table class="table align-middle">
+            <thead><tr><th>Reserva</th><th>Cliente / excursión</th><th>Importe</th><th>Referencia</th><th>Documento</th><th>Decisión</th></tr></thead>
+            <tbody>
+            @foreach (var item in Model.Pendientes)
+            {
+                <tr>
+                    <td><strong>#@item.ReservaId</strong><small class="d-block text-secondary">@item.CreadoUtc.ToString("dd/MM/yyyy HH:mm") UTC</small></td>
+                    <td><strong>@item.Cliente</strong><small class="d-block text-secondary">@item.Tour</small></td>
+                    <td>RD$ @item.MontoReportado.ToString("N2")</td>
+                    <td>@item.Referencia</td>
+                    <td><a class="btn btn-sm btn-outline-secondary" asp-action="Descargar" asp-route-id="@item.Id">Descargar</a></td>
+                    <td>
+                        <form method="post" asp-action="Aprobar" asp-route-id="@item.Id" class="mb-2"
+                              onsubmit="return confirm('¿Ya verificaste la transferencia REALMENTE en el banco? Se registrará como dinero recibido.')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-success">Aprobar pago recibido</button>
+                        </form>
+                        <form method="post" asp-action="Rechazar" asp-route-id="@item.Id">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="Id" value="@item.Id"/>
+                            <label class="small mb-1" for="motivo-@item.Id">Motivo de rechazo</label>
+                            <input name="Motivo" id="motivo-@item.Id" class="form-control form-control-sm mb-2"
+                                   maxlength="300" minlength="5" required placeholder="Indica por qué no se validó"/>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Rechazar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (Model.Pendientes.Count == 0)
+            {
+                <tr><td colspan="6" class="text-secondary py-4">No hay comprobantes pendientes de revisión.</td></tr>
+            }
+            </tbody>
+        </table></div>
+    </div>
+    <p class="text-secondary small mt-3">Después de aprobar un comprobante, abre Gestión de pagos de esa reserva para confirmar si cumple el adelanto y pulsa Confirmar reserva si corresponde.</p>
+</div></section>
