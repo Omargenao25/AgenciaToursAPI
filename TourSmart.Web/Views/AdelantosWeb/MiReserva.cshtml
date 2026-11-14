@@ -4,6 +4,8 @@
     var pendiente = Model.EstadoReserva == "Pendiente";
     var vencido = Model.VencePendienteUtc.HasValue && Model.VencePendienteUtc.Value <= DateTime.UtcNow;
     var enRevision = Model.Comprobantes.Any(x => x.Estado == "Pendiente");
+    var margenRevision = enRevision && Model.VencePendienteUtc.HasValue &&
+        DateTime.UtcNow < Model.VencePendienteUtc.Value.AddHours(2);
 }
 <section class="inner-hero dashboard-hero"><div class="container">
     <a asp-controller="MiCuentaWeb" asp-action="MisReservas" class="back-link">← Mis reservas</a>
@@ -19,12 +21,13 @@
         <div class="col-md-4"><div class="metric-card"><span>Adelanto mínimo (@Model.PorcentajeAdelanto%)</span><strong>RD$ @Model.AdelantoMinimo.ToString("N2")</strong></div></div>
         <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Faltante para cubrir adelanto</span><strong>RD$ @Model.FaltanteAdelanto.ToString("N2")</strong></div></div>
     </div>
-    <div class="alert alert-info"><strong>Importante:</strong> reportar una transferencia no equivale a pagar ni a confirmar la reserva. El personal debe verificar el dinero recibido. El reporte no extiende el vencimiento de la reserva.</div>
+    <div class="alert alert-info"><strong>Importante:</strong> reportar una transferencia no equivale a pagar ni a confirmar la reserva. El personal debe verificar el dinero recibido. Si envías un comprobante antes del vencimiento, la agencia dispone de hasta 2 horas adicionales para revisarlo. Esto no equivale a un pago aprobado.</div>
     @if (Model.VencePendienteUtc is DateTime fechaLimite && pendiente)
     {
         <div class="alert @(vencido ? "alert-warning" : "alert-secondary")">
-            Fecha límite de la reserva: <strong>@fechaLimite.ToString("dd/MM/yyyy HH:mm") UTC</strong>.
-            @if (vencido) { <span> El plazo venció. Contacta a la agencia antes de realizar cualquier transferencia.</span> }
+            Fecha límite del adelanto: <strong>@fechaLimite.ToString("dd/MM/yyyy HH:mm") UTC</strong>.
+            @if (margenRevision) { <span> Tu comprobante está en revisión; se protege temporalmente tu solicitud hasta @fechaLimite.AddHours(2).ToString("dd/MM/yyyy HH:mm") UTC, siempre que no se haya confirmado o cancelado antes.</span> }
+            @if (vencido && !margenRevision) { <span> El plazo venció. Contacta a la agencia antes de realizar cualquier transferencia.</span> }
         </div>
     }
     <div class="row g-4 align-items-start">
