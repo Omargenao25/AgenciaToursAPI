@@ -1,0 +1,116 @@
+@model TourSmart.Web.Models.AdelantoClienteViewModel
+@{
+    ViewData["Title"] = "Adelanto de reserva #" + Model.ReservaId;
+    var pendiente = Model.EstadoReserva == "Pendiente";
+    var vencido = Model.VencePendienteUtc.HasValue && Model.VencePendienteUtc.Value <= DateTime.UtcNow;
+    var enRevision = Model.Comprobantes.Any(x => x.Estado == "Pendiente");
+}
+<section class="inner-hero dashboard-hero"><div class="container">
+    <a asp-controller="MiCuentaWeb" asp-action="MisReservas" class="back-link">← Mis reservas</a>
+    <span class="eyebrow">MI ÁREA · TOURSMART RD</span>
+    <h1>Tu <em>adelanto.</em></h1>
+    <p>Reserva #@Model.ReservaId · @Model.Tour</p>
+</div></section>
+<section class="section-space"><div class="container">
+    @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
+    @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="metric-card"><span>Total de la reserva</span><strong>RD$ @Model.Total.ToString("N2")</strong></div></div>
+        <div class="col-md-4"><div class="metric-card"><span>Adelanto mínimo (@Model.PorcentajeAdelanto%)</span><strong>RD$ @Model.AdelantoMinimo.ToString("N2")</strong></div></div>
+        <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Faltante para cubrir adelanto</span><strong>RD$ @Model.FaltanteAdelanto.ToString("N2")</strong></div></div>
+    </div>
+    <div class="alert alert-info"><strong>Importante:</strong> reportar una transferencia no equivale a pagar ni a confirmar la reserva. El personal debe verificar el dinero recibido. El reporte no extiende el vencimiento de la reserva.</div>
+    @if (Model.VencePendienteUtc is DateTime fechaLimite && pendiente)
+    {
+        <div class="alert @(vencido ? "alert-warning" : "alert-secondary")">
+            Fecha límite de la reserva: <strong>@fechaLimite.ToString("dd/MM/yyyy HH:mm") UTC</strong>.
+            @if (vencido) { <span> El plazo venció. Contacta a la agencia antes de realizar cualquier transferencia.</span> }
+        </div>
+    }
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-5">
+            <div class="tour-admin-form">
+                <span class="eyebrow">PAGO POR TRANSFERENCIA</span>
+                <h2 class="h3 mt-2">Reportar <em>comprobante.</em></h2>
+                <p class="text-secondary">Solo transfiere a una cuenta verificada directamente con la agencia. No utilices números bancarios recibidos por mensajes desconocidos.</p>
+                @if (ViewBag.InstruccionesTransferencia is string instrucciones && !string.IsNullOrWhiteSpace(instrucciones))
+                {
+                    <div class="alert alert-secondary" style="white-space:pre-wrap">@instrucciones</div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">La agencia todavía no ha publicado las instrucciones bancarias. Solicítalas a la agencia antes de transferir. No realices pagos a cuentas desconocidas.</div>
+                }
+                @if (!pendiente || vencido || Model.Saldo <= 0 || enRevision)
+                {
+                    <div class="alert alert-secondary">
+                        @if (enRevision)
+                        { <span>Ya tienes un comprobante pendiente de revisión. Consulta su estado más abajo.</span> }
+                        else if (!pendiente)
+                        { <span>La reserva está @Model.EstadoReserva.ToLowerInvariant(). No se aceptan nuevos adelantos para esta reserva.</span> }
+                        else if (vencido)
+                        { <span>No puedes reportar un adelanto fuera del plazo. Contacta a la agencia.</span> }
+                        else
+                        { <span>La reserva ya no tiene saldo pendiente.</span> }
+                    </div>
+                }
+                else
+                {
+                    <form method="post" asp-controller="AdelantosWeb" asp-action="Reportar"
+                          asp-route-id="@Model.ReservaId" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReservaId"/>
+                        <div class="mb-3">
+                            <label asp-for="Monto" class="form-label">Importe transferido (RD$)</label>
+                            <input asp-for="Monto" type="number" min="0.01"
+                                   max="@Model.Saldo.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                   step="0.01" class="form-control" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Referencia" class="form-label">Referencia bancaria</label>
+                            <input asp-for="Referencia" class="form-control" maxlength="100" minlength="4" required
+                                   autocomplete="off" placeholder="Número de operación"/>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Archivo" class="form-label">Comprobante de transferencia</label>
+                            <input asp-for="Archivo" class="form-control" type="file" required
+                                   accept="application/pdf,image/jpeg,image/png,image/webp"/>
+                            <small class="text-secondary">PDF, JPG, PNG o WebP · máximo 2 MB</small>
+                        </div>
+                        <button type="submit" class="btn btn-accent w-100">Enviar comprobante para revisión</button>
+                    </form>
+                }
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="dashboard-table p-4">
+                <h2 class="h4">Historial de comprobantes</h2>
+                <p class="text-secondary small">Solo los pagos aprobados por la agencia se incluyen en el saldo recibido.</p>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead><tr><th>Fecha</th><th>Referencia</th><th>Importe</th><th>Estado</th></tr></thead>
+                        <tbody>
+                        @foreach (var item in Model.Comprobantes)
+                        {
+                            <tr>
+                                <td>@item.CreadoUtc.ToString("dd/MM/yyyy HH:mm") UTC</td>
+                                <td>@item.Referencia</td>
+                                <td>RD$ @item.MontoReportado.ToString("N2")</td>
+                                <td><strong>@item.Estado</strong>
+                                    @if (!string.IsNullOrWhiteSpace(item.MotivoRevision))
+                                    { <small class="d-block text-secondary">@item.MotivoRevision</small> }
+                                </td>
+                            </tr>
+                        }
+                        @if (Model.Comprobantes.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-secondary py-4">No has enviado comprobantes todavía.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-secondary small">Pagos verificados: RD$ @(Model.Pagado - Model.Devuelto).ToString("N2") · Saldo pendiente: RD$ @Model.Saldo.ToString("N2")</p>
+            </div>
+        </div>
+    </div>
+</div></section>
