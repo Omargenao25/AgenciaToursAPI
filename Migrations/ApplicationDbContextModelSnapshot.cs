@@ -60,6 +60,34 @@ namespace AgenciaToursAPI.Migrations
                     });
                 });
 
+            modelBuilder.Entity("AgenciaToursAPI.Models.ComprobanteTransferencia", b =>
+                {
+                    b.Property<long>("Id").ValueGeneratedOnAdd().HasColumnType("bigint");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    b.Property<byte[]>("Archivo").IsRequired().HasColumnType("varbinary(max)");
+                    b.Property<string>("ArchivoMime").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
+                    b.Property<int>("ClienteId").HasColumnType("int");
+                    b.Property<DateTime>("CreadoUtc").HasColumnType("datetime2");
+                    b.Property<string>("Estado").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
+                    b.Property<decimal>("MontoReportado").HasColumnType("decimal(18,2)");
+                    b.Property<string>("MotivoRevision").HasMaxLength(300).HasColumnType("nvarchar(300)");
+                    b.Property<int?>("PagoReservaId").HasColumnType("int");
+                    b.Property<string>("Referencia").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<int>("ReservaId").HasColumnType("int");
+                    b.Property<DateTime?>("RevisadoUtc").HasColumnType("datetime2");
+                    b.Property<int?>("RevisadoPorUsuarioId").HasColumnType("int");
+                    b.HasKey("Id");
+                    b.HasIndex("ClienteId");
+                    b.HasIndex("PagoReservaId").IsUnique().HasFilter("[PagoReservaId] IS NOT NULL");
+                    b.HasIndex("ReservaId", "Estado");
+                    b.HasIndex("Estado", "CreadoUtc");
+                    b.ToTable("ComprobantesTransferencia", t =>
+                    {
+                        t.HasCheckConstraint("CK_Comprobantes_Estado", "[Estado] IN (N'Pendiente', N'Aprobado', N'Rechazado')");
+                        t.HasCheckConstraint("CK_Comprobantes_Monto", "[MontoReportado] > 0");
+                    });
+                });
+
             modelBuilder.Entity("AgenciaToursAPI.Models.Cliente", b =>
                 {
                     b.Property<int>("Id")
@@ -783,6 +811,19 @@ namespace AgenciaToursAPI.Migrations
             modelBuilder.Entity("AgenciaToursAPI.Models.Categoria", b =>
                 {
                     b.Navigation("Tours");
+                });
+
+            modelBuilder.Entity("AgenciaToursAPI.Models.ComprobanteTransferencia", b =>
+                {
+                    b.HasOne("AgenciaToursAPI.Models.Cliente", "Cliente").WithMany()
+                        .HasForeignKey("ClienteId").OnDelete(DeleteBehavior.NoAction).IsRequired();
+                    b.HasOne("AgenciaToursAPI.Models.PagoReserva", "PagoReserva").WithMany()
+                        .HasForeignKey("PagoReservaId").OnDelete(DeleteBehavior.NoAction);
+                    b.HasOne("AgenciaToursAPI.Models.Reserva", "Reserva").WithMany()
+                        .HasForeignKey("ReservaId").OnDelete(DeleteBehavior.NoAction).IsRequired();
+                    b.Navigation("Cliente");
+                    b.Navigation("PagoReserva");
+                    b.Navigation("Reserva");
                 });
 
             modelBuilder.Entity("AgenciaToursAPI.Models.CierreOperativoTour", b =>
