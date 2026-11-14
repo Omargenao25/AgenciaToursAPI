@@ -189,6 +189,30 @@ public sealed class MiCuentaController(
     }
 
     [Authorize(Roles = Roles.Cliente)]
+    [HttpGet("reservas/{id:int}/estado-adelanto")]
+    public async Task<IActionResult> EstadoAdelanto(int id, CancellationToken ct)
+    {
+        var clienteId = await ClienteAutenticado();
+        if (clienteId is null) return NotFound();
+
+        var resumen = await db.Reservas.AsNoTracking()
+            .Where(r => r.Id == id && r.ClienteId == clienteId.Value)
+            .Select(r => new
+            {
+                ReservaId = r.Id, r.Total,
+                EstadoReserva = r.Estado,
+                r.VencePendienteUtc,
+                Tour = r.Tour != null ? r.Tour.Nombre : "",
+                PorcentajeAdelanto = r.Tour != null ? r.Tour.PorcentajeAdelanto : 30,
+                Pagado = db.PagosReserva.Where(p => p.ReservaId == r.Id)
+                    .Sum(p => (decimal?)p.Monto) ?? 0m,
+                Devuelto = db.ReembolsosReserva.Where(p => p.ReservaId == r.Id)
+                    .Sum(p => (decimal?)p.Monto) ?? 0m
+            }).SingleOrDefaultAsync(ct);
+        return resumen is null ? NotFound() : Ok(resumen);
+    }
+
+    [Authorize(Roles = Roles.Cliente)]
     [HttpGet("reservas")]
     public async Task<IActionResult> MisReservas()
     {
