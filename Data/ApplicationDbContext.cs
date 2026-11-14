@@ -32,6 +32,7 @@ namespace AgenciaToursAPI.Data
         public DbSet<CierreOperativoTour> CierresOperativosTour { get; set; }
 
         public DbSet<PagoReserva> PagosReserva { get; set; }
+        public DbSet<ComprobanteTransferencia> ComprobantesTransferencia { get; set; }
         public DbSet<ReembolsoReserva> ReembolsosReserva { get; set; }
 
         public DbSet<Usuario> Usuarios { get; set; }
@@ -182,6 +183,27 @@ namespace AgenciaToursAPI.Data
 
             modelBuilder.Entity<PasajeroReserva>()
                 .ToTable(t => t.HasCheckConstraint("CK_PasajerosReserva_Orden", "[Orden] BETWEEN 1 AND 100"));
+
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .HasOne(c => c.Reserva).WithMany()
+                .HasForeignKey(c => c.ReservaId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .HasOne(c => c.Cliente).WithMany()
+                .HasForeignKey(c => c.ClienteId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .HasOne(c => c.PagoReserva).WithMany()
+                .HasForeignKey(c => c.PagoReservaId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .HasIndex(c => new { c.Estado, c.CreadoUtc });
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .HasIndex(c => new { c.ReservaId, c.Estado });
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .HasIndex(c => c.PagoReservaId).IsUnique().HasFilter("[PagoReservaId] IS NOT NULL");
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .ToTable(t => t.HasCheckConstraint("CK_Comprobantes_Estado",
+                    "[Estado] IN (N'Pendiente', N'Aprobado', N'Rechazado')"));
+            modelBuilder.Entity<ComprobanteTransferencia>()
+                .ToTable(t => t.HasCheckConstraint("CK_Comprobantes_Monto", "[MontoReportado] > 0"));
 
             modelBuilder.Entity<PagoReserva>()
                 .HasOne(p => p.Reserva)
