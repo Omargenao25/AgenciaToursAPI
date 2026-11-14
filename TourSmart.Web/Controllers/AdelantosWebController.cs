@@ -36,7 +36,7 @@ public sealed class AdelantosWebController(IHttpClientFactory factory, IMemoryCa
     }
 
     // El resumen financiero se consulta desde la API usando exclusivamente el JWT del cliente.
-    private sealed class EstadoPagoCliente
+    public sealed class EstadoPagoCliente
     {
         public int ReservaId { get; set; }
         public string Tour { get; set; } = "";
