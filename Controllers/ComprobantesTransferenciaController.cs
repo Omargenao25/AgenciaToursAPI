@@ -209,6 +209,12 @@ public sealed class ComprobantesTransferenciaController(ApplicationDbContext db)
         if (c.Estado != "Pendiente") return Conflict("Este comprobante ya fue rechazado.");
         if (reserva.Estado != EstadosReserva.Pendiente)
             return Conflict("La reserva ya no está pendiente. No se puede aprobar el pago.");
+        // Si un comprobante fue reportado a tiempo, sólo se permite validar
+        // dentro del margen finito de revisión tras el vencimiento original.
+        if (reserva.VencePendienteUtc is DateTime vencimiento &&
+            DateTime.UtcNow >= vencimiento.AddHours(2) &&
+            !await db.PagosReserva.AnyAsync(p => p.ReservaId == reserva.Id, ct))
+            return Conflict("Venció el margen de revisión de dos horas. No se puede aprobar este comprobante.");
         if (await db.CierresOperativosTour.AnyAsync(t => t.TourId == reserva.TourId, ct))
             return Conflict("La excursión ya tiene cierre operativo.");
         var pagado = await db.PagosReserva.Where(x => x.ReservaId == reserva.Id)
