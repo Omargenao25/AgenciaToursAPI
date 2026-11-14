@@ -11,7 +11,7 @@ namespace TourSmart.Web.Controllers;
 
 [Authorize]
 [Route("adelantos")]
-public sealed class AdelantosWebController(IHttpClientFactory factory, IMemoryCache cache) : Controller
+public sealed class AdelantosWebController(IHttpClientFactory factory, IMemoryCache cache, IConfiguration configuration) : Controller
 {
     private const string Base = "api/comprobantes-transferencia";
     private HttpClient Api() => factory.CreateClient("TourSmart.Comprobantes");
@@ -71,6 +71,7 @@ public sealed class AdelantosWebController(IHttpClientFactory factory, IMemoryCa
                     Math.Max(0, Math.Ceiling(estado.Total * estado.PorcentajeAdelanto) / 100m - (estado.Pagado - estado.Devuelto))),
                 Comprobantes = items ?? new()
             };
+            ViewBag.InstruccionesTransferencia = configuration["Pagos:InstruccionesTransferencia"];
             Response.Headers.CacheControl = "private, no-store";
             return View(model);
         }
