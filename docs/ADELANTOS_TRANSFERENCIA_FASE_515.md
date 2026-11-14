@@ -58,8 +58,10 @@ dotnet run --project .\TourSmart.Web\TourSmart.Web.csproj --launch-profile http
 11. Rechaza un PDF inválido, archivo >2 MB, importe negativo, reserva vencida y comprobante simultáneo.
 12. Comprueba que los archivos no se puedan abrir visitando `/uploads` ni una URL pública.
 
-## Limitaciones y decisiones de esta fase
-- Una solicitud de comprobante pendiente **NO pausa ni extiende el vencimiento original**. Si el cliente reporta demasiado cerca de la fecha límite y el personal no revisa, la reserva puede cancelarse automáticamente. Mostramos advertencia clara. Próxima fase: política de revisión con plazo finito y protección antiabuso.
+## Política de vencimiento y siguientes mejoras
+- **Nuevo margen finito de revisión:** si el cliente presentó un comprobante válido antes del vencimiento y todavía está Pendiente, el proceso automático protege la reserva hasta **2 horas después del plazo original**, siempre que no haya pagos verificados. El plazo no se reinicia por volver a enviar comprobantes, ni se amplía sin límite.
+- Una vez transcurridas esas 2 horas, si no hay pago registrado, el proceso periódico cancela la reserva y marca los comprobantes aún pendientes como Rechazados por vencimiento. Si administración rechaza antes de tiempo, la reserva deja de estar protegida y se cancela después del vencimiento normal.
+- La aprobación administrativa comprueba también el plazo de gracia. El comprobante **nunca** se registra como pago sin validación humana; el margen tampoco concede confirmación automática.
 - Si un comprobante se aprueba, **no se confirma automáticamente** la reserva; el personal revisa el pago y utiliza la acción de confirmación actual.
 - Los comprobantes se almacenan en la base; limitar retención y establecer política de privacidad/respaldos antes de producción.
 - No hay pasarela de pagos ni validación bancaria automatizada. La aprobación requiere comprobación humana en el banco.
