@@ -7,7 +7,8 @@ namespace AgenciaToursAPI.Services;
 
 /// <summary>
 /// Revisa las solicitudes pendientes al iniciar la API y luego cada minuto.
-/// Solo cancela solicitudes vencidas sin un solo pago registrado.
+/// Protege hasta dos horas adicionales los reportes realizados antes del vencimiento.
+/// No considera un reporte como pago recibido; tras el margen, cancela sin pago verificado.
 /// </summary>
 public sealed class VencimientoReservasService(
     IServiceScopeFactory scopeFactory,
@@ -50,7 +51,11 @@ public sealed class VencimientoReservasService(
             .Where(r => r.Estado == EstadosReserva.Pendiente &&
                         r.VencePendienteUtc != null &&
                         r.VencePendienteUtc <= ahora &&
-                        !db.PagosReserva.Any(p => p.ReservaId == r.Id))
+                        !db.PagosReserva.Any(p => p.ReservaId == r.Id) &&
+                        !db.ComprobantesTransferencia.Any(c =>
+                            c.ReservaId == r.Id && c.Estado == "Pendiente" &&
+                            c.CreadoUtc <= r.VencePendienteUtc &&
+                            ahora < r.VencePendienteUtc.Value.AddHours(2)))
             .OrderBy(r => r.VencePendienteUtc)
             .Select(r => r.Id)
             .Take(100)
@@ -69,10 +74,24 @@ public sealed class VencimientoReservasService(
                 reserva.Estado == EstadosReserva.Pendiente &&
                 reserva.VencePendienteUtc is not null &&
                 reserva.VencePendienteUtc <= DateTime.UtcNow &&
-                !await db.PagosReserva.AnyAsync(p => p.ReservaId == id, ct))
+                !await db.PagosReserva.AnyAsync(p => p.ReservaId == id, ct) &&
+                !await db.ComprobantesTransferencia.AnyAsync(c =>
+                    c.ReservaId == id && c.Estado == "Pendiente" &&
+                    c.CreadoUtc <= reserva.VencePendienteUtc &&
+                    DateTime.UtcNow < reserva.VencePendienteUtc.Value.AddHours(2), ct))
             {
                 reserva.Estado = EstadosReserva.Cancelada;
                 reserva.MotivoCancelacion = "VencimientoSinPago";
+                // El reporte continúa registrado para auditoría, pero ya no es aprobable.
+                var comprobantes = await db.ComprobantesTransferencia
+                    .Where(c => c.ReservaId == id && c.Estado == "Pendiente")
+                    .ToListAsync(ct);
+                foreach (var comprobante in comprobantes)
+                {
+                    comprobante.Estado = "Rechazado";
+                    comprobante.MotivoRevision = "Venció el plazo de revisión sin pago verificado. Contacta a la agencia.";
+                    comprobante.RevisadoUtc = DateTime.UtcNow;
+                }
                 reserva.FechaCambioEstado = DateTime.UtcNow;
                 await db.SaveChangesAsync(ct);
                 canceladas++;
