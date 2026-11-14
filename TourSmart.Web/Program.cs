@@ -103,6 +103,12 @@ builder.Services.AddHttpClient<IMiCuentaApiClient, MiCuentaApiClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(8);
 });
 
+builder.Services.AddHttpClient("TourSmart.Comprobantes", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/");
+    client.Timeout = TimeSpan.FromSeconds(25);
+});
+
 builder.Services.AddHttpClient("TourSmart.Sesion", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://localhost:5290/");
