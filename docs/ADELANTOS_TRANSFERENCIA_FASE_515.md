@@ -65,5 +65,6 @@ dotnet run --project .\TourSmart.Web\TourSmart.Web.csproj --launch-profile http
 - Si un comprobante se aprueba, **no se confirma automáticamente** la reserva; el personal revisa el pago y utiliza la acción de confirmación actual.
 - Los comprobantes se almacenan en la base; limitar retención y establecer política de privacidad/respaldos antes de producción.
 - No hay pasarela de pagos ni validación bancaria automatizada. La aprobación requiere comprobación humana en el banco.
-- No hay correo automático de aprobación/rechazo del comprobante: el cliente ve estado al abrir su reserva. Puede incorporarse en la siguiente fase.
+- **Avisos SMTP de revisión implementados:** la aprobación y el rechazo manuales envían correo HTML con alternativa de texto plano tras confirmar la transacción. El rechazo incluye el motivo. Se utiliza la misma configuración `Notifications:*` de los avisos de reservas: `Notifications:Enabled=true` y credenciales SMTP completas. Si el servidor de correo falla, el estado financiero sigue guardado; esta versión no ofrece reintentos persistentes.
+- Los comprobantes rechazados automáticamente por vencimiento no generan aún un correo individual; el cliente puede consultar su estado en el historial.
 - Subida de archivos en servidor web utiliza JSON Base64 hacia la API, válida para un proyecto académico con límite de 2 MB; para producción puede reemplazarse por streaming y escaneo antivirus.
