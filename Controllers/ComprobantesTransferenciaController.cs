@@ -14,7 +14,7 @@ namespace AgenciaToursAPI.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/comprobantes-transferencia")]
-public sealed class ComprobantesTransferenciaController(ApplicationDbContext db) : ControllerBase
+public sealed class ComprobantesTransferenciaController(ApplicationDbContext db, AgenciaToursAPI.Services.NotificacionesAdelantoService notificaciones) : ControllerBase
 {
     private const int MaxBytes = 2 * 1024 * 1024;
 
@@ -246,6 +246,7 @@ public sealed class ComprobantesTransferenciaController(ApplicationDbContext db)
         c.PagoReservaId = pago.Id;
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
+        await notificaciones.AvisarRevisionAsync(c.Id);
         // No se confirma automáticamente la reserva: personal utilizará la regla habitual.
         return Ok(new { c.Id, c.PagoReservaId, Monto = pago.Monto, Estado = c.Estado });
     }
@@ -276,6 +277,7 @@ public sealed class ComprobantesTransferenciaController(ApplicationDbContext db)
         c.RevisadoPorUsuarioId = operadorId;
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
+        await notificaciones.AvisarRevisionAsync(c.Id);
         return NoContent();
     }
 }
