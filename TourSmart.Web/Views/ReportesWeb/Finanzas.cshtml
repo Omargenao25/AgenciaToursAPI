@@ -17,6 +17,7 @@
             <div class="alert alert-warning" role="alert">@error</div>
         }
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+        <div class="mb-4"><a class="btn btn-dark-pill" asp-controller="TableroAdelantos" asp-action="Index" asp-route-desde="@Model.DesdeUtc.ToString("yyyy-MM-dd")" asp-route-hasta="@Model.HastaIncluido.ToString("yyyy-MM-dd")">◫ Control de adelantos y comprobantes ↗</a></div>
         <form method="get" asp-controller="ReportesWeb" asp-action="Finanzas" class="row g-3 align-items-end mb-4">
             <div class="col-md-4">
                 <label class="form-label" for="desde">Desde (fecha UTC)</label>
