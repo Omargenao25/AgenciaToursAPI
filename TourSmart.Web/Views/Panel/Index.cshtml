@@ -62,7 +62,7 @@
                 <a asp-controller="GuiasAdmin" asp-action="Index">♧ Guías turísticos</a>
                 <a asp-controller="PortadaAdmin" asp-action="Index">▧ Imagen de portada</a>
                 <a asp-controller="ClientesAdmin" asp-action="Index">♧ Gestionar clientes</a>
-                @if (User.IsInRole("Administrador")) { <a asp-controller="ReportesWeb" asp-action="Finanzas">▥ Finanzas</a> }
+                @if (User.IsInRole("Administrador")) { <a asp-controller="ReportesWeb" asp-action="Finanzas">▥ Finanzas</a><a asp-controller="TableroAdelantos" asp-action="Index">◫ Control de adelantos</a> }
             </div>
             <div class="row g-3 mb-5 ts-v3-metrics">
                 <div class="col-6 col-xl"><div class="metric-card"><span>Tours futuros</span><strong>@Model.ToursFuturos</strong><small>Excursiones por iniciar</small></div></div>
