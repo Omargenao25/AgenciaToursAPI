@@ -1,0 +1,130 @@
+@model TourSmart.Web.Models.TableroAdelantosViewModel
+@{
+    ViewData["Title"] = "Tablero de adelantos";
+}
+<section class="inner-hero dashboard-hero">
+    <div class="container">
+        <a class="back-link" asp-controller="Panel" asp-action="Index">← Volver al panel</a>
+        <span class="eyebrow">FINANZAS · TOURSMART RD</span>
+        <h1>Control de <em>adelantos.</em></h1>
+        <p>Consulta comprobantes reportados, verifica pendientes y monitorea las revisiones.</p>
+    </div>
+</section>
+<section class="section-space"><div class="container">
+    @if (TempData["Error"] is string error) { <div role="alert" class="alert alert-warning">@error</div> }
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-accent" asp-controller="AdelantosWeb" asp-action="Revision">Revisar comprobantes pendientes ↗</a>
+        <a class="btn btn-dark-pill" asp-controller="ReportesWeb" asp-action="Finanzas">Ver ingresos verificados ↗</a>
+        <a class="btn btn-outline-secondary" asp-controller="ReportesWeb" asp-action="CuentasPorCobrar">Cuentas por cobrar</a>
+    </div>
+    <form method="get" asp-action="Index" class="tour-admin-form mb-4">
+        <span class="eyebrow">PERÍODO DE REPORTE (UTC)</span>
+        <div class="row g-3 align-items-end mt-1">
+            <div class="col-md-4">
+                <label class="form-label" for="desde">Desde</label>
+                <input id="desde" name="desde" type="date" class="form-control" required value="@Model.DesdeUtc.ToString("yyyy-MM-dd")"/>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="hasta">Hasta</label>
+                <input id="hasta" name="hasta" type="date" class="form-control" required value="@Model.HastaIncluido.ToString("yyyy-MM-dd")"/>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-accent w-100" type="submit">Aplicar período</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="metric-card"><span>Total de comprobantes</span><strong>@Model.TotalComprobantes</strong><small>Presentados en el período</small></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card"><span>En revisión</span><strong>@Model.CantidadPendientes</strong><small>RD$ @Model.MontoPendienteReportado.ToString("N2") reportados</small></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card metric-card-accent"><span>Aprobados</span><strong>@Model.CantidadAprobados</strong><small>RD$ @Model.MontoAprobadoReportado.ToString("N2") verificados</small></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card"><span>Rechazados</span><strong>@Model.CantidadRechazados</strong><small>RD$ @Model.MontoRechazadoReportado.ToString("N2") reportados</small></div>
+        </div>
+    </div>
+    <div class="alert alert-info mb-4">
+        <strong>Control operativo actual:</strong> @Model.PendientesActualesGlobal comprobante(s) pendientes en toda la agencia,
+        de los cuales @Model.PendientesConPlazoOriginalVencido ya superaron el plazo original.
+        Estos dos indicadores no están limitados por las fechas del reporte.
+    </div>
+    <div class="alert alert-warning mb-4">
+        <strong>No sumar comprobantes como ingresos.</strong> Los importes mostrados aquí describen reportes de clientes.
+        Los pagos aprobados se contabilizan en el reporte financiero general; no deben sumarse dos veces.
+        La aprobación de un comprobante tampoco significa que la reserva esté confirmada.
+    </div>
+
+    <section class="dashboard-table mb-4">
+        <div class="dashboard-table-title">
+            <h2>Actividad por excursión</h2>
+            <span>@Model.PorExcursion.Count tour(s) con reportes</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Excursión</th><th>Comprobantes</th><th>Pendientes</th><th>Aprobados</th><th>Rechazados</th><th>Montos aprobados</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.PorExcursion)
+                {
+                    <tr>
+                        <td><strong>@item.Nombre</strong><small class="d-block text-secondary">Tour #@item.Id</small></td>
+                        <td>@item.Total</td>
+                        <td>@item.Pendientes</td>
+                        <td>@item.Aprobados</td>
+                        <td>@item.Rechazados</td>
+                        <td>RD$ @item.MontoAprobado.ToString("N2")</td>
+                    </tr>
+                }
+                @if (Model.PorExcursion.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-secondary py-4">Todavía no hay comprobantes para este período.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section class="dashboard-table">
+        <div class="dashboard-table-title">
+            <h2>Últimos comprobantes del período</h2>
+            <span>@Model.Recientes.Count últimos registros (máximo 75)</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Registro UTC</th><th>Reserva / excursión</th><th>Cliente</th><th>Referencia</th><th>Importe reportado</th><th>Estado</th><th>Acción</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Recientes)
+                {
+                    <tr>
+                        <td>@item.CreadoUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><strong>#@item.ReservaId</strong><small class="d-block text-secondary">@item.Tour</small></td>
+                        <td>@item.Cliente</td>
+                        <td>@item.Referencia</td>
+                        <td>RD$ @item.MontoReportado.ToString("N2")</td>
+                        <td>
+                            <span class="reservation-status @(item.Estado == "Aprobado" ? "is-confirmed" : item.Estado == "Rechazado" ? "is-cancelled" : "is-pending")">@item.Estado</span>
+                            @if (!string.IsNullOrWhiteSpace(item.MotivoRevision))
+                            { <small class="d-block text-secondary">@item.MotivoRevision</small> }
+                        </td>
+                        <td>
+                            @if (item.Estado == "Pendiente")
+                            { <a class="btn btn-sm btn-outline-primary" asp-controller="AdelantosWeb" asp-action="Revision">Revisar</a> }
+                            else
+                            { <a class="btn btn-sm btn-outline-secondary" asp-controller="PagosWeb" asp-action="Detalle" asp-route-reservaId="@item.ReservaId">Ver pagos</a> }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Recientes.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-secondary py-4">No hay comprobantes registrados para estas fechas.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <p class="dashboard-footnote mt-3">Solo lectura. Los importes se calculan por fecha de presentación UTC. El listado visual muestra hasta 75 registros; las cifras de estado incluyen todos los comprobantes del período.</p>
+</div></section>
