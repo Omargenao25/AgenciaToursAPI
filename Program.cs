@@ -174,6 +174,7 @@ builder.Services.AddScoped<NotificacionesReservaService>();
 builder.Services.AddScoped<NotificacionesAdelantoService>();
 builder.Services.AddScoped<VerificacionCorreoService>();
 builder.Services.AddHostedService<VencimientoReservasService>();
+builder.Services.AddHostedService<RecordatoriosExcursionesService>();
 builder.Services.AddControllers();
 
 
