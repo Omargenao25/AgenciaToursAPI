@@ -34,6 +34,10 @@ namespace AgenciaToursAPI.Models
         // UTC; null para reservas históricas anteriores a esta funcionalidad.
         public DateTime? VencePendienteUtc { get; set; }
 
+        // Marca persistente del intento de recordatorio, para evitar duplicados.
+        public DateTime? RecordatorioIntentadoUtc { get; set; }
+        public DateTime? RecordatorioEnviadoUtc { get; set; }
+
         [MaxLength(30)]
         public string? MotivoCancelacion { get; set; }
 
