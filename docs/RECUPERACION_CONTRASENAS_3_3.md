@@ -57,3 +57,6 @@
 - Comprobar la correcta entrega SMTP y políticas SPF/DKIM/DMARC.
 - No publicar capturas con enlaces de recuperación, tokens o contraseñas.
 - Código subido a GitHub pero compilación/migración/pruebas reales **pendientes en el entorno del usuario**.
+
+## Actualización fase 5.19
+El servicio reutiliza el conjunto SMTP existente de Notifications si Recovery no tiene un conjunto completo de credenciales. Si Recovery está completo, conserva su configuración. La URL se toma de Recovery:PublicBaseUrl y, si está vacía, de EmailVerification:PublicBaseUrl. Solo se acepta HTTPS o HTTP loopback para desarrollo, sin usuario, consulta ni fragmento. No hay que duplicar la contraseña de aplicación. La recuperación no depende de Notifications:Enabled: es un flujo de seguridad independiente. El correo incorpora HTML de TourSmart RD y alternativa de texto plano; el enlace sigue caducando en 15 minutos. No hay nueva migración para este cambio, pero deben estar aplicadas las migraciones anteriores. Ejecutar las pruebas funcionales anteriores con una cuenta de viajero propia, sin compartir el enlace ni las credenciales. Para usar Gmail oficial con los secretos ya existentes basta verificar la URL de recuperación; una configuración Recovery antigua completa tendrá prioridad.
