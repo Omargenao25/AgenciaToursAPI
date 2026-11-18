@@ -62,8 +62,18 @@ Comprobar "Lista de pasajeros anónima" GET "$api/api/reservas/$ReservaId/pasaje
 Comprobar "Panel de historial anónimo" GET "$web/panel/reportes/historial-excursiones" @(302,401,403)
 Comprobar "Panel de rendimiento anónimo" GET "$web/panel/reportes/rendimiento-excursiones" @(302,401,403)
 
+# New modules: protected GET endpoints only.
+Comprobar "Anonymous receipts" GET "$api/api/comprobantes-transferencia/pendientes" @(401)
+Comprobar "Anonymous receipt file" GET "$api/api/comprobantes-transferencia/1/archivo" @(401)
+Comprobar "Anonymous receipt report" GET "$api/api/reportes/comprobantes" @(401)
+Comprobar "Anonymous customer balance" GET "$api/api/MiCuenta/reservas/$ReservaId/estado-adelanto" @(401)
+Comprobar "Anonymous review web" GET "$web/adelantos/revision" @(302,401,403)
+Comprobar "Anonymous financial dashboard" GET "$web/panel/finanzas/adelantos" @(302,401,403)
+
 if ($env:TOURSMART_TOKEN_CLIENTE) {
     $jwt = $env:TOURSMART_TOKEN_CLIENTE
+    Comprobar "Client cannot review receipts" GET "$api/api/comprobantes-transferencia/pendientes" @(403) $jwt
+    Comprobar "Client cannot see finance report" GET "$api/api/reportes/comprobantes" @(403) $jwt
     Comprobar "Cliente bloqueado del historial" GET "$api/api/reportes/historial-excursiones" @(403) $jwt
     Comprobar "Cliente bloqueado del rendimiento" GET "$api/api/reportes/rendimiento-excursiones" @(403) $jwt
     Comprobar "Cliente bloqueado del manifiesto" GET "$api/api/tours/$TourId/manifiesto" @(403) $jwt
@@ -73,6 +83,8 @@ else { Write-Host "[OMITIDO] Pruebas Cliente: definir TOURSMART_TOKEN_CLIENTE (J
 
 if ($env:TOURSMART_TOKEN_OPERADOR) {
     $jwt = $env:TOURSMART_TOKEN_OPERADOR
+    Comprobar "Operator can review receipts" GET "$api/api/comprobantes-transferencia/pendientes" @(200) $jwt
+    Comprobar "Operator cannot see admin report" GET "$api/api/reportes/comprobantes" @(403) $jwt
     Comprobar "Operador bloqueado del historial" GET "$api/api/reportes/historial-excursiones" @(403) $jwt
     Comprobar "Operador bloqueado del rendimiento" GET "$api/api/reportes/rendimiento-excursiones" @(403) $jwt
     Comprobar "Operador puede consultar manifiesto existente" GET "$api/api/tours/$TourId/manifiesto" @(200) $jwt
@@ -82,6 +94,8 @@ else { Write-Host "[OMITIDO] Pruebas Operador: definir TOURSMART_TOKEN_OPERADOR.
 
 if ($env:TOURSMART_TOKEN_ADMIN) {
     $jwt = $env:TOURSMART_TOKEN_ADMIN
+    Comprobar "Admin can review receipts" GET "$api/api/comprobantes-transferencia/pendientes" @(200) $jwt
+    Comprobar "Admin can see receipt report" GET "$api/api/reportes/comprobantes" @(200) $jwt
     Comprobar "Administrador consulta historial" GET "$api/api/reportes/historial-excursiones" @(200) $jwt
     Comprobar "Administrador consulta rendimiento" GET "$api/api/reportes/rendimiento-excursiones" @(200) $jwt
     Comprobar "Administrador consulta manifiesto" GET "$api/api/tours/$TourId/manifiesto" @(200) $jwt
