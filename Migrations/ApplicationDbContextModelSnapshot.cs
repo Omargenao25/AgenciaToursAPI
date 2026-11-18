@@ -452,6 +452,10 @@ namespace AgenciaToursAPI.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<DateTime?>("RecordatorioIntentadoUtc").HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RecordatorioEnviadoUtc").HasColumnType("datetime2");
+
                     b.Property<DateTime?>("VencePendienteUtc")
                         .HasColumnType("datetime2");
 
