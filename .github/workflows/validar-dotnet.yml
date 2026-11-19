@@ -32,3 +32,15 @@ jobs:
       - name: Diagnóstico de formato (informativo)
         continue-on-error: true
         run: dotnet format AgenciaToursAPI.sln --verify-no-changes --no-restore --severity error
+
+      - name: Publicar API para validar entregable
+        run: dotnet publish AgenciaToursAPI.csproj --configuration Release --no-restore --output ./out/api
+      - name: Publicar Web para validar entregable
+        run: dotnet publish TourSmart.Web/TourSmart.Web.csproj --configuration Release --no-restore --output ./out/web
+      - name: Verificar entregables esenciales
+        shell: bash
+        run: |
+          test -f out/api/AgenciaToursAPI.dll
+          test -f out/web/TourSmart.Web.dll
+          test -f out/web/wwwroot/css/toursmart-v3.css
+          echo "Publicacion API y Web generada correctamente (sin despliegue)."
