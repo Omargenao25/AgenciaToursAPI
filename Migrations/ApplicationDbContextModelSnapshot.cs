@@ -607,7 +607,7 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<bool>("CorreoConfirmado")
                         .ValueGeneratedNever()
                         .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasDefaultValue(false);
 
                     b.Property<int?>("ClienteId")
                         .HasColumnType("int");
