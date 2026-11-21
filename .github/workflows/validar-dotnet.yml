@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - feature/toursmart-integrador-ii
+      - feature/toursmart-visual-530
   pull_request:
     branches:
       - master
       - feature/toursmart-integrador-ii
+      - feature/toursmart-visual-530
 
 permissions:
   contents: read
