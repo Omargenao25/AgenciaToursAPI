@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
@@ -135,6 +136,7 @@ public sealed class MiCuentaController(
         return NoContent();
     }
 
+    [EnableRateLimiting("registro")]
     [HttpPost("registrar")]
     [AllowAnonymous]
     public async Task<IActionResult> Registrar(RegistroClienteWebDto dto)
