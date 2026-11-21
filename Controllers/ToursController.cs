@@ -32,6 +32,9 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    PuntoEncuentro = t.PuntoEncuentro,
+                    InstruccionesSalida = t.InstruccionesSalida,
+                    QueLlevar = t.QueLlevar,
                     ImagenUrl = t.ImagenUrl,
                     ImagenDestinoUrl = t.Destino != null ? t.Destino.ImagenUrl : null,
                     PaisId = t.PaisId,
@@ -98,6 +101,9 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    PuntoEncuentro = t.PuntoEncuentro,
+                    InstruccionesSalida = t.InstruccionesSalida,
+                    QueLlevar = t.QueLlevar,
                     ImagenUrl = t.ImagenUrl,
                     ImagenDestinoUrl = t.Destino != null ? t.Destino.ImagenUrl : null,
                     PaisId = t.PaisId,
@@ -282,6 +288,9 @@ namespace AgenciaToursAPI.Controllers
             var tour = new Tour
             {
                 Nombre = dto.Nombre.Trim(),
+                PuntoEncuentro = string.IsNullOrWhiteSpace(dto.PuntoEncuentro) ? null : dto.PuntoEncuentro.Trim(),
+                InstruccionesSalida = string.IsNullOrWhiteSpace(dto.InstruccionesSalida) ? null : dto.InstruccionesSalida.Trim(),
+                QueLlevar = string.IsNullOrWhiteSpace(dto.QueLlevar) ? null : dto.QueLlevar.Trim(),
                 ImagenUrl = string.IsNullOrWhiteSpace(dto.ImagenUrl) ? null : dto.ImagenUrl.Trim(),
                 PaisId = dto.PaisId,
                 DestinoId = dto.DestinoId,
@@ -429,6 +438,9 @@ namespace AgenciaToursAPI.Controllers
             }
 
             tour.Nombre = dto.Nombre.Trim();
+            tour.PuntoEncuentro = string.IsNullOrWhiteSpace(dto.PuntoEncuentro) ? null : dto.PuntoEncuentro.Trim();
+            tour.InstruccionesSalida = string.IsNullOrWhiteSpace(dto.InstruccionesSalida) ? null : dto.InstruccionesSalida.Trim();
+            tour.QueLlevar = string.IsNullOrWhiteSpace(dto.QueLlevar) ? null : dto.QueLlevar.Trim();
             tour.ImagenUrl = string.IsNullOrWhiteSpace(dto.ImagenUrl) ? null : dto.ImagenUrl.Trim();
             tour.PaisId = dto.PaisId;
             tour.DestinoId = dto.DestinoId;
@@ -533,6 +545,9 @@ namespace AgenciaToursAPI.Controllers
                 {
                     Id = t.Id,
                     Nombre = t.Nombre,
+                    PuntoEncuentro = t.PuntoEncuentro,
+                    InstruccionesSalida = t.InstruccionesSalida,
+                    QueLlevar = t.QueLlevar,
                     ImagenUrl = t.ImagenUrl,
                     ImagenDestinoUrl = t.Destino != null ? t.Destino.ImagenUrl : null,
                     PaisId = t.PaisId,
