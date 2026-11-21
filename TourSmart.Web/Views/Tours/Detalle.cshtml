@@ -6,7 +6,7 @@
 <section class="inner-hero detail-hero">
     <div class="container">
         <a asp-controller="Tours" asp-action="Index" class="back-link">← Todos los tours</a>
-        <span class="eyebrow">@Model.Categoria · @Model.Pais</span>
+        <span class="eyebrow">EXPERIENCIA · @Model.Categoria · @Model.Pais</span>
         <h1>@Model.Nombre</h1>
         <p>Descubre los detalles de tu próxima experiencia en @Model.Destino.</p>
     </div>
@@ -26,7 +26,7 @@
                 <h2 class="detail-title mt-5">La aventura comienza <em>aquí.</em></h2>
                 @if (!string.IsNullOrWhiteSpace(Model.PuntoEncuentro) || !string.IsNullOrWhiteSpace(Model.InstruccionesSalida) || !string.IsNullOrWhiteSpace(Model.QueLlevar))
                 {
-                    <section class="mt-4" aria-labelledby="logisticaTour">
+                    <section class="ts-premium-logistics mt-4" aria-labelledby="logisticaTour">
                         <h3 id="logisticaTour">Información para tu salida</h3>
                         @if (!string.IsNullOrWhiteSpace(Model.PuntoEncuentro))
                         {
