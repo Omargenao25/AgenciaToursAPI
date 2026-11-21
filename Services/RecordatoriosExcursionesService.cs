@@ -123,8 +123,8 @@ public sealed class RecordatoriosExcursionesService(
                 <div style="background:#F7FAFB;border:1px solid #DCE8EB;padding:20px;border-radius:12px;line-height:1.8">
                 <strong>{E(item.Tour)}</strong><br>Reserva #{item.Id}<br>Salida: {E(fecha)} (hora local de la agencia)<br>Pasajeros: {item.CantidadPersonas}</div>
                 <p><strong>{E(encuentro)}</strong></p>
-                <p style="white-space:pre-line">{E(item.InstruccionesSalida)}</p>
-                <p style="white-space:pre-line">{E(item.QueLlevar)}</p>
+                {(string.IsNullOrWhiteSpace(item.InstruccionesSalida) ? "" : "<p><strong>Instrucciones:</strong> " + E(item.InstruccionesSalida).Replace("\n", "<br>") + "</p>")}
+                {(string.IsNullOrWhiteSpace(item.QueLlevar) ? "" : "<p><strong>Qué llevar:</strong> " + E(item.QueLlevar).Replace("\n", "<br>") + "</p>")}
                 <p>Llega con anticipación y lleva tu identificación.</p>
                 <p>Contacto: {E(contacto)}</p></td></tr>
                 <tr><td style="padding:20px;background:#E8F1F3;text-align:center">TourSmart RD · Tu próxima aventura comienza aquí.</td></tr>
