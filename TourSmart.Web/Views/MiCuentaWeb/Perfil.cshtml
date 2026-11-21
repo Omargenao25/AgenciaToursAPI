@@ -23,8 +23,8 @@
         {
             <div class="alert alert-success" role="status">@exito</div>
         }
-        <div class="tour-admin-form">
-            <span class="eyebrow">MI INFORMACIÓN PERSONAL</span>
+        <div class="tour-admin-form ts-client-surface ts-client-profile">
+            <div class="ts-client-profile-heading"><div class="ts-client-avatar" aria-hidden="true">✦</div><div><span class="eyebrow">MI INFORMACIÓN PERSONAL</span><p class="mb-0 text-secondary small">Tu información de contacto y seguridad, en un solo lugar.</p></div></div>
             <h2 class="mt-2 mb-4">Tus datos, <em>siempre al día.</em></h2>
             <form method="post" asp-controller="MiCuentaWeb" asp-action="Perfil">
                 @Html.AntiForgeryToken()
