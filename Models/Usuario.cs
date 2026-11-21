@@ -12,7 +12,9 @@ namespace AgenciaToursAPI.Models
         [MaxLength(32)]
         public string VersionSesion { get; set; } = Guid.NewGuid().ToString("N");
 
-        public bool CorreoConfirmado { get; set; } = true;
+        // Por defecto, ninguna cuenta nueva se considera verificada.
+        // El administrador puede conservar sus cuentas existentes: no se modifica su estado.
+        public bool CorreoConfirmado { get; set; } = false;
 
         public int? ClienteId { get; set; }
         public Cliente? Cliente { get; set; }
