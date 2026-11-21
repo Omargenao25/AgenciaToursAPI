@@ -106,7 +106,7 @@ public sealed class PagosReservaController(ApplicationDbContext db) : Controller
         var devuelto = await db.ReembolsosReserva
             .Where(p => p.ReservaId == reservaId)
             .SumAsync(p => (decimal?)p.Monto, ct) ?? 0m;
-        var saldo = reserva.Total - (pagado - devuelto);
+        var saldo = ReglasReserva.Saldo(reserva.Total, pagado, devuelto);
         if (dto.Monto > saldo)
             return Conflict($"El monto supera el saldo pendiente de RD$ {Math.Max(0, saldo):N2}.");
 
