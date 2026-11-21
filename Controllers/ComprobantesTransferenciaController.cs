@@ -113,7 +113,7 @@ public sealed class ComprobantesTransferenciaController(ApplicationDbContext db,
             .SumAsync(x => (decimal?)x.Monto, ct) ?? 0m;
         var devuelto = await db.ReembolsosReserva.Where(x => x.ReservaId == reservaId)
             .SumAsync(x => (decimal?)x.Monto, ct) ?? 0m;
-        if (dto.Monto > reserva.Total - (pagado - devuelto))
+        if (dto.Monto > ReglasReserva.Saldo(reserva.Total, pagado, devuelto))
             return Conflict("El importe reportado supera el saldo pendiente.");
 
         var registro = new ComprobanteTransferencia
@@ -221,7 +221,7 @@ public sealed class ComprobantesTransferenciaController(ApplicationDbContext db,
             .SumAsync(x => (decimal?)x.Monto, ct) ?? 0m;
         var devuelto = await db.ReembolsosReserva.Where(x => x.ReservaId == reserva.Id)
             .SumAsync(x => (decimal?)x.Monto, ct) ?? 0m;
-        if (c.MontoReportado > reserva.Total - (pagado - devuelto))
+        if (c.MontoReportado > ReglasReserva.Saldo(reserva.Total, pagado, devuelto))
             return Conflict("El importe supera el saldo. Revisa los pagos ya registrados.");
 
         var metodoId = await db.MetodosPago.AsNoTracking()
