@@ -12,6 +12,10 @@
     <Compile Remove="TourSmart.Web\**\*.cs" />
     <Content Remove="TourSmart.Web\**\*" />
     <None Remove="TourSmart.Web\**\*" />
+    <!-- Los tests se compilan por su propio proyecto. -->
+    <Compile Remove="TourSmart.Tests/**/*.cs" />
+    <Content Remove="TourSmart.Tests/**" />
+    <None Remove="TourSmart.Tests/**" />
   </ItemGroup>
 
   <ItemGroup>
