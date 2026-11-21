@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
@@ -29,6 +30,7 @@ public sealed class RecuperacionController(
         clave.Any(char.IsUpper) && clave.Any(char.IsLower) &&
         clave.Any(char.IsDigit) && clave.Any(ch => !char.IsLetterOrDigit(ch));
 
+    [EnableRateLimiting("correo")]
     [HttpPost("solicitar")]
     public async Task<IActionResult> Solicitar(SolicitarRecuperacionDto dto, CancellationToken ct)
     {
