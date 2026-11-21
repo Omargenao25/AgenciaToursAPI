@@ -37,6 +37,15 @@ namespace AgenciaToursAPI.Models
         // Marca persistente del intento de recordatorio, para evitar duplicados.
         public DateTime? RecordatorioIntentadoUtc { get; set; }
         public DateTime? RecordatorioEnviadoUtc { get; set; }
+        
+        // Fase 5.25: estado del despacho y lease persistente de una sola instancia.
+        [MaxLength(20)]
+        public string RecordatorioEstado { get; set; } = "Pendiente";
+        public int RecordatorioIntentos { get; set; }
+        public DateTime? RecordatorioProximoIntentoUtc { get; set; }
+        public DateTime? RecordatorioLeaseHastaUtc { get; set; }
+        [MaxLength(32)]
+        public string? RecordatorioLeaseToken { get; set; }
 
         [MaxLength(30)]
         public string? MotivoCancelacion { get; set; }
