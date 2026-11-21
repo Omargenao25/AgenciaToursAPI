@@ -27,6 +27,13 @@
     <div class="col-md-6"><div class="d-flex flex-wrap justify-content-between align-items-center gap-2"><label asp-for="GuiaId" class="form-label mb-0">Guía turístico</label><a class="small fw-semibold" asp-controller="GuiasAdmin" asp-action="Index">+ Gestionar guías</a></div><select asp-for="GuiaId" asp-items="Model.Guias" class="form-select"><option value="0">Selecciona un guía</option></select><span asp-validation-for="GuiaId" class="text-danger small"></span></div>
     <div class="col-12"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><label asp-for="TransporteId" class="form-label mb-0">Transporte</label><a class="small fw-semibold" asp-controller="TransportesAdmin" asp-action="Index">+ Gestionar transportes</a></div><select asp-for="TransporteId" asp-items="Model.Transportes" class="form-select"><option value="0">Selecciona un transporte</option></select><span asp-validation-for="TransporteId" class="text-danger small"></span></div>
    </div>
+   <div class="eyebrow mt-5 mb-3">INFORMACIÓN PARA EL VIAJERO</div>
+   <p class="text-secondary small">Estos datos aparecerán en el detalle público y en los recordatorios de salida. No incluyas datos personales privados.</p>
+   <div class="row g-3">
+    <div class="col-12"><label asp-for="PuntoEncuentro" class="form-label">Punto de encuentro (opcional)</label><input asp-for="PuntoEncuentro" maxlength="250" class="form-control" placeholder="Ej. Entrada principal de la terminal" /><span asp-validation-for="PuntoEncuentro" class="text-danger small"></span></div>
+    <div class="col-12"><label asp-for="InstruccionesSalida" class="form-label">Instrucciones de salida</label><textarea asp-for="InstruccionesSalida" maxlength="1000" rows="3" class="form-control" placeholder="Ej. Presentarse 20 minutos antes con identificación"></textarea><span asp-validation-for="InstruccionesSalida" class="text-danger small"></span></div>
+    <div class="col-12"><label asp-for="QueLlevar" class="form-label">Qué llevar</label><textarea asp-for="QueLlevar" maxlength="500" rows="2" class="form-control" placeholder="Ej. Agua, protector solar y ropa cómoda"></textarea><span asp-validation-for="QueLlevar" class="text-danger small"></span></div>
+   </div>
    <div class="eyebrow mt-5 mb-3">IMAGEN DE LA EXPERIENCIA</div>
    <div class="row g-3 align-items-start">
     <div class="col-lg-7">
