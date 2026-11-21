@@ -139,3 +139,65 @@ main{overflow:clip}
 .ts-premium-tour-grid>.ts-premium-sort-item{display:flex;flex-direction:column}
 .ts-premium-tour-grid>.ts-premium-sort-item>.tour-card{width:100%}
 @media(max-width:575px){.ts-premium-sort-wrap,.ts-premium-sort-wrap .form-select{width:100%}}
+
+/* Fase 5.31 — Recorrido del viajero */
+.ts-client-section{background:radial-gradient(circle at 95% 5%,#d9f5e950,transparent 42%),#f7faf8}
+.ts-client-stepper{display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;margin-bottom:2rem}
+.ts-client-stepper span{display:inline-flex;align-items:center;gap:.55rem;padding:.78rem 1rem;border-radius:999px;border:1px solid #dce9e5;background:#fff;color:#697e83;font-size:.79rem;font-weight:700}
+.ts-client-stepper span b{background:#eaf3f0;color:#45717b;border-radius:50%;display:grid;place-items:center;width:29px;height:29px;font-size:.7rem}
+.ts-client-stepper span.is-current{background:#0a4852;border-color:#0a4852;color:#fff;box-shadow:0 12px 28px #0a4d5530}
+.ts-client-stepper span.is-current b{background:#baf0c5;color:#06454b}
+.ts-client-surface{background:#fff!important;border:1px solid #dbe9e5!important;border-radius:26px!important;box-shadow:0 25px 65px #0c4b5112!important}
+.ts-booking-form{padding:clamp(1.3rem,3vw,2.6rem)}
+.ts-booking-form h2{font-size:clamp(2rem,3vw,2.9rem);margin:.65rem 0 1rem}
+.ts-booking-form .form-label{font-weight:750}
+.ts-client-passengers{padding:1.35rem;background:#f3f9f6;border:1px solid #deeee7;border-radius:20px}
+.ts-client-counter{font-size:.73rem;font-weight:800;background:#e2f6e9;border-radius:999px;padding:.38rem .75rem;color:#12604f}
+.ts-client-passengers #listaPasajeros{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:.8rem}
+.ts-client-passengers #listaPasajeros>div{margin-bottom:0!important}
+.ts-client-passengers .form-control{background:#fff}
+.ts-client-assurance{display:flex;align-items:start;gap:1rem;background:#eaf6f0;border:1px solid #c9e8d7;border-radius:16px;padding:1rem 1.2rem;color:#234e48;font-size:.87rem;line-height:1.7}
+.ts-client-assurance>span{display:grid;place-items:center;background:#cfefd9;border-radius:12px;width:36px;height:36px;flex-shrink:0;font-size:1.15rem;color:#087c6b}
+.ts-client-submit{min-height:53px;padding:.85rem 1.55rem}
+.ts-client-booking-summary{padding:1.45rem;position:sticky;top:108px}
+.ts-client-booking-summary h3{font-size:1.55rem;line-height:1.2}
+.ts-client-mini-photo{height:195px;position:relative;overflow:hidden;background:linear-gradient(125deg,#b5e2dd,#1b7a86);border-radius:20px;margin-top:1rem;display:flex;align-items:end;padding:1.2rem}
+.ts-client-mini-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ts-client-mini-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 38%,#073541b0);pointer-events:none}
+.ts-client-mini-photo>span{position:relative;z-index:1;color:#fff;font-weight:800;text-shadow:0 2px 8px #0005;font-size:1.25rem}
+.ts-client-summary-line{display:flex;gap:1.5rem;justify-content:space-between;align-items:start;border-bottom:1px solid #e5eeeb;padding:.85rem 0;font-size:.89rem}
+.ts-client-summary-line>span{color:#688089}
+.ts-client-summary-line>strong{text-align:right;color:#173b45;overflow-wrap:anywhere}
+.ts-client-summary-total strong{font-size:1.28rem;color:#076d73}
+.ts-client-deposit{display:flex;flex-direction:column;gap:.4rem;background:linear-gradient(135deg,#e3f8ec,#e3f3f7);padding:1.2rem;border-radius:17px;margin:1.1rem 0;border:1px solid #cde8df}
+.ts-client-deposit span{font-size:.78rem;color:#366768;font-weight:750}
+.ts-client-deposit strong{font-size:1.7rem;color:#073e48}
+.ts-client-deposit small{font-size:.76rem;line-height:1.6;color:#517479}
+.ts-client-return-link{font-weight:750;color:#096f78;font-size:.85rem}
+.ts-client-reservations-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.4rem}
+.ts-client-reservation-card{background:#fff;border:1px solid #daebe7;border-radius:24px;padding:1.6rem;box-shadow:0 18px 50px #0b48500e;transition:transform .25s,box-shadow .25s}
+.ts-client-reservation-card:hover{transform:translateY(-4px);box-shadow:0 27px 58px #0b48501d}
+.ts-client-reservation-top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1.25rem}
+.ts-client-booking-id{font-size:.67rem;font-weight:850;letter-spacing:.14em;color:#087f85}
+.ts-client-reservation-card h3{font-size:1.5rem;margin:0 0 1.5rem}
+.ts-client-reservation-data{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;padding:1.25rem 0;border-block:1px solid #e5efec}
+.ts-client-reservation-data>div{display:flex;flex-direction:column;gap:.4rem}
+.ts-client-reservation-data span{font-size:.7rem;color:#668088}
+.ts-client-reservation-data strong{color:#16424a;overflow-wrap:anywhere;font-size:.87rem}
+.ts-client-reservation-actions{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1.4rem}
+.ts-client-reservation-actions .btn{min-height:39px;display:inline-flex;align-items:center}
+.ts-client-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:3.2rem 1.5rem;border:1px dashed #b9d9d1;border-radius:24px;background:#fff}
+.ts-client-empty-icon{font-size:3rem;display:grid;place-items:center;border-radius:50%;background:#e8f6ed;color:#087f85;width:90px;height:90px;margin-bottom:1.25rem}
+.ts-client-empty h3{font-size:1.7rem}.ts-client-empty p{max-width:490px;color:#667e81}
+.ts-client-profile,.ts-client-registration{max-width:1100px;margin:auto;padding:clamp(1.35rem,3.3vw,3rem)!important}
+.ts-client-profile-heading{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.ts-client-avatar{display:grid;place-items:center;width:63px;height:63px;border-radius:19px;background:linear-gradient(135deg,#0b5560,#16a18c);color:#dbffeb;font-size:1.8rem;box-shadow:0 12px 30px #0b697323}
+.ts-client-profile .info-tile{height:100%;background:#f0f8f5}
+.ts-client-identity strong{overflow-wrap:anywhere;font-size:.95rem}
+.ts-client-registration h2{font-size:clamp(2rem,3vw,3rem)}
+.ts-client-login{border-radius:28px!important;box-shadow:0 30px 90px #072c3550}
+.ts-client-login .auth-intro{background:radial-gradient(circle at top right,#278b8b85,transparent 45%),linear-gradient(135deg,#073443,#0d6870)}
+.ts-client-login .auth-form-panel{padding:clamp(1.5rem,4vw,3.7rem)}
+.ts-client-receipt{box-shadow:0 24px 70px #093d4414;border-color:#d4e9e3}
+@media(max-width:991px){.ts-client-booking-summary{position:static}.ts-client-reservations-grid{grid-template-columns:1fr}}
+@media(max-width:575px){.ts-client-stepper{gap:.45rem}.ts-client-stepper span{font-size:.68rem;padding:.55rem .7rem}.ts-client-reservation-card{padding:1.2rem}.ts-client-reservation-data{grid-template-columns:repeat(2,minmax(0,1fr))}.ts-client-reservation-actions>*{flex:1 1 auto}.ts-client-reservation-actions .btn{justify-content:center;width:100%}.ts-client-reservation-actions form{display:flex}.ts-client-booking-summary{padding:1.1rem}}
