@@ -67,7 +67,8 @@ public sealed class RecordatoriosExcursionesService(
                      (r.RecordatorioEstado == "Fallido" && r.RecordatorioProximoIntentoUtc <= ahoraUtc)) &&
                     !db.CierresOperativosTour.Any(c => c.TourId == r.TourId))
                 .Select(r => new { r.Id, r.TourId, r.CantidadPersonas, Nombre = r.Cliente!.Nombre,
-                    Correo = r.Cliente.Correo, Tour = r.Tour!.Nombre, r.Tour.Fecha, r.Tour.Hora })
+                    Correo = r.Cliente.Correo, Tour = r.Tour!.Nombre, r.Tour.Fecha, r.Tour.Hora,
+                    r.Tour.PuntoEncuentro, r.Tour.InstruccionesSalida, r.Tour.QueLlevar })
                 .SingleOrDefaultAsync(ct);
             if (item is null || string.IsNullOrWhiteSpace(item.Correo)) continue;
             var salida = item.Fecha.Date.Add(item.Hora);
@@ -106,7 +107,10 @@ public sealed class RecordatoriosExcursionesService(
                 }
                 var fecha = salida.ToString("dd/MM/yyyy HH:mm");
                 var contacto = config["Notifications:FromEmail"]!;
-                var texto = $"Hola {item.Nombre},\n\nTu excursión {item.Tour} está próxima.\nReserva #{item.Id}\nSalida: {fecha} (hora local de la agencia)\nPasajeros: {item.CantidadPersonas}\nConfirma el punto de encuentro con la agencia, llega con anticipación y lleva tu identificación.\nContacto: {contacto}\n\nTourSmart RD";
+                var encuentro = string.IsNullOrWhiteSpace(item.PuntoEncuentro) ? "Contacta a la agencia para confirmar el punto de encuentro." : "Punto de encuentro: " + item.PuntoEncuentro;
+                var salidaInfo = string.IsNullOrWhiteSpace(item.InstruccionesSalida) ? "" : "\nInstrucciones: " + item.InstruccionesSalida;
+                var equipajeInfo = string.IsNullOrWhiteSpace(item.QueLlevar) ? "" : "\nQué llevar: " + item.QueLlevar;
+                var texto = $"Hola {item.Nombre},\n\nTu excursión {item.Tour} está próxima.\nReserva #{item.Id}\nSalida: {fecha} (hora local de la agencia)\nPasajeros: {item.CantidadPersonas}\n{encuentro}{salidaInfo}{equipajeInfo}\nLlega con anticipación y lleva tu identificación.\nContacto: {contacto}\n\nTourSmart RD";
                 static string E(string? x) => WebUtility.HtmlEncode(x ?? "");
                 var html = $"""
                 <!doctype html><html lang="es"><body style="margin:0;background:#F0F5F7;font-family:Arial,sans-serif;color:#163543">
@@ -118,7 +122,10 @@ public sealed class RecordatoriosExcursionesService(
                 <p>Hola, {E(item.Nombre)}. Te recordamos los detalles de tu reserva confirmada.</p>
                 <div style="background:#F7FAFB;border:1px solid #DCE8EB;padding:20px;border-radius:12px;line-height:1.8">
                 <strong>{E(item.Tour)}</strong><br>Reserva #{item.Id}<br>Salida: {E(fecha)} (hora local de la agencia)<br>Pasajeros: {item.CantidadPersonas}</div>
-                <p>Confirma el punto de encuentro con la agencia, llega con anticipación y lleva tu identificación.</p>
+                <p><strong>{E(encuentro)}</strong></p>
+                <p style="white-space:pre-line">{E(item.InstruccionesSalida)}</p>
+                <p style="white-space:pre-line">{E(item.QueLlevar)}</p>
+                <p>Llega con anticipación y lleva tu identificación.</p>
                 <p>Contacto: {E(contacto)}</p></td></tr>
                 <tr><td style="padding:20px;background:#E8F1F3;text-align:center">TourSmart RD · Tu próxima aventura comienza aquí.</td></tr>
                 </table></td></tr></table></body></html>
