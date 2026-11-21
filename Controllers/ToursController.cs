@@ -195,7 +195,7 @@ namespace AgenciaToursAPI.Controllers
                 .SingleOrDefaultAsync();
             if (tour is null) return NotFound();
 
-            if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+            if (HorarioAgencia.Ahora >= tour.Fecha.Date.Add(tour.Hora))
                 return Conflict("El tour ya comenzó.");
 
             // No cambiar las condiciones anunciadas a clientes que ya reservaron.
@@ -215,7 +215,7 @@ namespace AgenciaToursAPI.Controllers
         {
             var fechaInicio = dto.Fecha.Date.Add(dto.Hora);
 
-            if (fechaInicio <= DateTime.Now)
+            if (fechaInicio <= HorarioAgencia.Ahora)
             {
                 return BadRequest(
                     "No se puede crear un tour con una fecha y hora pasadas."
@@ -337,7 +337,7 @@ namespace AgenciaToursAPI.Controllers
 
             var fechaInicioSolicitada = dto.Fecha.Date.Add(dto.Hora);
 
-            if (fechaInicioSolicitada <= DateTime.Now)
+            if (fechaInicioSolicitada <= HorarioAgencia.Ahora)
             {
                 return BadRequest(
                     "La fecha y hora del tour deben ser futuras."
@@ -509,7 +509,7 @@ namespace AgenciaToursAPI.Controllers
             DateTime fechaFin)
         {
             var fechaInicio = fecha.Date.Add(hora);
-            var ahora = DateTime.Now;
+            var ahora = HorarioAgencia.Ahora;
 
             if (ahora < fechaInicio)
             {
