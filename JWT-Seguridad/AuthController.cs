@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 ﻿using AgenciaToursAPI.Data;
 using AgenciaToursAPI.DTOs;
 using AgenciaToursAPI.Models;
@@ -33,6 +34,7 @@ namespace AgenciaToursAPI.Controllers
 
     
         [AllowAnonymous]
+        [EnableRateLimiting("acceso")]
         [HttpPost("login")]
         public async Task<ActionResult<LoginRespuestaDto>> Login(
             LoginDto dto)
