@@ -10,17 +10,18 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/redesign.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/toursmart-v3.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/toursmart-premium-530.css" asp-append-version="true" />
 </head>
 <body>
     <a class="ts-skip" href="#contenido-principal">Saltar al contenido</a>
-    <header class="site-header ts-v3-header">
+    <header class="site-header ts-v3-header ts-premium-header" id="cabeceraSitio">
         <nav class="navbar navbar-expand-lg container py-3" aria-label="Navegación principal">
             <a class="navbar-brand brand" asp-controller="Home" asp-action="Index"><span class="brand-mark">✦</span><span class="brand-name">TourSmart<span class="brand-rd">RD</span><small class="brand-subtitle">EXPERIENCIAS & EXCURSIONES</small></span></a>
             <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 ts-premium-main-nav">
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index" aria-current="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "page" : null)">Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Tours" asp-action="Index" aria-current="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Tours" ? "page" : null)">Explorar tours</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Tours" asp-action="Index" aria-current="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Tours" ? "page" : null)">Experiencias</a></li>
                     @if (User.IsInRole("Cliente"))
                     {
                         <li class="nav-item"><a class="nav-link" asp-controller="MiCuentaWeb" asp-action="MisReservas">Mis reservas</a></li>
@@ -28,29 +29,40 @@
                     }
                     @if (User.IsInRole("Administrador") || User.IsInRole("Operador"))
                     {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Panel" asp-action="Index">Panel</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="ReservasWeb" asp-action="Index">Reservas</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Panel" asp-action="Index">Panel de control</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="ToursAdmin" asp-action="Index">Tours</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="GeografiaAdmin" asp-action="Index">Destinos</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="CategoriasAdmin" asp-action="Index">Categorías</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="TransportesAdmin" asp-action="Index">Transportes</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="GuiasAdmin" asp-action="Index">Guías</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="AdelantosWeb" asp-action="Revision">Adelantos</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="PortadaAdmin" asp-action="Index">Portada</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="ToursAdmin" asp-action="Index">Gestionar tours</a></li>
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle ts-premium-menu-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menú de operaciones">Operaciones</button>
+                            <ul class="dropdown-menu dropdown-menu-end ts-premium-dropdown">
+                                <li><h6 class="dropdown-header">OPERACIÓN DE LA AGENCIA</h6></li>
+                                <li><a class="dropdown-item" asp-controller="AdelantosWeb" asp-action="Revision">Revisar adelantos</a></li>
+                                <li><a class="dropdown-item" asp-controller="GeografiaAdmin" asp-action="Index">Países y destinos</a></li>
+                                <li><a class="dropdown-item" asp-controller="CategoriasAdmin" asp-action="Index">Categorías</a></li>
+                                <li><a class="dropdown-item" asp-controller="TransportesAdmin" asp-action="Index">Transportes</a></li>
+                                <li><a class="dropdown-item" asp-controller="GuiasAdmin" asp-action="Index">Guías turísticos</a></li>
+                                <li><a class="dropdown-item" asp-controller="PortadaAdmin" asp-action="Index">Imagen de portada</a></li>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="ReportesWeb" asp-action="Finanzas">Reportes financieros</a></li>
+                                    <li><a class="dropdown-item" asp-controller="TableroAdelantos" asp-action="Index">Control de adelantos</a></li>
+                                }
+                            </ul>
+                        </li>
                     }
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <li class="nav-item"><a class="nav-link" asp-controller="Panel" asp-action="Index">Mi espacio</a></li>
                         <li class="nav-item">
                             <form method="post" asp-controller="Cuenta" asp-action="Salir" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <button class="btn btn-light nav-login" type="submit">Salir ↗</button>
+                                <button class="btn btn-light nav-login" type="submit">Salir <span aria-hidden="true">↗</span></button>
                             </form>
                         </li>
                     }
                     else
                     {
-                        <li class="nav-item"><a class="btn btn-light nav-login" asp-controller="Cuenta" asp-action="Acceder">Acceder ↗</a></li>
+                        <li class="nav-item"><a class="btn btn-light nav-login" asp-controller="Cuenta" asp-action="Acceder">Acceder <span aria-hidden="true">↗</span></a></li>
                     }
                 </ul>
             </div>
@@ -64,6 +76,7 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/toursmart-premium-530.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
