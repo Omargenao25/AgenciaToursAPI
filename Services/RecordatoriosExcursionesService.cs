@@ -30,7 +30,7 @@ public sealed class RecordatoriosExcursionesService(
     private async Task ProcesarAsync(CancellationToken ct)
     {
         // Fecha y hora de Tour usan la hora local del servidor, igual que reservas.
-        var ahora = DateTime.Now;
+        var ahora = HorarioAgencia.Ahora;
         var limite = ahora.AddHours(Math.Clamp(config.GetValue<int?>("Reminders:HoursBefore") ?? 24, 1, 72));
         await using var scope = scopes.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -56,7 +56,7 @@ public sealed class RecordatoriosExcursionesService(
                 .SingleOrDefaultAsync(ct);
             if (item is null || string.IsNullOrWhiteSpace(item.Correo)) continue;
             var salida = item.Fecha.Date.Add(item.Hora);
-            if (salida <= DateTime.Now || salida > limite) continue;
+            if (salida <= HorarioAgencia.Ahora || salida > limite) continue;
 
             // Reserva atómica del intento: dos instancias no envían el mismo aviso.
             // No se reintenta automáticamente porque SMTP puede aceptar un correo
@@ -76,7 +76,7 @@ public sealed class RecordatoriosExcursionesService(
                     r.Estado == EstadosReserva.Confirmada && r.TourId == item.TourId &&
                     r.Tour != null && r.Tour.Fecha == item.Fecha && r.Tour.Hora == item.Hora &&
                     !db.CierresOperativosTour.Any(c => c.TourId == r.TourId), ct)) continue;
-                if (salida <= DateTime.Now) continue;
+                if (salida <= HorarioAgencia.Ahora) continue;
                 var fecha = salida.ToString("dd/MM/yyyy HH:mm");
                 var contacto = config["Notifications:FromEmail"]!;
                 var texto = $"Hola {item.Nombre},\n\nTu excursión {item.Tour} está próxima.\nReserva #{item.Id}\nSalida: {fecha} (hora local de la agencia)\nPasajeros: {item.CantidadPersonas}\nConfirma el punto de encuentro con la agencia, llega con anticipación y lleva tu identificación.\nContacto: {contacto}\n\nTourSmart RD";
