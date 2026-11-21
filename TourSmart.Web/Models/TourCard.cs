@@ -4,6 +4,9 @@ public sealed class TourCard
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = "";
+    public string? PuntoEncuentro { get; set; }
+    public string? InstruccionesSalida { get; set; }
+    public string? QueLlevar { get; set; }
     public string? ImagenUrl { get; set; }
     public string? ImagenDestinoUrl { get; set; }
     public string? ImagenMostrarUrl => !string.IsNullOrWhiteSpace(ImagenUrl) ? ImagenUrl : ImagenDestinoUrl;
