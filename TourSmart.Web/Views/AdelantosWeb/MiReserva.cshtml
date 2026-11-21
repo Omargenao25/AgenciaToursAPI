@@ -149,7 +149,7 @@
     if (!campo || !texto) return;
     campo.addEventListener("change", () => {
         const archivo = campo.files && campo.files[0];
-        if (!archivo) { texto.textContent = "Selecciona el comprobante que deseas enviar para revisión."; return; }
+        if (!archivo) { campo.setCustomValidity(""); texto.textContent = "Selecciona el comprobante que deseas enviar para revisión."; return; }
         const maxBytes = 2 * 1024 * 1024;
         if (archivo.size <= 0 || archivo.size > maxBytes) {
             texto.textContent = "El archivo debe tener un tamaño mayor que cero y máximo 2 MB.";
