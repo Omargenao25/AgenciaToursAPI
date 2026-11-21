@@ -119,7 +119,8 @@ public sealed class ToursAdminClient(HttpClient http) : IToursAdminClient
         var payload = new
         {
             model.Nombre, model.PaisId, model.DestinoId, model.CategoriaId, model.GuiaId,
-            model.TransporteId, model.Fecha, model.Hora, model.Precio, model.CapacidadMaxima, model.ImagenUrl
+            model.TransporteId, model.Fecha, model.Hora, model.Precio, model.CapacidadMaxima, model.ImagenUrl,
+            model.PuntoEncuentro, model.InstruccionesSalida, model.QueLlevar
         };
         var method = model.Id == 0 ? HttpMethod.Post : HttpMethod.Put;
         var route = model.Id == 0 ? "api/Tours" : $"api/Tours/{model.Id}";
