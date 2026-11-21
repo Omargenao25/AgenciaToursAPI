@@ -131,3 +131,11 @@ main{overflow:clip}
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
  .ts-premium-reveal{opacity:1!important;transform:none!important}
 }
+
+/* Toolbar de ordenamiento progresivo: no cambia filtros ni datos de API. */
+.ts-premium-catalog-toolbar{padding:1.25rem 0;border-top:1px solid #d8e9e4;border-bottom:1px solid #d8e9e4}
+.ts-premium-sort-wrap .form-label{white-space:nowrap;font-size:.84rem;color:#55767b}
+.ts-premium-sort-wrap .form-select{min-width:200px;min-height:44px;background-color:#fff}
+.ts-premium-tour-grid>.ts-premium-sort-item{display:flex;flex-direction:column}
+.ts-premium-tour-grid>.ts-premium-sort-item>.tour-card{width:100%}
+@media(max-width:575px){.ts-premium-sort-wrap,.ts-premium-sort-wrap .form-select{width:100%}}
