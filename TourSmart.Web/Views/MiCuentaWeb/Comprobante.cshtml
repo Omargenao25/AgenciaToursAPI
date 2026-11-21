@@ -36,6 +36,7 @@
     <div class="container receipt-page">
         <div class="receipt-actions d-flex flex-wrap gap-3 mb-4">
             <a class="btn btn-dark-pill" asp-controller="MiCuentaWeb" asp-action="MisReservas">← Mis reservas</a>
+            <a class="btn btn-outline-primary" asp-controller="AdelantosWeb" asp-action="MiReserva" asp-route-id="@Model.Id">Estado de adelanto</a>
             <button class="btn btn-accent" type="button" onclick="window.print()">Imprimir / Guardar PDF ↗</button>
         </div>
         <article class="receipt-card ts-client-receipt" aria-label="Comprobante de reserva">
