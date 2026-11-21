@@ -49,7 +49,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
         {
             var model = await adminApi.ObtenerPasajerosAsync(jwt, reservaId, ct);
             if (model.Estado == "Cancelada" ||
-                DateTime.Now >= model.InicioTour.Date.Add(model.Hora))
+                HorarioAgencia.Ahora >= model.InicioTour.Date.Add(model.Hora))
             {
                 TempData["Error"] = "Esta reserva ya no permite modificar pasajeros.";
                 return RedirectToAction(nameof(Index));
@@ -372,6 +372,9 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
                 GuiaId = tour.GuiaId, TransporteId = tour.TransporteId,
                 Fecha = tour.Fecha, Hora = tour.Hora, Precio = tour.Precio,
                 ImagenUrl = tour.ImagenUrl,
+                PuntoEncuentro = tour.PuntoEncuentro,
+                InstruccionesSalida = tour.InstruccionesSalida,
+                QueLlevar = tour.QueLlevar,
                 CapacidadMaxima = tour.CapacidadMaxima, CuposReservados = tour.CuposReservados
             };
             await CargarCatalogos(model, token, ct);
@@ -408,7 +411,7 @@ public sealed class ToursAdminController(IToursApiClient toursApi, IToursAdminCl
                     ModelState.AddModelError("", "No puedes cambiar fecha, hora, país, destino, guía ni transporte mientras existan reservas activas.");
             }
 
-            if (model.Fecha.Date.Add(model.Hora) <= DateTime.Now)
+            if (model.Fecha.Date.Add(model.Hora) <= HorarioAgencia.Ahora)
                 ModelState.AddModelError(nameof(model.Fecha), "La fecha y hora deben ser futuras.");
 
             if (ModelState.IsValid)
