@@ -201,3 +201,34 @@ main{overflow:clip}
 .ts-client-receipt{box-shadow:0 24px 70px #093d4414;border-color:#d4e9e3}
 @media(max-width:991px){.ts-client-booking-summary{position:static}.ts-client-reservations-grid{grid-template-columns:1fr}}
 @media(max-width:575px){.ts-client-stepper{gap:.45rem}.ts-client-stepper span{font-size:.68rem;padding:.55rem .7rem}.ts-client-reservation-card{padding:1.2rem}.ts-client-reservation-data{grid-template-columns:repeat(2,minmax(0,1fr))}.ts-client-reservation-actions>*{flex:1 1 auto}.ts-client-reservation-actions .btn{justify-content:center;width:100%}.ts-client-reservation-actions form{display:flex}.ts-client-booking-summary{padding:1.1rem}}
+
+/* Fase 5.32 | Seguimiento posreserva del viajero.
+   Estados de comprobante y pagos son informativos, jamás aprobación automática. */
+.ts-client-payment-journey{padding:clamp(1.3rem,3vw,2.1rem);border:1px solid #dcece7;border-radius:25px;background:linear-gradient(135deg,#fff,#f1faf7);box-shadow:0 20px 55px #0c4a4910}
+.ts-client-payment-steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.ts-client-payment-steps li{position:relative;padding:1.3rem 1rem;border:1px solid #dceae6;border-radius:16px;background:#fff;display:flex;align-items:flex-start;gap:.85rem;min-width:0}
+.ts-client-step-number{display:grid;place-items:center;border:1px solid #d7e6e2;background:#eef5f3;border-radius:50%;min-width:37px;height:37px;color:#517279;font-weight:800}
+.ts-client-payment-steps strong{display:block;font-size:.87rem;color:#2e555a;margin-bottom:.45rem}
+.ts-client-payment-steps small{display:block;font-size:.75rem;line-height:1.55;color:#668085}
+.ts-client-payment-steps li.is-done{background:#e9f8ee;border-color:#bfe7d0}
+.ts-client-payment-steps li.is-done .ts-client-step-number{background:#177a66;border-color:#177a66;color:#fff}
+.ts-client-payment-steps li.is-current{background:#e8f4f7;border-color:#bcdfe4}
+.ts-client-payment-steps li.is-current .ts-client-step-number{background:#0a6877;color:white;border-color:#0a6877}
+.ts-client-payment-message{border-radius:16px;padding:1.15rem 1.35rem;font-size:.92rem}
+.ts-client-payment-message.is-muted{background:#f0f3f3;color:#495c63;border:1px solid #dbe4e4}
+.ts-client-payment-form,.ts-client-payment-history{border-radius:24px!important;box-shadow:0 18px 50px #063d4810}
+.ts-client-payment-form h2{font-size:1.8rem}
+.ts-client-payment-note{border-radius:17px}
+.ts-client-file-feedback{margin-top:.6rem;padding:.75rem 1rem;border-radius:12px;background:#f1f8f5;border:1px dashed #b8d8cd;color:#486b68;font-size:.8rem;overflow-wrap:anywhere}
+.ts-client-proof-status{display:inline-block;border-radius:999px;padding:.38rem .75rem;font-weight:750;font-size:.76rem;background:#eaf4f6;color:#0c5363}
+.ts-client-proof-status.is-approved{background:#dcf9e8;color:#166b44}
+.ts-client-proof-status.is-rejected{background:#ffebe9;color:#a33835}
+.ts-client-proof-status.is-review{background:#fff3d9;color:#8a580c}
+.ts-client-next-action{display:flex;flex-direction:column;gap:.28rem;margin:-.35rem 0 1.3rem;padding:1rem 1.1rem;border-radius:14px;font-size:.78rem;line-height:1.55}
+.ts-client-next-action strong{font-size:.83rem}
+.ts-client-next-action.is-pending{background:#fff5df;border:1px solid #f4dfb8;color:#735019}
+.ts-client-next-action.is-confirmed{background:#e7f8ec;border:1px solid #c3e8cd;color:#226545}
+.ts-client-next-action.is-cancelled{background:#f1f4f4;border:1px solid #dce4e3;color:#526669}
+.ts-client-payment-history .table td{overflow-wrap:anywhere}
+@media(max-width:991px){.ts-client-payment-steps{grid-template-columns:1fr}}
+@media(max-width:575px){.ts-client-payment-journey{padding:1.1rem}.ts-client-payment-steps li{padding:1rem}.ts-client-payment-history{padding:1rem!important}.ts-client-payment-history .table{min-width:500px}}
