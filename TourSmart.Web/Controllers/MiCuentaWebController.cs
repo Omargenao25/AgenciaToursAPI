@@ -390,7 +390,7 @@ public sealed class MiCuentaWebController(
         try
         {
             if (!await CargarReserva(model, jwt, ct)) return NotFound();
-            if (!model.Tour!.Reservable || model.Tour.Fecha.Date.Add(model.Tour.Hora) <= DateTime.Now)
+            if (!model.Tour!.Reservable || model.Tour.Fecha.Date.Add(model.Tour.Hora) <= HorarioAgencia.Ahora)
             {
                 TempData["Error"] = "El tour seleccionado ya no tiene disponibilidad.";
                 return RedirectToAction("Index", "Tours");
@@ -418,7 +418,7 @@ public sealed class MiCuentaWebController(
         try
         {
             if (!await CargarReserva(model, jwt, ct)) return NotFound();
-            if (!model.Tour!.Reservable || model.Tour.Fecha.Date.Add(model.Tour.Hora) <= DateTime.Now)
+            if (!model.Tour!.Reservable || model.Tour.Fecha.Date.Add(model.Tour.Hora) <= HorarioAgencia.Ahora)
                 ModelState.AddModelError("", "Este tour ya no está disponible.");
             if (model.CantidadPersonas > model.Tour.CuposDisponibles)
                 ModelState.AddModelError(nameof(model.CantidadPersonas), "No hay suficientes plazas disponibles.");
