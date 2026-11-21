@@ -322,7 +322,7 @@ public sealed class MiCuentaController(
         if (tour is null) return NotFound("El tour asociado ya no existe.");
         if (await db.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId))
             return Conflict("La salida ya fue cerrada operativamente.");
-        if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+        if (HorarioAgencia.Ahora >= tour.Fecha.Date.Add(tour.Hora))
             return Conflict("No se puede cancelar después del inicio del tour.");
 
         reserva.Estado = EstadosReserva.Cancelada;
@@ -371,7 +371,7 @@ public sealed class MiCuentaController(
         if (tour is null) return NotFound("El tour no existe.");
         if (await db.CierresOperativosTour.AnyAsync(c => c.TourId == dto.TourId))
             return Conflict("La salida ya fue cerrada operativamente.");
-        if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+        if (HorarioAgencia.Ahora >= tour.Fecha.Date.Add(tour.Hora))
             return Conflict("El tour ya comenzó.");
 
         if (!await db.MetodosPago.AnyAsync(m => m.Id == dto.MetodoPagoId))
@@ -387,7 +387,7 @@ public sealed class MiCuentaController(
         {
             ClienteId = clienteId.Value, TourId = dto.TourId,
             MetodoPagoId = dto.MetodoPagoId, CantidadPersonas = dto.CantidadPersonas,
-            FechaReserva = DateTime.Now, Estado = EstadosReserva.Pendiente,
+            FechaReserva = HorarioAgencia.Ahora, Estado = EstadosReserva.Pendiente,
             VencePendienteUtc = DateTime.UtcNow.AddHours(tour.HorasLimiteAdelanto),
             Total = Math.Round(tour.Precio * dto.CantidadPersonas, 2)
         };
