@@ -557,6 +557,18 @@ namespace AgenciaToursAPI.Migrations
                     b.Property<decimal>("Itbis")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("PuntoEncuentro")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("InstruccionesSalida")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("QueLlevar")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
