@@ -70,52 +70,15 @@ namespace AgenciaToursAPI.Controllers
             return Ok(usuario);
         }
 
-        [AllowAnonymous]
+        // Registro alternativo retirado: generaba cuentas sin ficha Cliente y
+        // evitaba el proceso de verificación de correo.
+        // Los viajeros deben registrarse en api/MiCuenta/registrar.
         [HttpPost]
-        public async Task<ActionResult<UsuarioRespuestaDto>>
-            PostUsuario(CrearUsuarioDto dto)
-        {
-            var correoNormalizado = dto.Correo
-                .Trim()
-                .ToLowerInvariant();
-
-            var correoExiste = await _context.Usuarios
-                .AnyAsync(u => u.Correo == correoNormalizado);
-
-            if (correoExiste)
+        public IActionResult PostUsuario() =>
+            StatusCode(StatusCodes.Status410Gone, new
             {
-                return BadRequest( "Ya existe un usuario con ese correo.");
-            }
-
-            var usuario = new Usuario
-            {
-                Nombre = dto.Nombre.Trim(),
-                Correo = correoNormalizado,
-                Rol = Roles.Cliente
-            };
-
-            usuario.PasswordHash = _passwordHasher.HashPassword(
-                usuario,
-                dto.Contraseña
-            );
-
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            var respuesta = new UsuarioRespuestaDto
-            {
-                Id = usuario.Id,
-                Nombre = usuario.Nombre,
-                Correo = usuario.Correo,
-                Rol = usuario.Rol
-            };
-
-            return CreatedAtAction(
-                nameof(GetUsuario),
-                new { id = usuario.Id },
-                respuesta
-            );
-        }
+                mensaje = "Ruta de registro retirada. Utiliza /viajero/registro o api/MiCuenta/registrar."
+            });
 
 
         [HttpPut("{id}")]
