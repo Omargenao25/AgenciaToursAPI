@@ -27,7 +27,7 @@ public sealed class TourFormularioViewModel
     public int TransporteId { get; set; }
     [Required]
     [DataType(DataType.Date)]
-    public DateTime Fecha { get; set; } = DateTime.Today.AddDays(7);
+    public DateTime Fecha { get; set; } = TourSmart.Web.Services.HorarioAgencia.Ahora.Date.AddDays(7);
     [Required]
     public TimeSpan Hora { get; set; } = new(9, 0, 0);
     [Range(typeof(decimal), "0.01", "10000000", ErrorMessage = "El precio debe ser mayor que cero.")]
