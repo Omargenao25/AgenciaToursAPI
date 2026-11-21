@@ -133,6 +133,27 @@ namespace AgenciaToursAPI.Data
                 .HasIndex(r => new { r.Estado, r.VencePendienteUtc });
 
             modelBuilder.Entity<Reserva>()
+                .Property(r => r.RecordatorioEstado)
+                .HasMaxLength(20)
+                .HasDefaultValue("Pendiente");
+
+            modelBuilder.Entity<Reserva>()
+                .Property(r => r.RecordatorioIntentos)
+                .HasDefaultValue(0);
+
+            modelBuilder.Entity<Reserva>()
+                .HasIndex(r => new { r.RecordatorioEstado, r.RecordatorioProximoIntentoUtc });
+
+            modelBuilder.Entity<Reserva>()
+                .ToTable(t => t.HasCheckConstraint("CK_Reservas_RecordatorioEstado",
+                    "[RecordatorioEstado] IN (N'Pendiente', N'Enviando', N'Fallido', N'Enviado', N'Revisar', N'Agotado')"));
+
+            modelBuilder.Entity<Reserva>()
+                .ToTable(t => t.HasCheckConstraint("CK_Reservas_RecordatorioIntentos",
+                    "[RecordatorioIntentos] BETWEEN 0 AND 3"));
+
+
+            modelBuilder.Entity<Reserva>()
                 .Property(r => r.Estado)
                 .HasMaxLength(20)
                 .HasDefaultValue(EstadosReserva.Confirmada);
