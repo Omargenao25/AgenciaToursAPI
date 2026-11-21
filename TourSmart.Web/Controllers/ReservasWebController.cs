@@ -32,7 +32,7 @@ public sealed class ReservasWebController(IReservasAdminClient reservasApi, ITou
             .Select(x => new SelectListItem(x.Nombre, x.Id.ToString()))
             .ToList();
         var toursDisponibles = tours
-            .Where(x => x.Estado == "Disponible" && !x.CerradoOperativo && x.Fecha.Date.Add(x.Hora) > DateTime.Now && x.CuposDisponibles > 0)
+            .Where(x => x.Estado == "Disponible" && !x.CerradoOperativo && x.Fecha.Date.Add(x.Hora) > HorarioAgencia.Ahora && x.CuposDisponibles > 0)
             .ToList();
         model.CuposPorTour = toursDisponibles.ToDictionary(x => x.Id, x => x.CuposDisponibles);
         model.Tours = toursDisponibles
