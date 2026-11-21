@@ -152,6 +152,12 @@ public sealed class MiCuentaController(
             c.PaisEmisorDocumento == pais && c.NumeroDocumento == numero))
             return Conflict("El documento ya está registrado. Contacta a la agencia para verificar su titularidad.");
 
+        // Sin correo configurado, nunca dar por verificada una cuenta nueva.
+        // Fallar cerrado evita que una caída de SMTP equivalga a confirmar identidad.
+        if (!verificacion.Habilitado)
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                "El registro de viajeros no está disponible temporalmente: la verificación de correo requiere configuración válida.");
+
         // Registro atómico para que nunca exista una cuenta nueva sin su ficha Cliente.
         await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);
         try
@@ -172,7 +178,7 @@ public sealed class MiCuentaController(
                 Nombre = cliente.Nombre + " " + cliente.Apellido,
                 Correo = correo, Rol = Roles.Cliente,
                 ClienteId = cliente.Id,
-                CorreoConfirmado = !verificacion.Habilitado
+                CorreoConfirmado = false
             };
             usuario.PasswordHash = passwordHasher.HashPassword(usuario, dto.Contrasena);
             db.Usuarios.Add(usuario);
