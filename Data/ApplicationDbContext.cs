@@ -47,7 +47,7 @@ namespace AgenciaToursAPI.Data
             // Unicidad a nivel SQL para evitar registros duplicados por solicitudes concurrentes.
             modelBuilder.Entity<Usuario>()
                 .Property(u => u.CorreoConfirmado)
-                .HasDefaultValue(true)
+                .HasDefaultValue(false)
                 .ValueGeneratedNever();
 
             modelBuilder.Entity<VerificacionCorreo>()
