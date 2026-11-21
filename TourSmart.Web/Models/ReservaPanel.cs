@@ -9,7 +9,7 @@ public sealed class ReservaPanel
     public DateTime? FechaTour { get; set; }
     public TimeSpan? HoraTour { get; set; }
     public bool TourPorIniciar => FechaTour.HasValue && HoraTour.HasValue &&
-        DateTime.Now < FechaTour.Value.Date.Add(HoraTour.Value);
+        TourSmart.Web.Services.HorarioAgencia.Ahora < FechaTour.Value.Date.Add(HoraTour.Value);
     public bool PuedeConfirmar => Estado == "Pendiente" && TourPorIniciar;
     public bool PuedeCancelar => (Estado is "Pendiente" or "Confirmada") && TourPorIniciar;
     public DateTime FechaReserva { get; set; }
