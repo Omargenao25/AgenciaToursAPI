@@ -5,15 +5,23 @@
     var fotoPortada = TourSmart.Web.Services.PortadaImagen.Obtener(Ambiente);
 }
 <section class="hero ts-v3-hero">
-    <div class="container hero-content">
+    <div class="container hero-content ts-premium-hero-layout">
         <div class="hero-text">
-            <div class="hero-eyebrow"><span class="live-dot"></span> UNA NUEVA FORMA DE EXPLORAR</div>
-            <h1>La aventura comienza <em>antes de partir.</em></h1>
-            <p class="hero-description">Descubre lugares increíbles, encuentra la excursión ideal y organiza cada detalle sin complicaciones. Tu próxima historia empieza aquí.</p>
+            <div class="hero-eyebrow"><span class="live-dot"></span> EL CARIBE TE ESPERA</div>
+            <h1>El mundo está lleno de <em>lugares por descubrir.</em></h1>
+            <p class="hero-description">Explora excursiones memorables, descubre nuevos destinos y reserva tu próximo viaje con toda la información a tu alcance.</p>
             <div class="hero-actions">
                 <a asp-controller="Tours" asp-action="Index" class="btn btn-accent btn-lg">Descubrir excursiones <span>↗</span></a>
                 <a href="#como-funciona" class="hero-secondary-link">Así funciona <span>↓</span></a>
             </div>
+            <form method="get" asp-controller="Tours" asp-action="Index" class="ts-premium-hero-search" aria-label="Buscar excursiones">
+                <label for="buscarDesdeInicio" class="ts-premium-search-label">¿A dónde quieres ir?</label>
+                <div class="ts-premium-search-inner">
+                    <span class="ts-premium-search-icon" aria-hidden="true">⌕</span>
+                    <input id="buscarDesdeInicio" name="busqueda" type="search" maxlength="100" placeholder="Playa, montaña, aventura..." autocomplete="off" />
+                    <button type="submit" class="btn btn-accent">Buscar tours <span aria-hidden="true">↗</span></button>
+                </div>
+            </form>
             <div class="hero-proof"><div class="avatar-group"><span>☼</span><span>✈</span><span>✦</span></div><p><strong>Viaja con más confianza.</strong><br />Países, destinos, plazas y reservas en un solo lugar.</p></div>
         </div>
         <div class="hero-visual ts-v3-visual @(fotoPortada is null ? "" : "ts-hero-con-foto")" aria-hidden="true">
@@ -22,9 +30,9 @@
                 <img class="ts-hero-main-image" src="@fotoPortada" alt="" loading="eager" fetchpriority="high" onerror="this.style.display='none';this.parentElement.classList.remove('ts-hero-con-foto')" />
             }
             <div class="sun-orb"></div><div class="landscape-back"></div><div class="landscape-front"></div><div class="ts-v3-visual-orbit"></div>
-            <div class="floating-tag floating-tag-one">✦ Rutas que inspiran</div>
-            <div class="floating-tag floating-tag-two">↗ Tu próxima escapada</div>
-            <div class="vertical-word">DISCOVER MORE · TOURSMART RD</div>
+            <div class="floating-tag floating-tag-one">✦ Recuerdos inolvidables</div>
+            <div class="floating-tag floating-tag-two">⌖ Destinos por explorar</div>
+            <div class="vertical-word">DISCOVER THE CARIBBEAN · TOURSMART RD</div>
         </div>
     </div>
     <div class="hero-bottom container"><span>TOURSMART RD · EXPLORA MÁS</span><span>TU PRÓXIMA HISTORIA ESTÁ AFUERA <span>↗</span></span></div>
