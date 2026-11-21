@@ -8,37 +8,46 @@
 @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
 @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
 <div class="dashboard-head mb-4"><h2>Mis <em>viajes.</em></h2><div class="d-flex gap-2 flex-wrap"><a class="btn btn-dark-pill" asp-controller="MiCuentaWeb" asp-action="Perfil">Mi perfil ↗</a><a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Explorar tours ↗</a></div></div>
-<div class="dashboard-table"><div class="table-responsive"><table class="table align-middle">
-<thead><tr><th>Reserva</th><th>Excursión</th><th>Fecha</th><th>Personas</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
-<tbody>
-@foreach (var item in Model)
+<div class="ts-client-reservations-grid">
+@if (!Model.Any())
 {
-<tr>
-  <td>#@item.Id</td>
-  <td><strong>@item.Tour</strong></td>
-  <td>@(item.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</td>
-  <td>@item.CantidadPersonas</td>
-  <td>RD$ @item.Total.ToString("N2")</td>
-  <td><span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span></td>
-  <td>
-    <a class="btn btn-sm btn-outline-secondary me-2 mb-1" asp-controller="MiCuentaWeb" asp-action="Comprobante" asp-route-id="@item.Id">Ver comprobante</a>
-    <a class="btn btn-sm btn-outline-primary me-2 mb-1" asp-controller="AdelantosWeb" asp-action="MiReserva" asp-route-id="@item.Id">Adelanto / pago</a>
-    @if (item.PuedeCancelar)
-    {
-      <form asp-controller="MiCuentaWeb" asp-action="CancelarMiReserva" asp-route-id="@item.Id" method="post" class="d-inline mi-cancel-form" data-reserva="@item.Id" data-tour="@item.Tour">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-sm btn-outline-danger">Cancelar reserva</button>
-      </form>
-    }
-    else
-    {
-      <span class="text-secondary small">—</span>
-    }
-  </td>
-</tr>
+  <div class="ts-client-empty">
+    <span class="ts-client-empty-icon" aria-hidden="true">✈</span>
+    <h3>Tu próxima aventura comienza aquí</h3>
+    <p>Aún no tienes reservas. Explora las excursiones disponibles y encuentra la que más te inspire.</p>
+    <a class="btn btn-accent" asp-controller="Tours" asp-action="Index">Descubrir experiencias ↗</a>
+  </div>
 }
-@if (!Model.Any()) { <tr><td colspan="7" class="text-secondary py-4">No tienes reservas registradas en tu cuenta.</td></tr> }
-</tbody></table></div></div>
+else
+{
+  @foreach (var item in Model.OrderByDescending(x => x.FechaReserva))
+  {
+    <article class="ts-client-reservation-card">
+      <div class="ts-client-reservation-top">
+        <span class="ts-client-booking-id">RESERVA #@item.Id</span>
+        <span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span>
+      </div>
+      <h3>@item.Tour</h3>
+      <div class="ts-client-reservation-data">
+        <div><span>Salida</span><strong>@(item.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</strong></div>
+        <div><span>Viajeros</span><strong>@item.CantidadPersonas</strong></div>
+        <div><span>Total de la reserva</span><strong>RD$ @item.Total.ToString("N2")</strong></div>
+      </div>
+      <div class="ts-client-reservation-actions">
+        <a class="btn btn-dark-pill btn-sm" asp-controller="MiCuentaWeb" asp-action="Comprobante" asp-route-id="@item.Id">Ver comprobante ↗</a>
+        <a class="btn btn-outline-primary btn-sm" asp-controller="AdelantosWeb" asp-action="MiReserva" asp-route-id="@item.Id">Adelanto / pago</a>
+        @if (item.PuedeCancelar)
+        {
+          <form asp-controller="MiCuentaWeb" asp-action="CancelarMiReserva" asp-route-id="@item.Id" method="post" class="mi-cancel-form" data-reserva="@item.Id" data-tour="@item.Tour">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-outline-danger btn-sm">Cancelar reserva</button>
+          </form>
+        }
+      </div>
+    </article>
+  }
+}
+</div>
 <p class="dashboard-footnote">Puedes cancelar una reserva pendiente o confirmada antes del inicio de su tour. Se conserva el registro en tu historial y las plazas vuelven a estar disponibles.</p>
 </div></section>
 
