@@ -28,6 +28,27 @@ else
         <span class="reservation-status @(item.Estado == "Confirmada" ? "is-confirmed" : item.Estado == "Cancelada" ? "is-cancelled" : "is-pending")">@item.Estado</span>
       </div>
       <h3>@item.Tour</h3>
+      @if (item.Estado == "Pendiente")
+      {
+        <div class="ts-client-next-action is-pending">
+          <strong>¿Qué sigue?</strong>
+          <span>Revisa el adelanto requerido y las instrucciones bancarias de la agencia. Tu solicitud aún no está confirmada.</span>
+        </div>
+      }
+      else if (item.Estado == "Confirmada")
+      {
+        <div class="ts-client-next-action is-confirmed">
+          <strong>¡Reserva confirmada!</strong>
+          <span>Consulta los detalles de salida y conserva tu constancia junto con tu identificación.</span>
+        </div>
+      }
+      else if (item.Estado == "Cancelada")
+      {
+        <div class="ts-client-next-action is-cancelled">
+          <strong>Reserva cancelada</strong>
+          <span>Puedes conservar la constancia histórica y consultar nuevas experiencias.</span>
+        </div>
+      }
       <div class="ts-client-reservation-data">
         <div><span>Salida</span><strong>@(item.FechaTour?.ToString("dd/MM/yyyy") ?? "Por confirmar")</strong></div>
         <div><span>Viajeros</span><strong>@item.CantidadPersonas</strong></div>
@@ -35,6 +56,10 @@ else
       </div>
       <div class="ts-client-reservation-actions">
         <a class="btn btn-dark-pill btn-sm" asp-controller="MiCuentaWeb" asp-action="Comprobante" asp-route-id="@item.Id">Ver comprobante ↗</a>
+        @if (item.TourId > 0)
+        {
+          <a class="btn btn-outline-secondary btn-sm" asp-controller="Tours" asp-action="Detalle" asp-route-id="@item.TourId">Ver excursión</a>
+        }
         <a class="btn btn-outline-primary btn-sm" asp-controller="AdelantosWeb" asp-action="MiReserva" asp-route-id="@item.Id">Adelanto / pago</a>
         @if (item.PuedeCancelar)
         {
