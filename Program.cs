@@ -9,6 +9,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json;
 using System.Security.Claims;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -168,6 +170,38 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// Límites por IP para puntos públicos sensibles. En producción configurar
+// proxy inverso confiable antes de usar X-Forwarded-For (no confiar en cabeceras externas).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("acceso", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "desconocido",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 12, Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0, AutoReplenishment = true
+            }));
+    options.AddPolicy("registro", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "desconocido",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 4, Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0, AutoReplenishment = true
+            }));
+    options.AddPolicy("correo", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "desconocido",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 8, Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0, AutoReplenishment = true
+            }));
+});
+
+
 
 builder.Services.AddScoped<CorreoRecuperacionService>();
 builder.Services.AddScoped<NotificacionesReservaService>();
@@ -258,6 +292,8 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
