@@ -6,6 +6,10 @@
     var enRevision = Model.Comprobantes.Any(x => x.Estado == "Pendiente");
     var margenRevision = enRevision && Model.VencePendienteUtc.HasValue &&
         DateTime.UtcNow < Model.VencePendienteUtc.Value.AddHours(2);
+    var confirmado = Model.EstadoReserva == "Confirmada";
+    var cancelado = Model.EstadoReserva == "Cancelada";
+    var adeudoCubierto = Model.FaltanteAdelanto <= 0;
+    var fechaReferenciaUtc = Model.VencePendienteUtc?.ToString("dd/MM/yyyy HH:mm") ?? "No disponible";
 }
 <section class="inner-hero dashboard-hero"><div class="container">
     <a asp-controller="MiCuentaWeb" asp-action="MisReservas" class="back-link">← Mis reservas</a>
@@ -16,12 +20,30 @@
 <section class="section-space"><div class="container">
     @if (TempData["Exito"] is string exito) { <div class="alert alert-success" role="status">@exito</div> }
     @if (TempData["Error"] is string error) { <div class="alert alert-warning" role="alert">@error</div> }
+    <section class="ts-client-payment-journey mb-4" aria-label="Seguimiento de la reserva">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div><span class="eyebrow">ESTADO DEL VIAJE</span><h2 class="h3 mt-2 mb-0">Tu reserva, <em>paso a paso.</em></h2></div>
+            <span class="reservation-status @(confirmado ? "is-confirmed" : cancelado ? "is-cancelled" : "is-pending")">@Model.EstadoReserva</span>
+        </div>
+        @if (cancelado)
+        {
+            <p class="ts-client-payment-message is-muted mb-0"><strong>Reserva cancelada.</strong> Conservamos el historial de tus comprobantes. Si necesitas ayuda con una devolución, contacta a la agencia.</p>
+        }
+        else
+        {
+            <ol class="ts-client-payment-steps">
+                <li class="is-done"><span class="ts-client-step-number">1</span><div><strong>Solicitud recibida</strong><small>Tu reserva está registrada en TourSmart RD.</small></div></li>
+                <li class="@(adeudoCubierto ? "is-done" : "is-current")"><span class="ts-client-step-number">2</span><div><strong>Adelanto por verificar</strong><small>@(adeudoCubierto ? "El mínimo se cubrió con pagos registrados, netos de devoluciones." : enRevision ? "Tu comprobante está esperando revisión humana." : "Consulta las instrucciones de la agencia y reporta tu comprobante.")</small></div></li>
+                <li class="@(confirmado ? "is-done" : "")"><span class="ts-client-step-number">3</span><div><strong>Confirmación de la agencia</strong><small>@(confirmado ? "La reserva ha sido confirmada." : "La agencia revisa el adelanto antes de confirmar tu viaje.")</small></div></li>
+            </ol>
+        }
+    </section>
     <div class="row g-3 mb-4">
         <div class="col-md-4"><div class="metric-card"><span>Total de la reserva</span><strong>RD$ @Model.Total.ToString("N2")</strong></div></div>
         <div class="col-md-4"><div class="metric-card"><span>Adelanto mínimo (@Model.PorcentajeAdelanto%)</span><strong>RD$ @Model.AdelantoMinimo.ToString("N2")</strong></div></div>
         <div class="col-md-4"><div class="metric-card metric-card-accent"><span>Faltante para cubrir adelanto</span><strong>RD$ @Model.FaltanteAdelanto.ToString("N2")</strong></div></div>
     </div>
-    <div class="alert alert-info"><strong>Importante:</strong> reportar una transferencia no equivale a pagar ni a confirmar la reserva. El personal debe verificar el dinero recibido. Si envías un comprobante antes del vencimiento, la agencia dispone de hasta 2 horas adicionales para revisarlo. Esto no equivale a un pago aprobado.</div>
+    <div class="alert alert-info ts-client-payment-note"><strong>Importante:</strong> reportar una transferencia no equivale a pagar ni a confirmar la reserva. El personal debe verificar el dinero recibido. Si envías un comprobante antes del vencimiento, la agencia dispone de hasta 2 horas adicionales para revisarlo. Esto no equivale a un pago aprobado.</div>
     @if (Model.VencePendienteUtc is DateTime fechaLimite && pendiente)
     {
         <div class="alert @(vencido ? "alert-warning" : "alert-secondary")">
@@ -32,7 +54,7 @@
     }
     <div class="row g-4 align-items-start">
         <div class="col-lg-5">
-            <div class="tour-admin-form">
+            <div class="tour-admin-form ts-client-payment-form">
                 <span class="eyebrow">PAGO POR TRANSFERENCIA</span>
                 <h2 class="h3 mt-2">Reportar <em>comprobante.</em></h2>
                 <p class="text-secondary">Solo transfiere a una cuenta verificada directamente con la agencia. No utilices números bancarios recibidos por mensajes desconocidos.</p>
@@ -79,6 +101,7 @@
                             <input asp-for="Archivo" class="form-control" type="file" required
                                    accept="application/pdf,image/jpeg,image/png,image/webp"/>
                             <small class="text-secondary">PDF, JPG, PNG o WebP · máximo 2 MB</small>
+                            <div id="detalleArchivoCliente" class="ts-client-file-feedback" role="status" aria-live="polite">Selecciona el comprobante que deseas enviar para revisión.</div>
                         </div>
                         <button type="submit" class="btn btn-accent w-100">Enviar comprobante para revisión</button>
                     </form>
@@ -86,7 +109,7 @@
             </div>
         </div>
         <div class="col-lg-7">
-            <div class="dashboard-table p-4">
+            <div class="dashboard-table p-4 ts-client-payment-history">
                 <h2 class="h4">Historial de comprobantes</h2>
                 <p class="text-secondary small">Solo los pagos aprobados por la agencia se incluyen en el saldo recibido.</p>
                 <div class="table-responsive">
@@ -99,7 +122,7 @@
                                 <td>@item.CreadoUtc.ToString("dd/MM/yyyy HH:mm") UTC</td>
                                 <td>@item.Referencia</td>
                                 <td>RD$ @item.MontoReportado.ToString("N2")</td>
-                                <td><strong>@item.Estado</strong>
+                                <td><span class="ts-client-proof-status @(item.Estado == "Aprobado" ? "is-approved" : item.Estado == "Rechazado" ? "is-rejected" : "is-review")">@item.Estado</span>
                                     @if (!string.IsNullOrWhiteSpace(item.MotivoRevision))
                                     { <small class="d-block text-secondary">@item.MotivoRevision</small> }
                                 </td>
@@ -117,3 +140,25 @@
         </div>
     </div>
 </div></section>
+
+@section Scripts {
+<script>
+(() => {
+    const campo = document.getElementById("Archivo");
+    const texto = document.getElementById("detalleArchivoCliente");
+    if (!campo || !texto) return;
+    campo.addEventListener("change", () => {
+        const archivo = campo.files && campo.files[0];
+        if (!archivo) { texto.textContent = "Selecciona el comprobante que deseas enviar para revisión."; return; }
+        const maxBytes = 2 * 1024 * 1024;
+        if (archivo.size <= 0 || archivo.size > maxBytes) {
+            texto.textContent = "El archivo debe tener un tamaño mayor que cero y máximo 2 MB.";
+            campo.setCustomValidity("El archivo supera el límite de 2 MB o está vacío.");
+        } else {
+            campo.setCustomValidity("");
+            texto.textContent = "Archivo seleccionado: " + archivo.name + " (" + (archivo.size / 1024 / 1024).toFixed(2) + " MB). La agencia verificará el comprobante."; 
+        }
+    });
+})();
+</script>
+}
