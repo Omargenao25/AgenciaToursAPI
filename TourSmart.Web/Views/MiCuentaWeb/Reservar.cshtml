@@ -79,7 +79,7 @@
           <div class="ts-client-summary-line"><span>Precio por persona</span><strong>RD$ @Model.Tour.Precio.ToString("N2")</strong></div>
           <div class="ts-client-summary-line"><span>Viajeros</span><strong id="personasResumen">@Model.CantidadPersonas</strong></div>
           <div class="ts-client-summary-line ts-client-summary-total"><span>Total estimado</span><strong id="totalReservaResumen" data-precio="@Model.Tour.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">RD$ @(Model.Tour.Precio * Model.CantidadPersonas).ToString("N2")</strong></div>
-          @{
+          {
             var totalEstimado = Model.Tour.Precio * Model.CantidadPersonas;
             var adelantoEstimado = Math.Ceiling(totalEstimado * Model.Tour.PorcentajeAdelanto) / 100m;
           }
