@@ -5,6 +5,9 @@
         public int Id { get; set; }
 
         public string Nombre { get; set; } = string.Empty;
+        public string? PuntoEncuentro { get; set; }
+        public string? InstruccionesSalida { get; set; }
+        public string? QueLlevar { get; set; }
         public string? ImagenUrl { get; set; }
         public string? ImagenDestinoUrl { get; set; }
         public int PaisId { get; set; }
