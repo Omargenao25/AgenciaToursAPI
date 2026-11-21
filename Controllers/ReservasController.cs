@@ -116,7 +116,7 @@ namespace AgenciaToursAPI.Controllers
 
             var fechaInicioTour = tour.Fecha.Date.Add(tour.Hora);
 
-            if (DateTime.Now >= fechaInicioTour)
+            if (HorarioAgencia.Ahora >= fechaInicioTour)
             {
                 return BadRequest(
                     "No es posible realizar una reserva para un tour que ya inició."
@@ -146,7 +146,7 @@ namespace AgenciaToursAPI.Controllers
                 TourId = dto.TourId,
                 MetodoPagoId = dto.MetodoPagoId,
                 CantidadPersonas = dto.CantidadPersonas,
-                FechaReserva = DateTime.Now,
+                FechaReserva = HorarioAgencia.Ahora,
                 VencePendienteUtc = DateTime.UtcNow.AddHours(tour.HorasLimiteAdelanto),
                 Estado = EstadosReserva.Pendiente,
 
@@ -228,7 +228,7 @@ namespace AgenciaToursAPI.Controllers
             var fechaInicioTourOriginal =
                 tourOriginal.Fecha.Date.Add(tourOriginal.Hora);
 
-            if (DateTime.Now >= fechaInicioTourOriginal)
+            if (HorarioAgencia.Ahora >= fechaInicioTourOriginal)
             {
                 return BadRequest(
                     "No se puede modificar una reserva cuyo tour ya inició."
@@ -257,7 +257,7 @@ namespace AgenciaToursAPI.Controllers
             var fechaInicioTourNuevo =
                 tourNuevo.Fecha.Date.Add(tourNuevo.Hora);
 
-            if (DateTime.Now >= fechaInicioTourNuevo)
+            if (HorarioAgencia.Ahora >= fechaInicioTourNuevo)
             {
                 return BadRequest(
                     "No es posible asignar la reserva a un tour que ya inició."
@@ -324,7 +324,7 @@ namespace AgenciaToursAPI.Controllers
             if (tour == null) return NotFound("El tour asociado no existe.");
             if (await _context.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId))
                 return Conflict("El tour tiene un cierre operativo y sus reservas están bloqueadas.");
-            if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+            if (HorarioAgencia.Ahora >= tour.Fecha.Date.Add(tour.Hora))
                 return Conflict("No es posible confirmar una reserva de un tour que ya comenzó.");
 
             // Confirmación financiera: el importe mínimo se redondea siempre
@@ -379,7 +379,7 @@ namespace AgenciaToursAPI.Controllers
             if (await _context.CierresOperativosTour.AnyAsync(c => c.TourId == reserva.TourId))
                 return Conflict("El tour tiene un cierre operativo y sus reservas están bloqueadas.");
             if (reserva.Estado == EstadosReserva.Cancelada) return NoContent();
-            if (DateTime.Now >= tour.Fecha.Date.Add(tour.Hora))
+            if (HorarioAgencia.Ahora >= tour.Fecha.Date.Add(tour.Hora))
                 return Conflict("No se puede cancelar una reserva después del inicio del tour.");
 
             reserva.Estado = EstadosReserva.Cancelada;
