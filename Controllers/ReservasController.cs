@@ -127,7 +127,7 @@ namespace AgenciaToursAPI.Controllers
                 .Where(r => r.TourId == dto.TourId && r.Estado != EstadosReserva.Cancelada)
                 .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
 
-            if ((long)reservados + dto.CantidadPersonas > tour.CapacidadMaxima)
+            if (!ReglasReserva.HayCupos(tour.CapacidadMaxima, reservados, dto.CantidadPersonas))
                 return Conflict($"Cupos insuficientes. Disponibles: {Math.Max(0, tour.CapacidadMaxima - reservados)}.");
 
             var metodoPagoExiste = await _context.MetodosPago
@@ -267,7 +267,7 @@ namespace AgenciaToursAPI.Controllers
             var reservadosDestino = await _context.Reservas
                 .Where(r => r.TourId == dto.TourId && r.Id != id && r.Estado != EstadosReserva.Cancelada)
                 .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
-            if ((long)reservadosDestino + dto.CantidadPersonas > tourNuevo.CapacidadMaxima)
+            if (!ReglasReserva.HayCupos(tourNuevo.CapacidadMaxima, reservadosDestino, dto.CantidadPersonas))
                 return Conflict($"Cupos insuficientes. Disponibles: {Math.Max(0, tourNuevo.CapacidadMaxima - reservadosDestino)}.");
 
             var metodoPagoExiste = await _context.MetodosPago
@@ -329,7 +329,7 @@ namespace AgenciaToursAPI.Controllers
 
             // Confirmación financiera: el importe mínimo se redondea siempre
             // hacia arriba al centavo; 30 % de RD$ 100.01 requiere RD$ 30.01.
-            var minimo = Math.Ceiling(reserva.Total * tour.PorcentajeAdelanto) / 100m;
+            var minimo = ReglasReserva.AdelantoMinimo(reserva.Total, tour.PorcentajeAdelanto);
             var pagado = await _context.PagosReserva
                 .Where(p => p.ReservaId == id)
                 .SumAsync(p => (decimal?)p.Monto) ?? 0m;
