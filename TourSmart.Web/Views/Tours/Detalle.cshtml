@@ -24,6 +24,24 @@
                     <span>@Model.Destino</span>
                 </div>
                 <h2 class="detail-title mt-5">La aventura comienza <em>aquí.</em></h2>
+                @if (!string.IsNullOrWhiteSpace(Model.PuntoEncuentro) || !string.IsNullOrWhiteSpace(Model.InstruccionesSalida) || !string.IsNullOrWhiteSpace(Model.QueLlevar))
+                {
+                    <section class="mt-4" aria-labelledby="logisticaTour">
+                        <h3 id="logisticaTour">Información para tu salida</h3>
+                        @if (!string.IsNullOrWhiteSpace(Model.PuntoEncuentro))
+                        {
+                            <p><strong>Punto de encuentro:</strong> @Model.PuntoEncuentro</p>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.InstruccionesSalida))
+                        {
+                            <p><strong>Instrucciones:</strong> <span style="white-space:pre-line">@Model.InstruccionesSalida</span></p>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.QueLlevar))
+                        {
+                            <p><strong>Qué llevar:</strong> <span style="white-space:pre-line">@Model.QueLlevar</span></p>
+                        }
+                    </section>
+                }
                 <p class="detail-copy">Esta experiencia forma parte del catálogo de TourSmart RD. La información de fecha, categoría, precio y capacidad se obtiene directamente de nuestra API.</p>
                 <div class="row g-3 mt-3">
                     <div class="col-sm-6"><div class="info-tile"><small>Destino</small><strong>@Model.Destino, @Model.Pais</strong></div></div>
@@ -49,7 +67,7 @@
                     {
                         <div class="booking-status booking-unavailable">Este tour no está disponible para reservar.</div>
                     }
-                    @if (Model.Reservable && Model.Fecha.Date.Add(Model.Hora) > DateTime.Now)
+                    @if (Model.Reservable && Model.Fecha.Date.Add(Model.Hora) > TourSmart.Web.Services.HorarioAgencia.Ahora)
                     {
                         @if (User.IsInRole("Cliente"))
                         {
