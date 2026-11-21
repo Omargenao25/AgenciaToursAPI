@@ -380,7 +380,7 @@ public sealed class MiCuentaController(
         var reservados = await db.Reservas
             .Where(r => r.TourId == dto.TourId && r.Estado != EstadosReserva.Cancelada)
             .SumAsync(r => (int?)r.CantidadPersonas) ?? 0;
-        if ((long)reservados + dto.CantidadPersonas > tour.CapacidadMaxima)
+        if (!ReglasReserva.HayCupos(tour.CapacidadMaxima, reservados, dto.CantidadPersonas))
             return Conflict($"No hay plazas suficientes. Disponibles: {Math.Max(0, tour.CapacidadMaxima - reservados)}.");
 
         var reserva = new Reserva
