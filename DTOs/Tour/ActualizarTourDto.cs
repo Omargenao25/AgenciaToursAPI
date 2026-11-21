@@ -4,6 +4,9 @@ namespace AgenciaToursAPI.DTOs
 {
     public class ActualizarTourDto
     {
+        [StringLength(250)] public string? PuntoEncuentro { get; set; }
+        [StringLength(1000)] public string? InstruccionesSalida { get; set; }
+        [StringLength(500)] public string? QueLlevar { get; set; }
         [StringLength(500)]
         [RegularExpression(@"^(?:https://[^\s/?#@:]+(?:\:[0-9]{2,5})?(?:[/\?#][^\s]*)?|/uploads/tours/[a-f0-9]{32}\.(?:jpg|png|webp))$", ErrorMessage = "Usa HTTPS o una imagen subida desde tu equipo.")]
         public string? ImagenUrl { get; set; }
