@@ -456,6 +456,26 @@ namespace AgenciaToursAPI.Migrations
 
                     b.Property<DateTime?>("RecordatorioEnviadoUtc").HasColumnType("datetime2");
 
+                    b.Property<string>("RecordatorioEstado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Pendiente");
+
+                    b.Property<int>("RecordatorioIntentos")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("RecordatorioProximoIntentoUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RecordatorioLeaseHastaUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RecordatorioLeaseToken")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<DateTime?>("VencePendienteUtc")
                         .HasColumnType("datetime2");
 
@@ -475,9 +495,13 @@ namespace AgenciaToursAPI.Migrations
 
                     b.HasIndex("Estado", "VencePendienteUtc");
 
+                    b.HasIndex("RecordatorioEstado", "RecordatorioProximoIntentoUtc");
+
                     b.ToTable("Reservas", t =>
                         {
                             t.HasCheckConstraint("CK_Reservas_Estado", "[Estado] IN (N'Pendiente', N'Confirmada', N'Cancelada')");
+                            t.HasCheckConstraint("CK_Reservas_RecordatorioEstado", "[RecordatorioEstado] IN (N'Pendiente', N'Enviando', N'Fallido', N'Enviado', N'Revisar', N'Agotado')");
+                            t.HasCheckConstraint("CK_Reservas_RecordatorioIntentos", "[RecordatorioIntentos] BETWEEN 0 AND 3");
                         });
                 });
 
