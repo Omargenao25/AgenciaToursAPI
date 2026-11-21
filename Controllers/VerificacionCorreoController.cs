@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using System.ComponentModel.DataAnnotations;
 using AgenciaToursAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +29,7 @@ public sealed class VerificacionCorreoController(VerificacionCorreoService servi
         return ok ? NoContent() : BadRequest("El enlace no existe, expiró o ya fue utilizado.");
     }
 
+    [EnableRateLimiting("correo")]
     [HttpPost("reenviar")]
     public async Task<IActionResult> Reenviar(ReenviarDto dto, CancellationToken ct)
     {
