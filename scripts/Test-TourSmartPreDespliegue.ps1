@@ -21,7 +21,12 @@ foreach ($ruta in @('AgenciaToursAPI.sln', 'AgenciaToursAPI.csproj',
  'TourSmart.Web/TourSmart.Web.csproj', 'Migrations/ApplicationDbContextModelSnapshot.cs',
  'Services/RecordatoriosExcursionesService.cs', 'Controllers/ComprobantesTransferenciaController.cs',
  'TourSmart.Web/Views/TableroAdelantos/Index.cshtml',
- 'docs/AUDITORIA_FINAL_520.md')) {
+ 'docs/AUDITORIA_FINAL_520.md',
+ 'TourSmart.Tests/TourSmart.Tests.csproj',
+ 'TourSmart.Tests/ReglasNegocioTests.cs',
+ 'scripts/Test-TourSmartSmoke528.ps1',
+ 'Migrations/20261120223000_RecordatoriosReintentosControlados.cs',
+ 'Migrations/20261120234000_DatosSalidaExcursiones.cs')) {
     if (Existe $ruta) { OK "Archivo requerido: $ruta" }
     else { ErrorCheck "Falta el archivo requerido: $ruta" }
 }
