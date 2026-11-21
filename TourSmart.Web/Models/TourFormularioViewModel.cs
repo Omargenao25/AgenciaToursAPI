@@ -6,6 +6,9 @@ namespace TourSmart.Web.Models;
 public sealed class TourFormularioViewModel
 {
     public int Id { get; set; }
+    [StringLength(250)] public string? PuntoEncuentro { get; set; }
+    [StringLength(1000)] public string? InstruccionesSalida { get; set; }
+    [StringLength(500)] public string? QueLlevar { get; set; }
     [Required(ErrorMessage = "Introduce el nombre.")]
     [StringLength(150, MinimumLength = 3)]
     public string Nombre { get; set; } = "";
