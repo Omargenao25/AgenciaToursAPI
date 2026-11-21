@@ -1,5 +1,9 @@
 @model MiReservaFormulario
-@{ ViewData["Title"] = "Reservar excursión"; }
+@{
+    ViewData["Title"] = "Reservar excursión";
+    var totalEstimado = Model.Tour is null ? 0m : Model.Tour.Precio * Model.CantidadPersonas;
+    var adelantoEstimado = Model.Tour is null ? 0m : Math.Ceiling(totalEstimado * Model.Tour.PorcentajeAdelanto) / 100m;
+}
 <section class="inner-hero dashboard-hero"><div class="container">
 <a class="back-link" asp-controller="Tours" asp-action="Detalle" asp-route-id="@Model.TourId">← Volver al tour</a>
 <span class="eyebrow">TOURSMART RD · RESERVAS</span><h1>Reserva tu <em>aventura.</em></h1>
@@ -79,10 +83,6 @@
           <div class="ts-client-summary-line"><span>Precio por persona</span><strong>RD$ @Model.Tour.Precio.ToString("N2")</strong></div>
           <div class="ts-client-summary-line"><span>Viajeros</span><strong id="personasResumen">@Model.CantidadPersonas</strong></div>
           <div class="ts-client-summary-line ts-client-summary-total"><span>Total estimado</span><strong id="totalReservaResumen" data-precio="@Model.Tour.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">RD$ @(Model.Tour.Precio * Model.CantidadPersonas).ToString("N2")</strong></div>
-          {
-            var totalEstimado = Model.Tour.Precio * Model.CantidadPersonas;
-            var adelantoEstimado = Math.Ceiling(totalEstimado * Model.Tour.PorcentajeAdelanto) / 100m;
-          }
           <div class="ts-client-deposit">
             <span>Adelanto mínimo estimado (@Model.Tour.PorcentajeAdelanto%)</span>
             <strong id="adelantoResumen" data-precio="@Model.Tour.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-porcentaje="@Model.Tour.PorcentajeAdelanto">RD$ @adelantoEstimado.ToString("N2")</strong>
