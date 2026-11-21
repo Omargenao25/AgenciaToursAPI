@@ -47,4 +47,6 @@ jobs:
           test -f out/api/AgenciaToursAPI.dll
           test -f out/web/TourSmart.Web.dll
           test -f out/web/wwwroot/css/toursmart-v3.css
+          test -f out/web/wwwroot/css/toursmart-premium-530.css
+          test -f out/web/wwwroot/js/toursmart-premium-530.js
           echo "Publicacion API y Web generada correctamente (sin despliegue)."
