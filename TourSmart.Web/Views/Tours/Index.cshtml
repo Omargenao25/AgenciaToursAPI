@@ -58,7 +58,19 @@
                 <a class="btn btn-outline-secondary rounded-pill" asp-action="Index">Limpiar</a>
             </div>
         </form>
-        <div class="catalog-count d-flex flex-wrap justify-content-between align-items-center gap-2" aria-live="polite"><span><strong>@Model.TotalTours</strong> experiencias encontradas</span><span class="text-secondary small">Selecciona una experiencia para conocer sus detalles y disponibilidad.</span></div>
+        <div class="catalog-count ts-premium-catalog-toolbar d-flex flex-wrap justify-content-between align-items-center gap-3" aria-live="polite">
+            <div><span><strong>@Model.TotalTours</strong> experiencias encontradas</span><small class="d-block text-secondary">Encuentra tu próxima aventura y compara opciones.</small></div>
+            <div class="d-flex gap-2 align-items-center ts-premium-sort-wrap">
+                <label for="ordenVisual" class="form-label m-0">Ordenar:</label>
+                <select id="ordenVisual" class="form-select" aria-label="Orden de las excursiones">
+                    <option value="predeterminado">Recomendado</option>
+                    <option value="fecha">Salida más próxima</option>
+                    <option value="precioAsc">Menor precio</option>
+                    <option value="precioDesc">Mayor precio</option>
+                    <option value="disponibilidad">Más plazas libres</option>
+                </select>
+            </div>
+        </div>
         @if (!Model.ServicioDisponible)
         {
             <div class="service-alert" role="status">No se pudo conectar con AgenciaToursAPI. Comprueba que esté ejecutándose en http://localhost:5290.</div>
@@ -69,10 +81,15 @@
         }
         else
         {
-            <div class="row g-4">
+            <div class="row g-4 ts-premium-tour-grid" id="catalogoResultados">
                 @foreach (var tour in Model.Tours)
                 {
-                    <div class="col-md-6 col-xl-4"><partial name="_TourCard" model="tour" /></div>
+                    <div class="col-md-6 col-xl-4 ts-premium-sort-item"
+                         data-precio="@tour.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                         data-fecha="@tour.Fecha.ToString("yyyy-MM-dd")"
+                         data-cupos="@tour.CuposDisponibles">
+                        <partial name="_TourCard" model="tour" />
+                    </div>
                 }
             </div>
         }
@@ -95,6 +112,27 @@
     }
     pais.addEventListener("change", actualizarDestinos);
     actualizarDestinos();
+})();
+(() => {
+    const select = document.getElementById("ordenVisual");
+    const grid = document.getElementById("catalogoResultados");
+    if (!select || !grid) return;
+    const tarjetas = Array.from(grid.querySelectorAll(".ts-premium-sort-item"));
+    const ordenOriginal = new Map(tarjetas.map((el, i) => [el, i]));
+    select.addEventListener("change", () => {
+        const orden = select.value;
+        tarjetas.sort((a,b) => {
+            const numero = (el, key) => Number(el.dataset[key] || 0);
+            const texto = (el, key) => el.dataset[key] || "";
+            let comp = 0;
+            if (orden === "fecha") comp = texto(a,"fecha").localeCompare(texto(b,"fecha"));
+            else if (orden === "precioAsc") comp = numero(a,"precio") - numero(b,"precio");
+            else if (orden === "precioDesc") comp = numero(b,"precio") - numero(a,"precio");
+            else if (orden === "disponibilidad") comp = numero(b,"cupos") - numero(a,"cupos");
+            return comp || ordenOriginal.get(a) - ordenOriginal.get(b);
+        });
+        tarjetas.forEach(el => grid.appendChild(el));
+    });
 })();
 </script>
 }
