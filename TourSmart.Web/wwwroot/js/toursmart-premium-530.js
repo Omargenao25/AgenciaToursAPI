@@ -28,6 +28,20 @@
         });
     }
 
+    // Mantener visible la navegación incluso cuando JS no puede animarla.
+    // En dispositivos que reducen movimiento las tarjetas nunca se ocultan.
+    const onKeyboard = event => {
+        if (event.key !== "Escape") return;
+        const nav = document.getElementById("mainNav");
+        if (nav && nav.classList.contains("show") &&
+            typeof bootstrap !== "undefined" && bootstrap.Collapse) {
+            bootstrap.Collapse.getOrCreateInstance(nav, { toggle: false }).hide();
+            const toggle = document.querySelector('[data-bs-target="#mainNav"]');
+            if (toggle) toggle.focus();
+        }
+    };
+    document.addEventListener("keydown", onKeyboard);
+
     // La barra móvil se cierra únicamente tras navegar a otro enlace.
     const collapse = document.getElementById("mainNav");
     if (collapse) {
