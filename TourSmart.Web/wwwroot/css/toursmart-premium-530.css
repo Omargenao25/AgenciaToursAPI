@@ -232,3 +232,38 @@ main{overflow:clip}
 .ts-client-payment-history .table td{overflow-wrap:anywhere}
 @media(max-width:991px){.ts-client-payment-steps{grid-template-columns:1fr}}
 @media(max-width:575px){.ts-client-payment-journey{padding:1.1rem}.ts-client-payment-steps li{padding:1rem}.ts-client-payment-history{padding:1rem!important}.ts-client-payment-history .table{min-width:500px}}
+
+/* Fase 5.33 — navegación móvil accesible y ajustes de última milla */
+.ts-client-mobile-nav{display:none}
+@media(max-width:767.98px){
+ body:has(.ts-client-mobile-nav){padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
+ .ts-client-mobile-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;position:fixed;bottom:0;left:0;right:0;z-index:1025;padding:7px max(10px,env(safe-area-inset-left,0px)) calc(7px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-right,0px));background:#ffffffed;border-top:1px solid #cfe3dd;box-shadow:0 -10px 36px #07384121;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+ .ts-client-mobile-link{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:57px;padding:7px 3px;border-radius:14px;color:#436570;text-decoration:none;font-weight:750}
+ .ts-client-mobile-link span{font-size:1.4rem;line-height:1.1}
+ .ts-client-mobile-link small{font-size:.67rem;letter-spacing:.01em}
+ .ts-client-mobile-link:hover,.ts-client-mobile-link.is-active{background:#e6f5ed;color:#076b66}
+ .ts-client-mobile-link:focus-visible{outline:3px solid #c58c14!important;outline-offset:-3px}
+ .ts-premium-header .navbar{min-height:62px}
+ .ts-premium-header .navbar-brand{max-width:calc(100vw - 98px)}
+ .ts-premium-header .brand-subtitle{font-size:.43rem;letter-spacing:.12em}
+ .ts-premium-header .brand-name{font-size:1.2rem}
+ .ts-premium-header .brand-mark{width:34px;height:34px}
+ .site-footer{padding-bottom:18px}
+ .ts-client-reservations-grid,.ts-client-payment-steps,.ts-client-booking-summary,.booking-summary{min-width:0}
+ .ts-client-surface,.ts-client-reservation-card,.ts-client-payment-journey{overflow-wrap:anywhere}
+ .ts-client-reservation-top{flex-wrap:wrap}
+ .ts-client-booking-summary{position:static}
+ .ts-v3-hero .hero-actions{gap:.85rem}
+ .ts-v3-hero .hero-actions .btn{min-width:0}
+}
+@media(max-width:380px){
+ .ts-client-mobile-link small{font-size:.61rem}
+ .ts-premium-search-inner input{font-size:16px}
+ .ts-client-stepper span{font-size:.63rem}
+}
+/* Evitar recortar el contorno de foco y el zoom de lectura. */
+.ts-client-payment-history .table-responsive{overflow-x:auto}
+.ts-client-reservation-actions .btn,.ts-client-return-link,.ts-premium-header .nav-link{outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+ .ts-client-reservation-card:hover,.tour-card.ts-v3-tour-card:hover{transform:none!important}
+}
